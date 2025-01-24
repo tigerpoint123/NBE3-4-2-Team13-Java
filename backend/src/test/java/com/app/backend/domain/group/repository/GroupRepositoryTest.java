@@ -17,13 +17,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * PackageName : com.app.backend.domain.group.repository
- * FileName    : GroupRepositoryTest
- * Author      : loadingKKamo21
- * Date        : 25. 1. 24.
- * Description :
- */
 @ActiveProfiles("test")
 @Import(QuerydslConfig.class)
 @DataJpaTest
@@ -169,10 +162,12 @@ class GroupRepositoryTest {
         afterEach();
 
         //When
-        Optional<Group> opGroup = groupRepository.findById(id);
+        groupRepository.deleteById(id);
 
         //Then
-        assertThat(opGroup).isEmpty();
+        Group deletedGroup = em.find(Group.class, id);
+
+        assertThat(deletedGroup).isNull();
     }
 
 }
