@@ -1,7 +1,6 @@
 package com.app.backend.domain.group.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.app.backend.domain.group.entity.Group;
 import com.app.backend.domain.group.entity.RecruitStatus;
@@ -38,8 +37,15 @@ class GroupRepositoryTest {
     @DisplayName("save")
     void save() {
         //Given
-        Group group = Group.of("test", "test province", "test city", "test town", "test description",
-                               RecruitStatus.RECRUITING, 10);
+        Group group = Group.builder()
+                           .name("test")
+                           .province("test province")
+                           .city("test city")
+                           .town("test town")
+                           .description("test description")
+                           .recruitStatus(RecruitStatus.RECRUITING)
+                           .maxRecruitCount(10)
+                           .build();
 
         //When
         Group savedGroup = groupRepository.save(group);
@@ -60,25 +66,18 @@ class GroupRepositoryTest {
     }
 
     @Test
-    @DisplayName("save, field is null")
-    void save_nullCheck() {
-        //Given
-        String name = null;
-
-        //When
-
-        //Then
-        assertThatThrownBy(() -> Group.of(name, "test province", "test city", "test town", "test description",
-                                          RecruitStatus.RECRUITING, 10))
-                .isInstanceOf(NullPointerException.class);
-    }
-
-    @Test
     @DisplayName("findById")
     void findById() {
         //Given
-        Group group = Group.of("test", "test province", "test city", "test town", "test description",
-                               RecruitStatus.RECRUITING, 10);
+        Group group = Group.builder()
+                           .name("test")
+                           .province("test province")
+                           .city("test city")
+                           .town("test town")
+                           .description("test description")
+                           .recruitStatus(RecruitStatus.RECRUITING)
+                           .maxRecruitCount(10)
+                           .build();
         Group savedGroup = em.persist(group);
         Long  id         = savedGroup.getId();
         afterEach();
@@ -115,8 +114,15 @@ class GroupRepositoryTest {
     @DisplayName("update")
     void update() {
         //Given
-        Group group = Group.of("test", "test province", "test city", "test town", "test description",
-                               RecruitStatus.RECRUITING, 10);
+        Group group = Group.builder()
+                           .name("test")
+                           .province("test province")
+                           .city("test city")
+                           .town("test town")
+                           .description("test description")
+                           .recruitStatus(RecruitStatus.RECRUITING)
+                           .maxRecruitCount(10)
+                           .build();
         Group savedGroup = em.persist(group);
         Long  id         = savedGroup.getId();
         afterEach();
@@ -155,8 +161,15 @@ class GroupRepositoryTest {
     @DisplayName("deleteById, hard delete")
     void deleteById() {
         //Given
-        Group group = Group.of("test", "test province", "test city", "test town", "test description",
-                               RecruitStatus.RECRUITING, 10);
+        Group group = Group.builder()
+                           .name("test")
+                           .province("test province")
+                           .city("test city")
+                           .town("test town")
+                           .description("test description")
+                           .recruitStatus(RecruitStatus.RECRUITING)
+                           .maxRecruitCount(10)
+                           .build();
         Group savedGroup = em.persist(group);
         Long  id         = savedGroup.getId();
         afterEach();
@@ -174,8 +187,15 @@ class GroupRepositoryTest {
     @DisplayName("delete, soft delete")
     void softDelete() {
         //Given
-        Group group = Group.of("test", "test province", "test city", "test town", "test description",
-                               RecruitStatus.RECRUITING, 10);
+        Group group = Group.builder()
+                           .name("test")
+                           .province("test province")
+                           .city("test city")
+                           .town("test town")
+                           .description("test description")
+                           .recruitStatus(RecruitStatus.RECRUITING)
+                           .maxRecruitCount(10)
+                           .build();
         Group savedGroup = em.persist(group);
         Long  id         = savedGroup.getId();
         afterEach();
