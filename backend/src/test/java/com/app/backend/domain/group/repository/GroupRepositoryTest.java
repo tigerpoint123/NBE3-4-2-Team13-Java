@@ -152,7 +152,7 @@ class GroupRepositoryTest {
     }
 
     @Test
-    @DisplayName("deleteById")
+    @DisplayName("deleteById, hard delete")
     void deleteById() {
         //Given
         Group group = Group.of("test", "test province", "test city", "test town", "test description",
@@ -168,6 +168,26 @@ class GroupRepositoryTest {
         Group deletedGroup = em.find(Group.class, id);
 
         assertThat(deletedGroup).isNull();
+    }
+
+    @Test
+    @DisplayName("delete, soft delete")
+    void softDelete() {
+        //Given
+        Group group = Group.of("test", "test province", "test city", "test town", "test description",
+                               RecruitStatus.RECRUITING, 10);
+        Group savedGroup = em.persist(group);
+        Long  id         = savedGroup.getId();
+        afterEach();
+
+        //When
+        groupRepository.findById(id).ifPresent(Group::delete);
+        afterEach();
+
+        //Then
+        Group findGroup = em.find(Group.class, id);
+
+        assertThat(findGroup.getDisabled()).isTrue();
     }
 
 }
