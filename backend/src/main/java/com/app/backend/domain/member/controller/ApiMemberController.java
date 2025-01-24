@@ -10,12 +10,12 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/members")
 public class ApiMemberController {
     private final MemberService memberService;
 
     //회원가입
-    @PostMapping("/members")
+    @PostMapping
     public ApiResponse<MemberResponse> join(
             @RequestBody @Valid MemberCreateRequest request
             ) {
