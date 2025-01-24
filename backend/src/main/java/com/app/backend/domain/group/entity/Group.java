@@ -157,4 +157,12 @@ public class Group extends BaseEntity {
         return this;
     }
 
+    /**
+     * 모임 삭제(Soft Delete)
+     */
+    public void delete() {
+        if (!this.getDisabled())
+            deactivate();
+    }
+
 }
