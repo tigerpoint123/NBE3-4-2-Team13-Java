@@ -19,11 +19,16 @@ public class MemberService {
 
     @Transactional
     public MemberResponse createMember(@Valid MemberCreateRequest request) {
+        memberRepository.findByUsername("testID")
+                .ifPresent(a -> {
+                    throw new ServiceException("409-1", "username 있음");
+                });
+
         Member member = Member.builder()
-                .username("test id")
-                .password(passwordEncoder.encode("1234"))
-                .nickname("김호남")
-                .role("USER")
+                .username("testID") // request.username() 넣어야함
+                .password(passwordEncoder.encode("1234")) //request.password()
+                .nickname("김호남")  // request.nickname()
+                .role("ADMIN")
                 .disabled(false)
                 .build();
 
