@@ -20,15 +20,16 @@ public class MemberService {
     @Transactional
     public MemberResponse createMember(@Valid MemberCreateRequest request) {
         Member member = Member.builder()
-            .username("test id")
-            .password(passwordEncoder.encode("1234"))
-            .nickname("김호남")
-            .role("USER")
-            .build();
-        
+                .username("test id")
+                .password(passwordEncoder.encode("1234"))
+                .nickname("김호남")
+                .role("USER")
+                .disabled(false)
+                .build();
+
         // Repository를 통한 저장
         Member savedMember = memberRepository.save(member);
-        
+
         // Entity -> Response DTO 변환
         return MemberResponse.from(savedMember);
     }

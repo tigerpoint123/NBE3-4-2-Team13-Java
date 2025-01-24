@@ -14,8 +14,9 @@ import org.springframework.web.bind.annotation.*;
 public class ApiMemberController {
     private final MemberService memberService;
 
+    //회원가입
     @PostMapping("/members")
-    public ApiResponse<MemberResponse> createMember(
+    public ApiResponse<MemberResponse> join(
             @RequestBody @Valid MemberCreateRequest request
             ) {
         MemberResponse response = memberService.createMember(request);

@@ -36,4 +36,11 @@ public class Member extends BaseEntity {
     @Column(name = "role", length = 255)
     private String role;
 
+    @Column(nullable = false)
+    private boolean disabled;
+
+    @Override
+    public void activate() {
+        super.deactivate();
+    }
 }
