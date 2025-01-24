@@ -1,6 +1,6 @@
-package com.app.backend.member.dto.response;
+package com.app.backend.domain.member.dto.response;
 
-import com.app.backend.member.entity.Member;
+import com.app.backend.domain.member.entity.Member;
 
 import java.time.LocalDateTime;
 

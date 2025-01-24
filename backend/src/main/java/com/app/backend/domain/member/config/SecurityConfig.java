@@ -1,4 +1,4 @@
-package com.app.backend.member.config;
+package com.app.backend.domain.member.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

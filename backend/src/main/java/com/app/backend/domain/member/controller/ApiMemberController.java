@@ -1,9 +1,9 @@
-package com.app.backend.member.controller;
+package com.app.backend.domain.member.controller;
 
 import com.app.backend.global.dto.response.ApiResponse;
-import com.app.backend.member.dto.request.MemberCreateRequest;
-import com.app.backend.member.dto.response.MemberResponse;
-import com.app.backend.member.service.MemberService;
+import com.app.backend.domain.member.dto.request.MemberCreateRequest;
+import com.app.backend.domain.member.dto.response.MemberResponse;
+import com.app.backend.domain.member.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

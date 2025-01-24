@@ -1,9 +1,9 @@
-package com.app.backend.member.service;
+package com.app.backend.domain.member.service;
 
-import com.app.backend.member.dto.request.MemberCreateRequest;
-import com.app.backend.member.dto.response.MemberResponse;
-import com.app.backend.member.entity.Member;
-import com.app.backend.member.repository.MemberRepository;
+import com.app.backend.domain.member.dto.request.MemberCreateRequest;
+import com.app.backend.domain.member.dto.response.MemberResponse;
+import com.app.backend.domain.member.entity.Member;
+import com.app.backend.domain.member.repository.MemberRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
