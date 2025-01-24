@@ -23,7 +23,7 @@ public class BaseEntity {
     private LocalDateTime modifiedAt;
 
     @Column(nullable = false)
-    private Boolean disabled;
+    private Boolean disabled = false;
 
     public void activate() {
         disabled = false;
