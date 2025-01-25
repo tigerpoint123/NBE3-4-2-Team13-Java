@@ -27,8 +27,9 @@ public class Member extends BaseEntity {
     @Column(name = "nickname", length = 255)
     private String nickname;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "oauth_provider", length = 255)
-    private String oauthProvider;
+    private Provider provider;
 
     @Column(name = "oauth_provider_id", length = 255)
     private String oauthProviderId;
@@ -42,5 +43,14 @@ public class Member extends BaseEntity {
     @Override
     public void activate() {
         super.deactivate();
+    }
+
+    public enum Provider {
+        LOCAL, KAKAO
+        // 필요시 NAVER, GOOGLE 등 추가
+    }
+
+    public void updateRefreshToken(String refreshToken) {
+
     }
 }
