@@ -48,17 +48,9 @@ public class MemberService {
         return MemberJoinResponseDto.from(savedMember);
     }
 
-    public Optional<Member> findByUsername(String user) {
-        return memberRepository.findByUsername(user);
-    }
-
-    public MemberJoinResponseDto findById(Long id) {
-        return null;
-    }
-
     public MemberLoginResponseDto login(MemberLoginRequestDto request) {
         // 사용자 찾기
-        Member member = memberRepository.findByUsername(request.username())
+        Member member = memberRepository.findByUsername("김호남") //request.username()
                 .orElseThrow(() -> new IllegalArgumentException("가입되지 않은 사용자입니다."));
 
         // 비밀번호 확인

@@ -1,13 +1,15 @@
 package com.app.backend.domain.member.controller;
 
-import com.app.backend.domain.member.dto.request.MemberLoginRequestDto;
-import com.app.backend.domain.member.dto.response.MemberLoginResponseDto;
-import com.app.backend.global.dto.response.ApiResponse;
 import com.app.backend.domain.member.dto.request.MemberJoinRequestDto;
+import com.app.backend.domain.member.dto.request.MemberLoginRequestDto;
 import com.app.backend.domain.member.dto.response.MemberJoinResponseDto;
+import com.app.backend.domain.member.dto.response.MemberLoginResponseDto;
+import com.app.backend.domain.member.entity.Member;
 import com.app.backend.domain.member.service.MemberService;
+import com.app.backend.global.dto.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -42,4 +44,17 @@ public class ApiMemberController {
                 response
         );
     }
+
+    @GetMapping
+    public ApiResponse<MemberLoginResponseDto> getMyInfo(
+            @AuthenticationPrincipal Member member
+    ) {
+        return ApiResponse.of(
+                true,
+                "MEMBER_INFO_SUCCESS",
+                "회원 정보 조회 성공",
+                MemberLoginResponseDto.of(member, null, null)
+        );
+    }
+
 }
