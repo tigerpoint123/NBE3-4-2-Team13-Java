@@ -5,11 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
-public class CategoryDto {
-
+public record CategoryDto(
 	@NotBlank(message = "카테고리 이름은 필수입니다.")
-	private String name;
+	String name
+) {
 }
