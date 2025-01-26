@@ -27,15 +27,15 @@ public class CategoryController {
 	private final CategoryService categoryService;
 
 	public record CreateCategoryReqBody(
-		@NotBlank(message = "카테고리 이름은 필수입니다.")
-		@Length(max = 10, message = "카테고리 이름은 최대 10자까지 가능합니다.")
+		@NotBlank
+		@Length(max = 10)
 		String name
 	) {
 	}
 
 	@PostMapping
 	public ApiResponse<CategoryDto> createCategory(
-		@RequestBody @Valid CreateCategoryReqBody request
+		@RequestBody CreateCategoryReqBody request
 	) {
 		Category category = categoryService.create(request.name());
 
@@ -46,4 +46,4 @@ public class CategoryController {
 		);
 	}
 
-}
+}햣

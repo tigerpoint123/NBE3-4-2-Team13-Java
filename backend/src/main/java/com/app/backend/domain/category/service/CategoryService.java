@@ -22,6 +22,8 @@ public class CategoryService {
 	@Transactional
 	public Category create(String name) {
 
+		validateCategoryName(name); // 입력값 검증
+
 		if (categoryRepository.existsByName(name)) {
 			throw new CategoryException(CategoryErrorCode.CATEGORY_NAME_DUPLICATE);
 		}
@@ -31,5 +33,18 @@ public class CategoryService {
 			.build();
 
 		return categoryRepository.save(category);
+	}
+
+	// 검증 메서드
+	private void validateCategoryName(String name) {
+		if (name == null || name.isBlank()) {
+			throw new CategoryException(CategoryErrorCode.CATEGORY_NAME_REQUIRED);
+		}
+		if (name.length() > 10) {
+			throw new CategoryException(CategoryErrorCode.CATEGORY_NAME_TOO_LONG);
+		}
+		if (categoryRepository.existsByName(name)) {
+			throw new CategoryException(CategoryErrorCode.CATEGORY_NAME_DUPLICATE);
+		}
 	}
 }
