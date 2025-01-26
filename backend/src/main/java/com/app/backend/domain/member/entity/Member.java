@@ -40,6 +40,9 @@ public class Member extends BaseEntity {
     @Column(nullable = false)
     private boolean disabled;
 
+    @Column(name = "refresh_token")
+    private String refreshToken;
+
     @Override
     public void activate() {
         super.deactivate();
@@ -51,6 +54,6 @@ public class Member extends BaseEntity {
     }
 
     public void updateRefreshToken(String refreshToken) {
-
+        this.refreshToken = refreshToken;
     }
 }

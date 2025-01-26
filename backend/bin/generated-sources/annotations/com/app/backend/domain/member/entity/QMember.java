@@ -39,6 +39,8 @@ public class QMember extends EntityPathBase<Member> {
 
     public final EnumPath<Member.Provider> provider = createEnum("provider", Member.Provider.class);
 
+    public final StringPath refreshToken = createString("refreshToken");
+
     public final StringPath role = createString("role");
 
     public final StringPath username = createString("username");

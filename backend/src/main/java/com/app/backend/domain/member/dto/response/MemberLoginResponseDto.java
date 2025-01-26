@@ -1,6 +1,5 @@
 package com.app.backend.domain.member.dto.response;
 
-
 import com.app.backend.domain.member.entity.Member;
 
 public record MemberLoginResponseDto(
