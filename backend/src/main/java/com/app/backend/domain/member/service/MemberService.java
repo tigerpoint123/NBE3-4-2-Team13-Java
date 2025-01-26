@@ -1,18 +1,18 @@
 package com.app.backend.domain.member.service;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.app.backend.domain.member.dto.request.MemberLoginRequestDto;
 import com.app.backend.domain.member.dto.response.MemberJoinResponseDto;
 import com.app.backend.domain.member.dto.response.MemberLoginResponseDto;
 import com.app.backend.domain.member.entity.Member;
 import com.app.backend.domain.member.jwt.JwtProvider;
 import com.app.backend.domain.member.repository.MemberRepository;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -50,7 +50,7 @@ public class MemberService {
 
     public MemberLoginResponseDto login(MemberLoginRequestDto request) {
         // 사용자 찾기
-        Member member = memberRepository.findByUsername("김호남") //request.username()
+        Member member = memberRepository.findByUsername(request.username()) //request.username()
                 .orElseThrow(() -> new IllegalArgumentException("가입되지 않은 사용자입니다."));
 
         // 비밀번호 확인
@@ -67,7 +67,6 @@ public class MemberService {
 
         // 응답
         return MemberLoginResponseDto.of(member, accessToken, refreshToken);
-
-
     }
+
 }
