@@ -4,7 +4,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import java.util.List;
 
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -72,5 +71,18 @@ public class CategoryService {
 		if (categoryRepository.existsByName(name)) {
 			throw new CategoryException(CategoryErrorCode.CATEGORY_NAME_DUPLICATE);
 		}
+	}
+
+	public Category findById(Long id) {
+		return categoryRepository.findById(id)
+			.orElseThrow(() -> new CategoryException(CategoryErrorCode.CATEGORY_NOT_FOUND));
+	}
+
+	@Transactional
+	public void modify(Category category, String newName) {
+
+		validateCategoryName(newName); // 입력값 검증
+
+		category.modifyName(newName);
 	}
 }
