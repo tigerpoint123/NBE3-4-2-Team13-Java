@@ -1,19 +1,20 @@
 package com.app.backend.domain.member.jwt;
 
-import io.jsonwebtoken.Jwts;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
-
-import javax.crypto.SecretKey;
 import java.time.Instant;
 import java.util.Date;
 
+import javax.crypto.SecretKey;
+
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Component;
+
 import com.app.backend.domain.member.entity.Member;
+import com.app.backend.domain.member.entity.MemberDetails;
 import com.app.backend.domain.member.repository.MemberRepository;
+
+import io.jsonwebtoken.Jwts;
+import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
@@ -26,7 +27,7 @@ public class JwtProvider {
     // access token 생성
     public String generateAccessToken(String username) {
         return Jwts.builder()
-                .claim("sub", username)
+                .claim("name", username)
                 .claim("id", getMemberId(username))
                 .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRE_TIME))
                 .signWith(getSigningKey())
@@ -70,18 +71,16 @@ public class JwtProvider {
                 .getPayload()
                 .getSubject();
 
-        // 2. UserDetails 객체 생성
-        UserDetails userDetails = User.builder()
-                .username(username)
-                .password("") // 토큰 기반 인증이므로 비밀번호는 불필요
-                .roles("USER") // 기본 역할 설정
-                .build();
+        // 2. MemberDetails 객체 생성
+        Member member = memberRepository.findByUsername(username)
+            .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        MemberDetails memberDetails = MemberDetails.of(member);
 
         // 3. Authentication 객체 생성 및 반환
         return new UsernamePasswordAuthenticationToken(
-                userDetails,
+                memberDetails,
                 "",
-                userDetails.getAuthorities()
+                memberDetails.getAuthorities()
         );
     }
 
