@@ -1,4 +1,4 @@
-package com.app.backend.global.supporter;
+package com.app.backend.domain.group.supporter;
 
 import com.app.backend.domain.group.repository.GroupRepository;
 import com.app.backend.domain.group.service.GroupService;
