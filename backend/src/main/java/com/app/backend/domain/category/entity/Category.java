@@ -32,4 +32,9 @@ public class Category extends BaseEntity {
 	public void modifyName(String newName) {
 		this.name = newName; // 이름 변경
 	}
+
+	// soft delete
+	public void softDelete() {
+		this.deactivate();
+	}
 }
