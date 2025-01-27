@@ -31,6 +31,8 @@ spring:
           min-idle: 0
           max-idle: 8
           max-active: 8
+    mongodb:
+      uri: ${MONGO_DB_URI}
 
 #logging:
 #  level:
