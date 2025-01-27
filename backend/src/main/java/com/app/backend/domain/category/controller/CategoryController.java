@@ -4,6 +4,7 @@ package com.app.backend.domain.category.controller;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -75,6 +76,19 @@ public class CategoryController {
 			HttpStatus.OK,
 			"%d번 카테고리가 수정되었습니다.".formatted(category.getId()),
 			categoryDto
+		);
+	}
+
+	@DeleteMapping("/{id}")
+	public ApiResponse<Void> deleteCategory(
+		@PathVariable Long id
+	) {
+		categoryService.softDelete(id);
+
+		return ApiResponse.of(
+			true,
+			HttpStatus.OK,
+			"%d번 카테고리가 삭제되었습니다.".formatted(id)
 		);
 	}
 
