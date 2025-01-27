@@ -20,7 +20,6 @@ import com.app.backend.domain.category.exception.CategoryErrorCode;
 import com.app.backend.domain.category.exception.CategoryException;
 import com.app.backend.domain.category.repository.CategoryRepository;
 
-/*
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
@@ -178,7 +177,7 @@ public class CategoryControllerTest {
 				.content(requestJson)
 				.contentType(MediaType.APPLICATION_JSON))
 			.andExpect(jsonPath("$.code").value("200"))
-			.andExpect(jsonPath("$.message").value("%s 카테고리가 수정되었습니다.".formatted(categoryName)))
+			.andExpect(jsonPath("$.message").value("%d번 카테고리가 수정되었습니다.".formatted(category.getId())))
 			.andExpect(jsonPath("$.data.name").value(categoryName));
 
 		Category updatedCategory = categoryRepository.findById(category.getId()).orElseThrow(() -> new CategoryException(
@@ -186,4 +185,3 @@ public class CategoryControllerTest {
 		assertEquals(categoryName, updatedCategory.getName()); // 반영되었는지 확인
 	}
 }
-*/
