@@ -1,9 +1,0 @@
-spring:
-  application:
-    name: backend
-  config:
-    additional-location: classpath:/config/
-  profiles:
-    group:
-      test: [ "test_auth","test_db","dev_web","dev_server" ]
-    active: test

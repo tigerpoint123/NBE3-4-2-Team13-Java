@@ -21,7 +21,7 @@ public class JwtProvider {
     // access token 생성
     public String generateAccessToken(String username) {
         return Jwts.builder()
-                .claim("sub", username)
+                .claim("sub", username) // 회원 ID도 저장 추가
                 .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRE_TIME))
                 .signWith(getSigningKey())
                 .compact();

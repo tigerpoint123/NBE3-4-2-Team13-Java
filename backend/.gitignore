@@ -210,4 +210,6 @@ gradle-app.setting
 # example 파일은 포함
 !.env.example
 
+bin/
+
 # End of https://www.toptal.com/developers/gitignore/api/windows,intellij,java,gradle
