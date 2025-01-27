@@ -12,16 +12,22 @@ import javax.crypto.SecretKey;
 import java.time.Instant;
 import java.util.Date;
 
+import com.app.backend.domain.member.entity.Member;
+import com.app.backend.domain.member.repository.MemberRepository;
+
 @Component
 @RequiredArgsConstructor
 public class JwtProvider {
     private final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 30; // 30분
     private final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 24; // 1일
 
+    private final MemberRepository memberRepository;
+
     // access token 생성
     public String generateAccessToken(String username) {
         return Jwts.builder()
-                .claim("sub", username) // 회원 ID도 저장 추가
+                .claim("sub", username)
+                .claim("id", getMemberId(username))
                 .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRE_TIME))
                 .signWith(getSigningKey())
                 .compact();
@@ -77,5 +83,11 @@ public class JwtProvider {
                 "",
                 userDetails.getAuthorities()
         );
+    }
+
+    private Long getMemberId(String username) {
+        return memberRepository.findByUsername(username)
+                .map(Member::getId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
     }
 }
