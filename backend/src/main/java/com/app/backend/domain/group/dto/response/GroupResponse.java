@@ -1,6 +1,7 @@
 package com.app.backend.domain.group.dto.response;
 
 import com.app.backend.domain.group.entity.Group;
+import com.app.backend.global.util.AppUtil;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,6 +18,7 @@ public class GroupResponse {
                      .description(group.getDescription())
                      .recruitStatus(group.getRecruitStatus().name())
                      .maxRecruitCount(group.getMaxRecruitCount())
+                     .createdAt(AppUtil.localDateTimeToString(group.getCreatedAt()))
                      .build();
     }
 
@@ -28,6 +30,7 @@ public class GroupResponse {
                        .town(group.getTown())
                        .recruitStatus(group.getRecruitStatus().name())
                        .maxRecruitCount(group.getMaxRecruitCount())
+                       .createdAt(AppUtil.localDateTimeToString(group.getCreatedAt()))
                        .build();
     }
 
@@ -42,6 +45,7 @@ public class GroupResponse {
         private final String  description;
         private final String  recruitStatus;
         private final Integer maxRecruitCount;
+        private final String  createdAt;
     }
 
     @Getter
@@ -54,6 +58,7 @@ public class GroupResponse {
         private final String  town;
         private final String  recruitStatus;
         private final Integer maxRecruitCount;
+        private final String  createdAt;
     }
 
 }
