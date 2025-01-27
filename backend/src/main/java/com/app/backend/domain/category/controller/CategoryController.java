@@ -63,7 +63,7 @@ public class CategoryController {
 		@RequestBody CategoryReqBody modifyRequest
 	) {
 
-		Category category = categoryService.findById(id).get();
+		Category category = categoryService.findById(id);
 
 		categoryService.modify(category, modifyRequest.name());
 
