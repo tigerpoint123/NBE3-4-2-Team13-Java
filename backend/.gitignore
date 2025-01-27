@@ -204,7 +204,7 @@ gradle-app.setting
 
 # .env 파일 무시
 .env
-.env
+.env.local
 .env.*.local
 
 # example 파일은 포함
