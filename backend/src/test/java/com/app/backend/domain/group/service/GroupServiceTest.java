@@ -9,7 +9,7 @@ import com.app.backend.domain.group.entity.Group;
 import com.app.backend.domain.group.entity.RecruitStatus;
 import com.app.backend.domain.group.exception.GroupErrorCode;
 import com.app.backend.domain.group.exception.GroupException;
-import com.app.backend.global.supporter.SpringBootTestSupporter;
+import com.app.backend.domain.group.supporter.SpringBootTestSupporter;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
