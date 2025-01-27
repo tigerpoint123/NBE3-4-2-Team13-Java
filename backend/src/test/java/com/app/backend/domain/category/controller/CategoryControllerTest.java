@@ -3,6 +3,8 @@ package com.app.backend.domain.category.controller;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -184,5 +186,54 @@ public class CategoryControllerTest {
 		Category updatedCategory = categoryRepository.findById(category.getId()).orElseThrow(() -> new CategoryException(
 			CategoryErrorCode.CATEGORY_NOT_FOUND));
 		assertEquals(categoryName, updatedCategory.getName()); // 반영되었는지 확인
+	}
+
+	@Test
+	@DisplayName("카테고리 삭제")
+	void t8() throws Exception {
+		Category category = Category.builder()
+			.name("카테고리")
+			.build();
+		categoryRepository.save(category);
+
+		ResultActions resultActions = mvc.perform(MockMvcRequestBuilders.delete("/api/v1/admin/categories/{id}", category.getId())
+				.contentType(MediaType.APPLICATION_JSON)
+			)
+			.andExpect(jsonPath("$.code").value(HttpStatus.OK.value()))
+			.andExpect(jsonPath("$.message").value("%d번 카테고리가 삭제되었습니다.".formatted(category.getId())));
+
+		Category deletedCategory = categoryRepository.findById(category.getId())
+			.orElseThrow(() -> new CategoryException(
+				CategoryErrorCode.CATEGORY_NOT_FOUND));
+		assertTrue(deletedCategory.getDisabled());
+	}
+
+	@Test
+	@DisplayName("카테고리 삭제 후 카테고리 조회")
+	void t9() throws Exception {
+		for (int i = 1; i <= 11; i++) {
+			Category category = Category.builder()
+				.name("카테고리" + i)
+				.build();
+			categoryRepository.save(category);
+		}
+
+		Category category1 = categoryRepository.findById(1L)
+			.orElseThrow(() -> new CategoryException(CategoryErrorCode.CATEGORY_NOT_FOUND));
+		category1.softDelete();
+		categoryRepository.save(category1);
+
+		ResultActions resultActions = mvc.perform(MockMvcRequestBuilders.get("/api/v1/admin/categories")
+				.contentType(MediaType.APPLICATION_JSON)
+			)
+			.andExpect(jsonPath("$.code").value(HttpStatus.OK.value()))
+			.andExpect(jsonPath("$.message").value("카테고리 목록 조회"))
+			.andExpect(jsonPath("$.data.categories.length()").value(10))
+			.andExpect(jsonPath("$.data.currentPage").value(1))
+			.andExpect(jsonPath("$.data.totalPages").value(1))
+			.andExpect(jsonPath("$.data.totalItems").value(10))
+			.andExpect(jsonPath("$.data.pageSize").value(10));
+
+		assertEquals(11, categoryRepository.count());
 	}
 }
