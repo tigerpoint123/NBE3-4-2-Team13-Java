@@ -1,8 +1,7 @@
 package com.app.backend.domain.chat.message.repository;
 
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Repository;
-
-import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
 
@@ -10,5 +9,5 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class MessageRepositoryImpl implements MessageRepositoryCustom{
 
-	private final JPAQueryFactory jpaQueryFactory;
+	private final MongoTemplate mongoTemplate;
 }
