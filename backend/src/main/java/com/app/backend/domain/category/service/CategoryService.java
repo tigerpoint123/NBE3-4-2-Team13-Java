@@ -82,6 +82,7 @@ public class CategoryService {
 			.orElseThrow(() -> new CategoryException(CategoryErrorCode.CATEGORY_NOT_FOUND));
 	}
 
+	@Transactional
 	public void modify(Category category, String newName) {
 
 		validateCategoryName(newName); // 입력값 검증
