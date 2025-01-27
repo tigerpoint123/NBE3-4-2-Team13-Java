@@ -44,7 +44,6 @@ public class GroupRequest {
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
     @AllArgsConstructor(access = AccessLevel.PRIVATE)
     public static class Update {
-        @NotNull
         private Long    groupId;
         @NotNull
         @NotBlank
