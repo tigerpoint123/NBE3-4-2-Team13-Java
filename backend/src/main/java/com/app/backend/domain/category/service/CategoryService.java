@@ -1,15 +1,20 @@
 package com.app.backend.domain.category.service;
 
-import org.hibernate.validator.constraints.Length;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import java.util.List;
+
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.app.backend.domain.category.dto.CategoryDto;
+import com.app.backend.domain.category.dto.CategoryPageDto;
 import com.app.backend.domain.category.entity.Category;
 import com.app.backend.domain.category.exception.CategoryErrorCode;
 import com.app.backend.domain.category.exception.CategoryException;
 import com.app.backend.domain.category.repository.CategoryRepository;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -33,6 +38,26 @@ public class CategoryService {
 			.build();
 
 		return categoryRepository.save(category);
+	}
+
+	public CategoryPageDto getCategories(Pageable pageable) {
+		Page<Category> categoryPage = categoryRepository.findAll(pageable);
+
+		List<CategoryDto> categories = categoryPage
+			.getContent()
+			.stream()
+			.map(CategoryDto::from)
+			.toList();
+
+		return new CategoryPageDto(
+			categories,
+			categoryPage.getNumber() + 1,
+			categoryPage.getTotalPages(),
+			categoryPage.getTotalElements(),
+			categoryPage.getSize()
+		);
+
+
 	}
 
 	// 검증 메서드

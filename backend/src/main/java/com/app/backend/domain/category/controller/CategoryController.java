@@ -1,12 +1,16 @@
 package com.app.backend.domain.category.controller;
 
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.app.backend.domain.category.dto.CategoryDto;
+import com.app.backend.domain.category.dto.CategoryPageDto;
 import com.app.backend.domain.category.dto.CreateCategoryReqBody;
 import com.app.backend.domain.category.entity.Category;
 import com.app.backend.domain.category.service.CategoryService;
@@ -36,4 +40,19 @@ public class CategoryController {
 			categoryDto
 		);
 	}
+
+	@GetMapping
+	public ApiResponse<CategoryPageDto> getCategories(
+		@PageableDefault(size = 10) Pageable pageable
+	) {
+		CategoryPageDto categoryPageDto = categoryService.getCategories(pageable);
+
+		return ApiResponse.of(
+			true,
+			"200",
+			"카테고리 목록 조회",
+			categoryPageDto
+		);
+	}
+
 }
