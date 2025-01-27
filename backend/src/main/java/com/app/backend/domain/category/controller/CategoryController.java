@@ -43,7 +43,7 @@ public class CategoryController {
 
 	@GetMapping
 	public ApiResponse<CategoryPageDto> getCategories(
-		@PageableDefault(size = 10) Pageable pageable
+		@PageableDefault(page = 0, size = 10) Pageable pageable
 	) {
 		CategoryPageDto categoryPageDto = categoryService.getCategories(pageable);
 
