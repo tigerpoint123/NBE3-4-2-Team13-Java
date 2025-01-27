@@ -50,7 +50,7 @@ public class MemberService {
 
     public MemberLoginResponseDto login(MemberLoginRequestDto request) {
         // 사용자 찾기
-        Member member = memberRepository.findByUsername(request.username()) //request.username()
+        Member member = memberRepository.findByUsername(request.username())
                 .orElseThrow(() -> new IllegalArgumentException("가입되지 않은 사용자입니다."));
 
         // 비밀번호 확인

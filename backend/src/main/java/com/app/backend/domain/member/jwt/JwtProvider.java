@@ -15,8 +15,6 @@ import java.util.Date;
 @Component
 @RequiredArgsConstructor
 public class JwtProvider {
-    private String secretKey;
-
     private final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 30; // 30분
     private final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 24; // 1일
 
