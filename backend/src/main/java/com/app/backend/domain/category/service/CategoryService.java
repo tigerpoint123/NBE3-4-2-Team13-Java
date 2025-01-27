@@ -77,8 +77,9 @@ public class CategoryService {
 		}
 	}
 
-	public Optional<Category> findById(Long id) {
-		return categoryRepository.findById(id);
+	public Category findById(Long id) {
+		return categoryRepository.findById(id)
+			.orElseThrow(() -> new CategoryException(CategoryErrorCode.CATEGORY_NOT_FOUND));
 	}
 
 	public void modify(Category category, String newName) {
