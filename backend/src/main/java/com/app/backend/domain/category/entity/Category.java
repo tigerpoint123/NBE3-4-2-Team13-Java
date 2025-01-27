@@ -29,7 +29,7 @@ public class Category extends BaseEntity {
 	@Column(length = 10, nullable = false)
 	private String name;
 
-	public void changeName(String newName) {
+	public void modifyName(String newName) {
 		this.name = newName; // 이름 변경
 	}
 }
