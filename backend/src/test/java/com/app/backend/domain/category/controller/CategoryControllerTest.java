@@ -3,8 +3,6 @@ package com.app.backend.domain.category.controller;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import java.util.Optional;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -218,8 +216,7 @@ public class CategoryControllerTest {
 			categoryRepository.save(category);
 		}
 
-		Category category1 = categoryRepository.findById(1L)
-			.orElseThrow(() -> new CategoryException(CategoryErrorCode.CATEGORY_NOT_FOUND));
+		Category category1 = categoryRepository.findAll().get(0);
 		category1.softDelete();
 		categoryRepository.save(category1);
 
