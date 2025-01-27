@@ -34,7 +34,7 @@ public class CategoryController {
 	}
 
 	@PostMapping
-	public ApiResponse<CategoryDto> createCategory(
+	public ApiResponse<Void> createCategory(
 		@RequestBody CreateCategoryReqBody request
 	) {
 		Category category = categoryService.create(request.name());
