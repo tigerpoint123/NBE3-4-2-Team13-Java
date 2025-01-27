@@ -1,6 +1,7 @@
 package com.app.backend.global.supporter;
 
 import com.app.backend.domain.group.repository.GroupRepository;
+import com.app.backend.domain.group.service.GroupService;
 import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,5 +16,8 @@ public abstract class SpringBootTestSupporter {
 
     @Autowired
     protected GroupRepository groupRepository;
+
+    @Autowired
+    protected GroupService groupService;
 
 }
