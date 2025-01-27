@@ -58,7 +58,7 @@ public class MemberService {
             throw new IllegalArgumentException("잘못된 비밀번호입니다");
 
         // 토큰 생성
-        String accessToken = jwtProvider.generateAccessToken(member.getUsername());
+        String accessToken = jwtProvider.generateAccessToken(member);
         String refreshToken = jwtProvider.generateRefreshToken();
 
         // refresh token 저장

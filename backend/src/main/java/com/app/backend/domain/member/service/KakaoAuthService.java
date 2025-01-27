@@ -50,7 +50,7 @@ public class KakaoAuthService {
 		Member member = saveOrUpdate(userInfo);
 
 		// 4. JWT 토큰 발급
-		String accessToken = jwtProvider.generateAccessToken(member.getUsername());
+		String accessToken = jwtProvider.generateAccessToken(member);
 		String refreshToken = jwtProvider.generateRefreshToken();
 		
 		member.updateRefreshToken(refreshToken);
