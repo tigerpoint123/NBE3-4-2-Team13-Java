@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -46,7 +47,7 @@ public class CategoryControllerTest {
 		mvc.perform(MockMvcRequestBuilders.post("/api/v1/admin/categories")
 				.content(requestJson)
 				.contentType(MediaType.APPLICATION_JSON))
-			.andExpect(jsonPath("$.code").value("201"))
+			.andExpect(jsonPath("$.code").value(HttpStatus.CREATED.value()))
 			.andExpect(jsonPath("$.message").value("%s 카테고리가 생성되었습니다.".formatted(categoryName)))
 			.andExpect(jsonPath("$.data.name").value(categoryName));
 
@@ -122,7 +123,7 @@ public class CategoryControllerTest {
 		ResultActions resultActions = mvc.perform(MockMvcRequestBuilders.get("/api/v1/admin/categories")
 				.contentType(MediaType.APPLICATION_JSON)
 			)
-			.andExpect(jsonPath("$.code").value("200"))
+			.andExpect(jsonPath("$.code").value(HttpStatus.OK.value()))
 			.andExpect(jsonPath("$.message").value("카테고리 목록 조회"))
 			.andExpect(jsonPath("$.data.categories.length()").value(10))
 			.andExpect(jsonPath("$.data.currentPage").value(1))
@@ -146,7 +147,7 @@ public class CategoryControllerTest {
 		ResultActions resultActions = mvc.perform(MockMvcRequestBuilders.get("/api/v1/admin/categories?page=1")
 				.contentType(MediaType.APPLICATION_JSON)
 			)
-			.andExpect(jsonPath("$.code").value("200"))
+			.andExpect(jsonPath("$.code").value(HttpStatus.OK.value()))
 			.andExpect(jsonPath("$.message").value("카테고리 목록 조회"))
 			.andExpect(jsonPath("$.data.categories.length()").value(1))
 			.andExpect(jsonPath("$.data.currentPage").value(2))
@@ -176,7 +177,7 @@ public class CategoryControllerTest {
 		mvc.perform(MockMvcRequestBuilders.patch("/api/v1/admin/categories/{id}", category.getId())
 				.content(requestJson)
 				.contentType(MediaType.APPLICATION_JSON))
-			.andExpect(jsonPath("$.code").value("200"))
+			.andExpect(jsonPath("$.code").value(HttpStatus.OK.value()))
 			.andExpect(jsonPath("$.message").value("%d번 카테고리가 수정되었습니다.".formatted(category.getId())))
 			.andExpect(jsonPath("$.data.name").value(categoryName));
 
