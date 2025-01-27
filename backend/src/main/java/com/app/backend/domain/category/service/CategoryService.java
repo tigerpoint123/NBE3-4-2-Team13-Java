@@ -40,6 +40,7 @@ public class CategoryService {
 		return categoryRepository.save(category);
 	}
 
+	// 카테고리 목록 페이지로 조회
 	public CategoryPageDto getCategories(Pageable pageable) {
 		Page<Category> categoryPage = categoryRepository.findAll(pageable);
 
