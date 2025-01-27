@@ -211,5 +211,6 @@ gradle-app.setting
 !.env.example
 
 bin/
+.vscode/
 
 # End of https://www.toptal.com/developers/gitignore/api/windows,intellij,java,gradle
