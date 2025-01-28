@@ -1,11 +1,6 @@
 package com.app.backend.domain.member.controller;
 
-import java.security.Principal;
-
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,6 +13,7 @@ import com.app.backend.domain.member.dto.request.MemberJoinRequestDto;
 import com.app.backend.domain.member.dto.request.MemberLoginRequestDto;
 import com.app.backend.domain.member.dto.response.MemberJoinResponseDto;
 import com.app.backend.domain.member.dto.response.MemberLoginResponseDto;
+import com.app.backend.domain.member.entity.Member;
 import com.app.backend.domain.member.entity.MemberDetails;
 import com.app.backend.domain.member.jwt.JwtProvider;
 import com.app.backend.domain.member.service.MemberService;
@@ -64,50 +60,29 @@ public class ApiMemberController {
 		);
 	}
 
-	@GetMapping
-	public ApiResponse<MemberDetails> getMyInfo(
-		@RequestHeader("Authorization") String bearerToken
+	// 회원정보 조회
+	@GetMapping("/info")
+	public ApiResponse<MemberDetails> getMemberInfo(
+		@RequestHeader(value = "Authorization", required = false) String token
 	) {
-		try {
-			// "Bearer " 제거하고 실제 토큰만 추출
-			String token = bearerToken.substring(7);
-
-			log.info("전달받은 토큰: {}", token);
-
-			// 토큰 유효성 검증
-			if (!jwtProvider.validateToken(token)) {
-				log.error("유효하지 않은 토큰");
-				return ApiResponse.of(
-					false,
-					"INVALID_TOKEN",
-					"유효하지 않은 토큰입니다."
-				);
-			}
-
-			// 토큰에서 Authentication 객체 가져오기
-			Authentication authentication = jwtProvider.getAuthentication(token);
-			MemberDetails memberDetails = (MemberDetails) authentication.getPrincipal();
-
-			log.info("조회된 사용자: id={}, username={}",
-				memberDetails.getId(),
-				memberDetails.getUsername());
-
+		log.info("토큰 : {}", token);
+		// Bearer 토큰에서 실제 토큰 값만 추출
+		// String actualToken = token.substring(7);
+		Member member = memberService.getCurrentMember(token);
+		if (member != null) {
 			return ApiResponse.of(
 				true,
 				"MEMBER_INFO_SUCCESS",
-				"사용자 정보 조회에 성공했습니다.",
-				memberDetails
+				"회원정보 조회에 성공했습니다",
+				MemberDetails.of(member)
 			);
-
-		} catch (Exception e) {
-			log.error("사용자 정보 조회 실패: {}", e.getMessage());
+		} else {
 			return ApiResponse.of(
 				false,
-				"INVALID_TOKEN",
-				"유효하지 않은 토큰입니다."
+				"MEMBER_INFO_FAIL",
+				"회원정보 조회에 실패했습니다"
 			);
 		}
-
 	}
 
 }
