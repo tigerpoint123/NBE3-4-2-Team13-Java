@@ -25,11 +25,11 @@ public class MemberService {
 
     @Transactional
     public MemberJoinResponseDto createMember(String username, String password, String nickname) {
-        memberRepository.findByUsername("testID")
+        memberRepository.findByUsername(username)
                 .ifPresent(a -> {
                     throw new ServiceException("409-1", "이미 존재하는 username 입니다.");
                 });
-        memberRepository.findByNickname("김호남")
+        memberRepository.findByNickname(nickname)
                 .ifPresent(a->{
                     throw new ServiceException("409-2", "이미 존재하는 닉네임입니다");
                 });
@@ -69,4 +69,9 @@ public class MemberService {
         return MemberLoginResponseDto.of(member, accessToken, refreshToken);
     }
 
+    public Member getCurrentMember(String actualToken) {
+        Long memberId = jwtProvider.getMemberId(actualToken);
+        return this.memberRepository.findById(memberId)
+            .orElseThrow(() -> new IllegalArgumentException("가입되지 않은 사용자입니다"));
+    }
 }

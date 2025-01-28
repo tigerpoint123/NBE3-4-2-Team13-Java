@@ -1,8 +1,11 @@
 package com.app.backend.domain.member.controller;
 
-import org.springframework.beans.factory.annotation.Value;
+import javax.security.sasl.AuthenticationException;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.Mapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,10 +21,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/members/kakao")
 public class KakaoController {
-	@Value("${spring.security.oauth2.client.registration.kakao.client-id}")
-	private String clientId;
-	@Value("${spring.security.oauth2.client.registration.kakao.redirect-uri}")
-	private String redirectUri;
 	private final KakaoAuthService kakaoAuthService;
 
 	@Operation(summary = "카카오 로그인 콜백", description = """
@@ -36,12 +35,11 @@ public class KakaoController {
         
         3. 이 API의 code 파라미터에 복사한 값을 입력하세요
         """)
-	@GetMapping("/callback")
+	@PostMapping("/callback")
 	public ResponseEntity<TokenDto> kakaoCallback(
 		@Parameter(description = "카카오 인증 코드")
 		@RequestParam("code") String code
-	) {
+	) throws AuthenticationException {
 		return ResponseEntity.ok(kakaoAuthService.kakaoLogin(code));
 	}
-
 }
