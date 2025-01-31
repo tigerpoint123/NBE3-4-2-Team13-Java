@@ -30,8 +30,11 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @RequiredArgsConstructor
 public class SecurityConfig {
 	private final JwtProvider jwtProvider;
-	// @Value("${cors.allowed-origins}")
-	// private String[] allowedOrigins;
+	private final String[] allowedOrigins = {
+		"http://localhost:3000",  // React
+		"http://localhost:5173",  // Vite
+		"http://localhost:8080"   // Spring Boot
+	};
 
 	@Bean       // 비밀번호 암호화
 	public PasswordEncoder passwordEncoder() {
@@ -58,20 +61,20 @@ public class SecurityConfig {
 
 		return http.build();
 	}
-	//
-	// @Bean
-	// public CorsConfigurationSource corsConfigurationSource() {
-	// 	CorsConfiguration configuration = new CorsConfiguration();
-	//
-	// 	configuration.setAllowedOrigins(Arrays.asList(allowedOrigins));
-	// 	configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-	// 	configuration.setAllowedHeaders(Arrays.asList("*"));
-	// 	configuration.setAllowCredentials(true);
-	// 	configuration.setMaxAge(3600L);
-	//
-	// 	UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-	// 	source.registerCorsConfiguration("/**", configuration);
-	//
-	// 	return source;
-	// }
+
+	@Bean
+	public CorsConfigurationSource corsConfigurationSource() {
+		CorsConfiguration configuration = new CorsConfiguration();
+
+		configuration.setAllowedOrigins(Arrays.asList(allowedOrigins));
+		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+		configuration.setAllowedHeaders(Arrays.asList("*"));
+		configuration.setAllowCredentials(true);
+		configuration.setMaxAge(3600L);
+
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", configuration);
+
+		return source;
+	}
 }
