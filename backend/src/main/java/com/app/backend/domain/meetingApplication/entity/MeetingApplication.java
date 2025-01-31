@@ -1,5 +1,6 @@
-package com.app.backend.domain.group.entity;
+package com.app.backend.domain.meetingApplication.entity;
 
+import com.app.backend.domain.group.entity.Group;
 import com.app.backend.domain.member.entity.Member;
 import com.app.backend.global.entity.BaseEntity;
 
