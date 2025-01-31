@@ -1,14 +1,15 @@
 "use client";
 
 import { createContext, use, useState } from "react";
-
 import { usePathname, useRouter } from "next/navigation";
-
 import client from "@/lib/backend/client";
 
-import { components } from "@/lib/backend/apiV1/schema";
-
-type Member = components["schemas"]["MemberDto"];
+type Member = {
+  id: number;
+  nickname: string;
+  profileImgUrl: string | null;  // null도 허용하도록 수정
+  createDate: string;  // 추가
+};
 
 export const LoginMemberContext = createContext<{
   loginMember: Member;
@@ -20,6 +21,7 @@ export const LoginMemberContext = createContext<{
   logoutAndHome: () => void;
   isAdminPage: boolean;
   isUserPage: boolean;
+  checkLoginStatus: () => Promise<void>;
 }>({
   loginMember: createEmptyMember(),
   setLoginMember: () => {},
@@ -30,15 +32,15 @@ export const LoginMemberContext = createContext<{
   logoutAndHome: () => {},
   isAdminPage: false,
   isUserPage: false,
+  checkLoginStatus: async () => {},
 });
 
 function createEmptyMember(): Member {
   return {
     id: 0,
-    createDate: "",
-    modifyDate: "",
     nickname: "",
     profileImgUrl: "",
+    createDate: new Date().toISOString(),  // 추가
   };
 }
 
@@ -80,6 +82,55 @@ export function useLoginMember() {
   const isAdminPage = pathname.startsWith("/adm");
   const isUserPage = !isAdminPage;
 
+  const checkLoginStatus = async () => {
+    try {
+      // 쿠키 파싱 함수
+      const getAccessTokenFromCookie = () => {
+        const cookies = document.cookie;
+        const match = cookies.match(/accessToken=([^;]+)/);
+        const accessToken = match ? match[1] : null;
+        return accessToken;
+      };
+
+      const accessToken = getAccessTokenFromCookie();
+
+      if (!accessToken) {
+        setNoLoginMember();
+        return;
+      }
+
+      const response = await fetch("http://localhost:8080/api/v1/members/info", {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        },
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        const responseData = await response.json();
+        // API 응답 구조에 맞게 수정
+        if (responseData.isSuccess && responseData.data) {
+          const memberData = {
+            id: responseData.data.id,
+            nickname: responseData.data.nickname,
+            createDate: responseData.data.createDate || "",
+            modifyDate: responseData.data.modifyDate || "",
+            profileImgUrl: responseData.data.profileImgUrl || "https://placehold.co/80x80"
+          };
+          setLoginMember(memberData);
+        } else {
+          setNoLoginMember();
+        }
+      } else {
+        setNoLoginMember();
+      }
+    } catch (error) {
+      console.error('로그인 상태 확인 실패:', error);
+      setNoLoginMember();
+    }
+  };
+
   return {
     loginMember,
     setLoginMember,
@@ -91,6 +142,7 @@ export function useLoginMember() {
     logoutAndHome,
     isAdminPage,
     isUserPage,
+    checkLoginStatus,
   };
 }
 

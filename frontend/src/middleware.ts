@@ -3,9 +3,7 @@ import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adap
 import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-
 import { parseAccessToken } from "@/lib/auth/token";
-
 import client from "./lib/backend/client";
 
 export async function middleware(req: NextRequest) {
@@ -14,6 +12,8 @@ export async function middleware(req: NextRequest) {
 
   const { isLogin, isAccessTokenExpired, isAdmin } =
     parseAccessToken(accessToken);
+
+  console.log('Login status:', { isLogin, isAccessTokenExpired, isAdmin });  // 로그인 상태 확인
 
   if (isLogin && isAccessTokenExpired) await refreshTokens(cookieStore);
 
