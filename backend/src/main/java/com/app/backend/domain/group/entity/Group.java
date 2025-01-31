@@ -3,7 +3,6 @@ package com.app.backend.domain.group.entity;
 import com.app.backend.domain.chat.room.entity.ChatRoom;
 import com.app.backend.global.entity.BaseEntity;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -60,7 +59,7 @@ public class Group extends BaseEntity {
     @Min(1)
     private Integer maxRecruitCount;    //모임 최대 인원
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chat_room_id")
     private ChatRoom chatRoom;      // 채팅방
 
