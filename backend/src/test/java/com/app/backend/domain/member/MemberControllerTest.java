@@ -1,7 +1,6 @@
 package com.app.backend.domain.member;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -20,8 +19,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.app.backend.domain.member.controller.KakaoController;
-import com.app.backend.domain.member.dto.kakao.KakaoUserInfo;
-import com.app.backend.domain.member.dto.request.KakaoLoginRequestDto;
 import com.app.backend.domain.member.dto.request.MemberJoinRequestDto;
 import com.app.backend.domain.member.dto.request.MemberLoginRequestDto;
 import com.app.backend.domain.member.entity.Member;
@@ -88,7 +85,7 @@ public class MemberControllerTest {
 
 		//then
 		// DB에 실제로 저장되었는지 확인
-		Member savedMember = memberRepository.findByUsername(newUsername)
+		Member savedMember = memberRepository.findByUsernameAndDisabled(newUsername, false)
 			.orElseThrow(() -> new RuntimeException("회원이 저장되지 않았습니다."));
 
 		assertAll(
@@ -113,7 +110,7 @@ public class MemberControllerTest {
 			.andDo(print());  // 결과 출력
 
 		// then
-		Member savedMember = memberRepository.findByUsername(setupUsername)
+		Member savedMember = memberRepository.findByUsernameAndDisabled(setupUsername, false)
 			.orElseThrow(() -> new IllegalArgumentException("가입되지 않은 사용자입니다"));
 
 		assertAll(

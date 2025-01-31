@@ -5,8 +5,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.app.backend.domain.member.dto.request.MemberLoginRequestDto;
+import com.app.backend.domain.member.dto.request.MemberModifyRequestDto;
 import com.app.backend.domain.member.dto.response.MemberJoinResponseDto;
 import com.app.backend.domain.member.dto.response.MemberLoginResponseDto;
+import com.app.backend.domain.member.dto.response.MemberModifyResponseDto;
 import com.app.backend.domain.member.entity.Member;
 import com.app.backend.domain.member.jwt.JwtProvider;
 import com.app.backend.domain.member.repository.MemberRepository;
@@ -22,14 +24,15 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
+    private final boolean disabled = false;
 
     @Transactional
     public MemberJoinResponseDto createMember(String username, String password, String nickname) {
-        memberRepository.findByUsername(username)
+        memberRepository.findByUsernameAndDisabled(username, disabled)
                 .ifPresent(a -> {
                     throw new ServiceException("409-1", "이미 존재하는 username 입니다.");
                 });
-        memberRepository.findByNickname(nickname)
+        memberRepository.findByNicknameAndDisabled(nickname, disabled)
                 .ifPresent(a->{
                     throw new ServiceException("409-2", "이미 존재하는 닉네임입니다");
                 });
@@ -50,7 +53,7 @@ public class MemberService {
 
     public MemberLoginResponseDto login(MemberLoginRequestDto request) {
         // 사용자 찾기
-        Member member = memberRepository.findByUsername(request.username())
+        Member member = memberRepository.findByUsernameAndDisabled(request.username(), disabled)
                 .orElseThrow(() -> new IllegalArgumentException("가입되지 않은 사용자입니다."));
 
         // 비밀번호 확인
@@ -73,5 +76,21 @@ public class MemberService {
         Long memberId = jwtProvider.getMemberId(accessToken);
         return this.memberRepository.findById(memberId)
             .orElseThrow(() -> new IllegalArgumentException("가입되지 않은 사용자입니다"));
+    }
+
+    public MemberModifyResponseDto modifyMember(Member member, MemberModifyRequestDto request) {
+        Member modifiedMember = Member.builder()
+            .id(member.getId())
+            .username(member.getUsername())
+            .password(request.password() != null ?
+                passwordEncoder.encode(request.password()) : member.getPassword())
+            .nickname("김경남")
+            .role(member.getRole())
+            .disabled(member.isDisabled())
+            .build();
+
+        Member savedMember = memberRepository.save(modifiedMember);
+
+        return MemberModifyResponseDto.of(savedMember);
     }
 }
