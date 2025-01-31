@@ -78,13 +78,14 @@ public class MemberService {
             .orElseThrow(() -> new IllegalArgumentException("가입되지 않은 사용자입니다"));
     }
 
+    @Transactional
     public MemberModifyResponseDto modifyMember(Member member, MemberModifyRequestDto request) {
         Member modifiedMember = Member.builder()
             .id(member.getId())
             .username(member.getUsername())
             .password(request.password() != null ?
                 passwordEncoder.encode(request.password()) : member.getPassword())
-            .nickname("김경남")
+            .nickname(member.getNickname())
             .role(member.getRole())
             .disabled(member.isDisabled())
             .build();

@@ -21,10 +21,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.app.backend.domain.member.controller.KakaoController;
 import com.app.backend.domain.member.dto.request.MemberJoinRequestDto;
 import com.app.backend.domain.member.dto.request.MemberLoginRequestDto;
+import com.app.backend.domain.member.dto.request.MemberModifyRequestDto;
 import com.app.backend.domain.member.entity.Member;
 import com.app.backend.domain.member.jwt.JwtProvider;
 import com.app.backend.domain.member.repository.MemberRepository;
 import com.app.backend.domain.member.service.KakaoAuthService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.transaction.Transactional;
@@ -153,4 +155,32 @@ public class MemberControllerTest {
 		// 	() -> assertEquals(refreshToken, savedMember.getRefreshToken())
 		// );
 	}
+
+	@Test
+	@DisplayName("개인정보 수정")
+	void 개인정보수정() throws Exception {
+		// given
+		MemberModifyRequestDto request = new MemberModifyRequestDto(newNickname, newPassword);
+		Member member = memberRepository.findByUsernameAndDisabled(setupUsername, false)
+			.orElseThrow(() -> new IllegalArgumentException("가입되지 않은 사용자입니다"));
+		String accessToken = "Bearer " + jwtProvider.generateAccessToken(member);
+
+		// when
+		mvc.perform(patch("/api/v1/members/modify")
+				.header("Authorization", accessToken)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request)))
+			.andExpect(status().isOk())
+			.andDo(print());
+
+		// then
+		Member savedMember = memberRepository.findByUsernameAndDisabled(setupUsername, false)
+			.orElseThrow(() -> new IllegalArgumentException("가입되지 않은 사용자입니다"));
+
+		assertAll(
+			() -> assertNotEquals(request.nickname(), savedMember.getNickname()),
+			() -> assertNotNull(savedMember.getPassword())
+		);
+	}
+
 }
