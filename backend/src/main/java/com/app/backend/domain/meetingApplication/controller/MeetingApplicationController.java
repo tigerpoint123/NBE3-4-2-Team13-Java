@@ -1,13 +1,16 @@
 package com.app.backend.domain.meetingApplication.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.app.backend.domain.category.dto.CategoryReqBody;
 import com.app.backend.domain.meetingApplication.dto.MeetingApplicationDto;
+import com.app.backend.domain.meetingApplication.entity.MeetingApplication;
+import com.app.backend.domain.meetingApplication.entity.MeetingApplicationReqBody;
+import com.app.backend.domain.meetingApplication.service.MeetingApplicationService;
 import com.app.backend.global.dto.response.ApiResponse;
 
 import lombok.RequiredArgsConstructor;
@@ -17,12 +20,23 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1/groups")
 public class MeetingApplicationController {
 
-	@PostMapping("/{id}")
-	public ApiResponse<MeetingApplicationDto> createMeetingApplication(
-		@PathVariable Long id,
-		@RequestBody CategoryReqBody modifyRequest
-	) {
+	private final MeetingApplicationService meetingApplicationService;
 
+	@PostMapping("/{groupId}")
+	public ApiResponse<MeetingApplicationDto> createMeetingApplication(
+		@PathVariable Long groupId,
+		@RequestBody MeetingApplicationReqBody request
+	) {
+		MeetingApplication meetingApplication = meetingApplicationService.create(groupId, request);
+
+		MeetingApplicationDto meetingApplicationDto = MeetingApplicationDto.from(meetingApplication);
+
+		return ApiResponse.of(
+			true,
+			HttpStatus.CREATED,
+			"%d번 모임에 성공적으로 가입 신청을 하셨습니다.".formatted(meetingApplication.getGroup().getId()),
+			meetingApplicationDto
+		);
 	}
 
 }
