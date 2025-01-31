@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -13,8 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.app.backend.domain.member.dto.request.MemberJoinRequestDto;
 import com.app.backend.domain.member.dto.request.MemberLoginRequestDto;
+import com.app.backend.domain.member.dto.request.MemberModifyRequestDto;
 import com.app.backend.domain.member.dto.response.MemberJoinResponseDto;
 import com.app.backend.domain.member.dto.response.MemberLoginResponseDto;
+import com.app.backend.domain.member.dto.response.MemberModifyResponseDto;
 import com.app.backend.domain.member.entity.Member;
 import com.app.backend.domain.member.entity.MemberDetails;
 import com.app.backend.domain.member.jwt.JwtProvider;
@@ -70,7 +73,7 @@ public class ApiMemberController {
 	@Parameter(name = "Authorization", description = "Bearer JWT token", required = true, in = ParameterIn.HEADER)
 	@GetMapping("/info")
 	public ApiResponse<MemberDetails> getMemberInfo(
-		@RequestHeader(value = "Authorization", required = false) String token
+		@RequestHeader(value = "Authorization") String token
 	) {
 		log.info("토큰 : {}", token);
 		
@@ -83,6 +86,31 @@ public class ApiMemberController {
 					return member != null
 						? ApiResponse.of(true, "MEMBER_INFO_SUCCESS", "회원정보 조회에 성공했습니다", MemberDetails.of(member))
 						: ApiResponse.of(false, "MEMBER_INFO_FAIL", "회원정보 조회에 실패했습니다");
+				} catch (Exception e) {
+					log.error("에러 내용 : ", e);
+					return ApiResponse.of(false, "INVALID_TOKEN", "유효하지 않은 토큰입니다");
+				}
+			})
+			.orElse(ApiResponse.of(false, "TOKEN_MISSING", "토큰이 필요합니다"));
+	}
+
+	@PatchMapping("/modify")
+	public ApiResponse<MemberModifyResponseDto> modifyMemberInfo(
+		@RequestHeader(value = "Authorization") String token,
+		@RequestBody MemberModifyRequestDto request
+	) {
+		return Optional.ofNullable(token)
+			.map(t -> t.startsWith("Bearer ") ? t.substring(7) : t)
+			.filter(jwtProvider::validateToken)
+			.<ApiResponse<MemberModifyResponseDto>>map(validToken -> {
+				try {
+					Member member = memberService.getCurrentMember(validToken); // 현재 사용자 조회
+					if (member != null) {
+						MemberModifyResponseDto response = memberService.modifyMember(member, request);
+						return ApiResponse.of(true, "MEMBER_MODIFY_SUCCESS", "회원정보 수정에 성공했습니다", response);
+					} else {
+						return ApiResponse.of(false, "MEMBER_MODIFY_FAIL", "회원정보 수정에 실패했습니다");
+					}
 				} catch (Exception e) {
 					log.error("에러 내용 : ", e);
 					return ApiResponse.of(false, "INVALID_TOKEN", "유효하지 않은 토큰입니다");
