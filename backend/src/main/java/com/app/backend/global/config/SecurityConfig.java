@@ -55,7 +55,7 @@ public class SecurityConfig {
 			.sessionManagement(session -> session
 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
-			// .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+			.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 			.csrf(AbstractHttpConfigurer::disable)
 		;
 
