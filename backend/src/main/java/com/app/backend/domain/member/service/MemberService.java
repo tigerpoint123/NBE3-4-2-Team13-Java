@@ -69,8 +69,8 @@ public class MemberService {
         return MemberLoginResponseDto.of(member, accessToken, refreshToken);
     }
 
-    public Member getCurrentMember(String actualToken) {
-        Long memberId = jwtProvider.getMemberId(actualToken);
+    public Member getCurrentMember(String accessToken) {
+        Long memberId = jwtProvider.getMemberId(accessToken);
         return this.memberRepository.findById(memberId)
             .orElseThrow(() -> new IllegalArgumentException("가입되지 않은 사용자입니다"));
     }

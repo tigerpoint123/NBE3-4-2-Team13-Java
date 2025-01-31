@@ -1,5 +1,7 @@
 package com.app.backend.domain.member.controller;
 
+import java.util.Optional;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +24,9 @@ import com.app.backend.global.dto.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 
 @RestController
 @RequiredArgsConstructor
@@ -51,7 +56,7 @@ public class ApiMemberController {
 	public ApiResponse<MemberLoginResponseDto> login(
 		@RequestBody MemberLoginRequestDto request) {
 		MemberLoginResponseDto response = memberService.login(request);
-		log.info("login response : {}", response);
+		log.info("로그인 결과 : {}", response);
 		return ApiResponse.of(
 			true,
 			"MEMBER_LOGIN_SUCCESS",
@@ -61,28 +66,29 @@ public class ApiMemberController {
 	}
 
 	// 회원정보 조회
+	@Operation(summary = "회원 정보 조회", description = "JWT 토큰을 이용해 회원 정보를 조회합니다.")
+	@Parameter(name = "Authorization", description = "Bearer JWT token", required = true, in = ParameterIn.HEADER)
 	@GetMapping("/info")
 	public ApiResponse<MemberDetails> getMemberInfo(
 		@RequestHeader(value = "Authorization", required = false) String token
 	) {
 		log.info("토큰 : {}", token);
-		// Bearer 토큰에서 실제 토큰 값만 추출
-		// String actualToken = token.substring(7);
-		Member member = memberService.getCurrentMember(token);
-		if (member != null) {
-			return ApiResponse.of(
-				true,
-				"MEMBER_INFO_SUCCESS",
-				"회원정보 조회에 성공했습니다",
-				MemberDetails.of(member)
-			);
-		} else {
-			return ApiResponse.of(
-				false,
-				"MEMBER_INFO_FAIL",
-				"회원정보 조회에 실패했습니다"
-			);
-		}
+		
+		return Optional.ofNullable(token)
+			.map(t -> t.startsWith("Bearer ") ? t.substring(7) : t)
+			.filter(jwtProvider::validateToken)
+			.<ApiResponse<MemberDetails>>map(validToken -> {
+				try {
+					Member member = memberService.getCurrentMember(validToken); // 현재 사용자 조회
+					return member != null
+						? ApiResponse.of(true, "MEMBER_INFO_SUCCESS", "회원정보 조회에 성공했습니다", MemberDetails.of(member))
+						: ApiResponse.of(false, "MEMBER_INFO_FAIL", "회원정보 조회에 실패했습니다");
+				} catch (Exception e) {
+					log.error("에러 내용 : ", e);
+					return ApiResponse.of(false, "INVALID_TOKEN", "유효하지 않은 토큰입니다");
+				}
+			})
+			.orElse(ApiResponse.of(false, "TOKEN_MISSING", "토큰이 필요합니다"));
 	}
 
 }
