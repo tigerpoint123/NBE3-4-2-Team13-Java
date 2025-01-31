@@ -1,5 +1,7 @@
 package com.app.backend.domain.member.service;
 
+import java.util.Optional;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,9 +75,15 @@ public class MemberService {
     }
 
     public Member getCurrentMember(String accessToken) {
-        Long memberId = jwtProvider.getMemberId(accessToken);
-        return this.memberRepository.findById(memberId)
-            .orElseThrow(() -> new IllegalArgumentException("가입되지 않은 사용자입니다"));
+        return Optional.ofNullable(accessToken)
+            .map(t -> t.startsWith("Bearer ") ? t.substring(7) : t)
+            .filter(jwtProvider::validateToken)
+            .map(validateToken -> {
+                Long memberId = jwtProvider.getMemberId(validateToken);
+                return this.memberRepository.findByIdAndDisabled(memberId, false)
+                    .orElseThrow(() -> new IllegalArgumentException("가입되지 않은 사용자입니다"));
+            })
+            .orElseThrow(() -> new IllegalArgumentException("유효하지 않는 토큰입니다"));  // 토큰 검증
     }
 
     @Transactional
@@ -90,7 +98,9 @@ public class MemberService {
             .disabled(member.isDisabled())
             .build();
 
-        Member savedMember = memberRepository.save(modifiedMember);
+        Member savedMember = Optional.of(
+            memberRepository.save(modifiedMember)
+        ).orElseThrow(() -> new ServiceException("400", "회원정보 수정에 실패했습니다"));
 
         return MemberModifyResponseDto.of(savedMember);
     }

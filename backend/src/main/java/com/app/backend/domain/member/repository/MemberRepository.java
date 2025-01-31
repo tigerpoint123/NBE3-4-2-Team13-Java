@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
+    Optional<Member> findByIdAndDisabled(Long in, boolean disabled);
 
     Optional<Member> findByUsernameAndDisabled(String username, boolean disabled);
 

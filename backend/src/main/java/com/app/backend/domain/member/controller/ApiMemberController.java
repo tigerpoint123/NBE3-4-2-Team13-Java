@@ -36,6 +36,7 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 public class ApiMemberController {
 	private final MemberService memberService;
 	private final JwtProvider jwtProvider;
+	private String token;
 
 	//회원가입
 	@PostMapping
@@ -73,23 +74,10 @@ public class ApiMemberController {
 	public ApiResponse<MemberDetails> getMemberInfo(
 		@RequestHeader(value = "Authorization") String token
 	) {
-		log.info("토큰 : {}", token);
-		
-		return Optional.ofNullable(token)
-			.map(t -> t.startsWith("Bearer ") ? t.substring(7) : t)
-			.filter(jwtProvider::validateToken)
-			.<ApiResponse<MemberDetails>>map(validToken -> {
-				try {
-					Member member = memberService.getCurrentMember(validToken); // 현재 사용자 조회
-					return member != null
-						? ApiResponse.of(true, "MEMBER_INFO_SUCCESS", "회원정보 조회에 성공했습니다", MemberDetails.of(member))
-						: ApiResponse.of(false, "MEMBER_INFO_FAIL", "회원정보 조회에 실패했습니다");
-				} catch (Exception e) {
-					log.error("에러 내용 : ", e);
-					return ApiResponse.of(false, "INVALID_TOKEN", "유효하지 않은 토큰입니다");
-				}
-			})
-			.orElse(ApiResponse.of(false, "TOKEN_MISSING", "토큰이 필요합니다"));
+		Member member = memberService.getCurrentMember(token); // 현재 사용자 조회
+		return ApiResponse.of(
+			true, "MEMBER_INFO_SUCCESS", "회원정보 조회에 성공했습니다", MemberDetails.of(member)
+		);
 	}
 
 	@PatchMapping("/modify")
@@ -97,24 +85,8 @@ public class ApiMemberController {
 		@RequestHeader(value = "Authorization") String token,
 		@RequestBody MemberModifyRequestDto request
 	) {
-		return Optional.ofNullable(token)
-			.map(t -> t.startsWith("Bearer ") ? t.substring(7) : t)
-			.filter(jwtProvider::validateToken)
-			.<ApiResponse<MemberModifyResponseDto>>map(validToken -> {
-				try {
-					Member member = memberService.getCurrentMember(validToken); // 현재 사용자 조회
-					if (member != null) {
-						MemberModifyResponseDto response = memberService.modifyMember(member, request);
-						return ApiResponse.of(true, "MEMBER_MODIFY_SUCCESS", "회원정보 수정에 성공했습니다", response);
-					} else {
-						return ApiResponse.of(false, "MEMBER_MODIFY_FAIL", "회원정보 수정에 실패했습니다");
-					}
-				} catch (Exception e) {
-					log.error("에러 내용 : ", e);
-					return ApiResponse.of(false, "INVALID_TOKEN", "유효하지 않은 토큰입니다");
-				}
-			})
-			.orElse(ApiResponse.of(false, "TOKEN_MISSING", "토큰이 필요합니다"));
+		Member member = memberService.getCurrentMember(token); // 현재 사용자 조회
+		MemberModifyResponseDto response = memberService.modifyMember(member, request);
+		return ApiResponse.of(true, "MEMBER_MODIFY_SUCCESS", "회원정보 수정에 성공했습니다", response);
 	}
-
 }
