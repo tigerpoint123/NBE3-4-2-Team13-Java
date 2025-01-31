@@ -2,6 +2,8 @@ package com.app.backend.domain.member.service;
 
 import java.util.Map;
 
+import javax.security.sasl.AuthenticationException;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -32,14 +34,12 @@ public class KakaoAuthService {
 
 	@Value("${spring.security.oauth2.client.registration.kakao.client-id}")
 	private String clientId;
-
 	@Value("${spring.security.oauth2.client.registration.kakao.client-secret}")
 	private String clientSecret;
-
 	@Value("${spring.security.oauth2.client.registration.kakao.redirect-uri}")
 	private String redirectUri;
 
-	public TokenDto kakaoLogin(String code) {
+	public TokenDto kakaoLogin(String code) throws AuthenticationException {
 		// 1. 인가코드로 액세스 토큰 요청
 		String kakaoAccessToken = getKakaoAccessToken(code);
 		
@@ -82,26 +82,31 @@ public class KakaoAuthService {
 	}
 
 	// 필수 동의항목 설정 필요
-	private KakaoUserInfo getKakaoUserInfo(String accessToken) {
+	public KakaoUserInfo getKakaoUserInfo(String accessToken) throws AuthenticationException {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setBearerAuth(accessToken);
 		
 		HttpEntity<String> request = new HttpEntity<>(headers);
-		
-		ResponseEntity<Map> response = restTemplate.exchange(
-			"https://kapi.kakao.com/v2/user/me", // 카카오 사용자 정보 조회 api
-			HttpMethod.GET,
-			request,
-			Map.class
-		);
 
-		Map<String, Object> body = response.getBody();
-		Map<String, Object> properties = (Map<String, Object>) body.get("properties");
-		
-		return new KakaoUserInfo(
-			String.valueOf(body.get("id")),
-			(String) properties.get("nickname")
-		);
+		try {
+			ResponseEntity<Map> response = restTemplate.exchange(
+				"https://kapi.kakao.com/v2/user/me", // 카카오 사용자 정보 조회 api
+				HttpMethod.GET,
+				request,
+				Map.class
+			);
+
+			Map<String, Object> body = response.getBody();
+			Map<String, Object> properties = (Map<String, Object>) body.get("properties");
+
+			return new KakaoUserInfo(
+				String.valueOf(body.get("id")),
+				(String) properties.get("nickname")
+			);
+		} catch (Exception e) {
+			log.error("카카오 API 호출 실패: {}", e.getMessage());
+			throw new AuthenticationException("카카오 인증에 실패했습니다.");
+		}
 	}
 
 	private Member saveOrUpdate(KakaoUserInfo userInfo) {
@@ -112,7 +117,7 @@ public class KakaoAuthService {
 				.nickname(userInfo.nickname())
 				.provider(Member.Provider.KAKAO)
 				.oauthProviderId(userInfo.id())
-				.role("ROLE_USER")
+				.role("USER")
 				.disabled(false)
 				.build()));
 	}

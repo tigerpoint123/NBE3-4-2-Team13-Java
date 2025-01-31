@@ -19,6 +19,8 @@ import lombok.RequiredArgsConstructor;
 @Component
 @RequiredArgsConstructor
 public class JwtProvider {
+	private final SecretKey key = Jwts.SIG.HS256.key().build();  // 키를 상수로 저장
+	
 	private final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 30; // 30분
 	private final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 24; // 1일
 
@@ -29,7 +31,7 @@ public class JwtProvider {
 			.claim("id", member.getId())
 			.claim("role", member.getRole())
 			.expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRE_TIME))
-			.signWith(getSigningKey())
+			.signWith(key)  // 저장된 키 사용
 			.compact();
 	}
 
@@ -37,7 +39,7 @@ public class JwtProvider {
 	public String generateRefreshToken() {
 		return Jwts.builder()
 			.expiration(Date.from(Instant.now().plusMillis(REFRESH_TOKEN_EXPIRE_TIME)))
-			.signWith(getSigningKey())
+			.signWith(key)  // 저장된 키 사용
 			.compact();
 	}
 
@@ -45,7 +47,7 @@ public class JwtProvider {
 	public boolean validateToken(String token) {
 		try {
 			Jwts.parser()
-				.verifyWith(getSigningKey())
+				.verifyWith(key)  // 저장된 키 사용
 				.build()
 				.parseSignedClaims(token);
 			return true;
@@ -54,17 +56,10 @@ public class JwtProvider {
 		}
 	}
 
-	private SecretKey getSigningKey() {
-		return Jwts.SIG     // JJWT 의 서명 기능 사용
-			.HS256      // HMAC(대칭키 암호화 알고리즘. 256비트 보안 강도) SHA-256 알고리즘 사용
-			.key()       // 키 생성
-			.build();  // 자동으로 안전한 키 생성
-	}
-
 	public Authentication getAuthentication(String token) {
 		// 토큰에서 모든 필요한 정보를 추출
         Claims claims = Jwts.parser()
-            .verifyWith(getSigningKey())
+            .verifyWith(key)  // 저장된 키 사용
             .build()
             .parseSignedClaims(token)
             .getPayload();
@@ -83,5 +78,14 @@ public class JwtProvider {
 			"",
 			memberDetails.getAuthorities()
 		);
+	}
+
+	public Long getMemberId(String token) {
+		Claims claims = Jwts.parser()
+			.verifyWith(key)  // 저장된 키 사용
+			.build()
+			.parseSignedClaims(token)
+			.getPayload();
+		return claims.get("id", Long.class);
 	}
 }
