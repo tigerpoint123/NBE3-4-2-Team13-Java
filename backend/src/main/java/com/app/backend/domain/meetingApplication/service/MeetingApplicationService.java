@@ -4,8 +4,8 @@ import org.springframework.stereotype.Service;
 
 import com.app.backend.domain.group.entity.Group;
 import com.app.backend.domain.group.repository.GroupRepository;
+import com.app.backend.domain.meetingApplication.dto.MeetingApplicationReqBody;
 import com.app.backend.domain.meetingApplication.entity.MeetingApplication;
-import com.app.backend.domain.meetingApplication.entity.MeetingApplicationReqBody;
 import com.app.backend.domain.meetingApplication.exception.MeetingApplicationErrorCode;
 import com.app.backend.domain.meetingApplication.exception.MeetingApplicationException;
 import com.app.backend.domain.meetingApplication.repository.MeetingApplicationRepository;

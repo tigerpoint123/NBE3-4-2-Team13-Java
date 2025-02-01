@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.app.backend.domain.meetingApplication.dto.MeetingApplicationDto;
+import com.app.backend.domain.meetingApplication.dto.MeetingApplicationReqBody;
 import com.app.backend.domain.meetingApplication.entity.MeetingApplication;
-import com.app.backend.domain.meetingApplication.entity.MeetingApplicationReqBody;
 import com.app.backend.domain.meetingApplication.service.MeetingApplicationService;
 import com.app.backend.global.dto.response.ApiResponse;
 
