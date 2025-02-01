@@ -1,6 +1,5 @@
 package com.app.backend.domain.meetingApplication.controller;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,7 +32,7 @@ public class MeetingApplicationController {
 
 		return ApiResponse.of(
 			true,
-			HttpStatus.CREATED,
+			"201",
 			"%d번 모임에 성공적으로 가입 신청을 하셨습니다.".formatted(meetingApplication.getGroup().getId()),
 			meetingApplicationDto
 		);
