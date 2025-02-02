@@ -42,3 +42,5 @@ next-env.d.ts
 
 # InteliJ IDEA
 .idea
+
+.env
