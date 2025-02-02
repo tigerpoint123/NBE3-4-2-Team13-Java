@@ -4,6 +4,8 @@ import java.util.Arrays;
 
 import com.app.backend.domain.member.jwt.JwtAuthenticationFilter;
 import com.app.backend.domain.member.jwt.JwtProvider;
+import com.app.backend.domain.member.oauth.OAuth2SuccessHandler;
+import com.app.backend.domain.member.service.CustomOAuth2UserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,6 +32,9 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @RequiredArgsConstructor
 public class SecurityConfig {
 	private final JwtProvider jwtProvider;
+	private final CustomOAuth2UserService customOAuth2UserService;
+	private final OAuth2SuccessHandler oAuth2SuccessHandler;
+
 	private final String[] allowedOrigins = {
 		"http://localhost:3000",  // React
 		"http://localhost:5173",  // Vite
@@ -50,8 +55,18 @@ public class SecurityConfig {
 				.requestMatchers("/swagger-ui/**").permitAll()      // 없으면 스웨거 안열림 1
 				.requestMatchers("/v3/api-docs/**").permitAll()      // 없으면 스웨거 안열림 2
 				.requestMatchers("/api/**").permitAll()      // 없으면 스웨거 안열림 3
+				.requestMatchers("/api/v1/members/kakao/**").permitAll()
+				.requestMatchers("/oauth2/authorization/**", "/login/oauth2/code/*").permitAll()
 				.requestMatchers("/api/v1/members/info").authenticated()
 				.anyRequest().authenticated())
+			.oauth2Login(oauth2 -> oauth2
+				.authorizationEndpoint(authorizationEndpointConfig -> authorizationEndpointConfig
+					.baseUri("/oauth2/authorization/kakao"))  // 카카오 로그인 시작점
+				.redirectionEndpoint(redirectionEndpointConfig -> redirectionEndpointConfig
+					.baseUri("/login/oauth2/code/*"))  // 카카오 인증 후 백엔드 콜백
+				.userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig
+					.userService(customOAuth2UserService))
+				.successHandler(oAuth2SuccessHandler))
 			.sessionManagement(session -> session
 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)

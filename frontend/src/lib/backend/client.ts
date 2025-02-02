@@ -1,10 +1,11 @@
-import createClient from "openapi-fetch";
+import axios from 'axios';
 
-import type { paths } from "@/lib/backend/apiV1/schema";
-
-const client = createClient<paths>({
-  baseUrl: "http://localhost:8080",
-  credentials: "include",
+const client = axios.create({
+    baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080',
+    withCredentials: true,
+    headers: {
+        'Content-Type': 'application/json',
+    }
 });
 
 export default client;

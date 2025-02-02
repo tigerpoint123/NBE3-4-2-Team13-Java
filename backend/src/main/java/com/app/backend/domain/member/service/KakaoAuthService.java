@@ -8,12 +8,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.app.backend.domain.member.dto.kakao.KakaoUserInfo;
 import com.app.backend.domain.member.dto.kakao.TokenDto;
@@ -59,26 +61,41 @@ public class KakaoAuthService {
 		return new TokenDto(accessToken, refreshToken);
 	}
 
+	public String getKakaoLoginUrl() {
+		return String.format("https://kauth.kakao.com/oauth/authorize?client_id=%s&redirect_uri=%s&response_type=code",
+			clientId,
+			redirectUri
+		);
+	}
+
 	private String getKakaoAccessToken(String code) {
+		String tokenUri = UriComponentsBuilder
+			.fromUriString("https://kauth.kakao.com/oauth/token")
+			.queryParam("grant_type", "authorization_code")
+			.queryParam("client_id", clientId)
+			.queryParam("redirect_uri", redirectUri)
+			.queryParam("code", code)
+			.queryParam("client_secret", clientSecret)
+			.build()
+			.toString();
+
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+		
+		HttpEntity<?> request = new HttpEntity<>(headers);
 
-		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-		params.add("grant_type", "authorization_code");
-		params.add("client_id", clientId);
-		params.add("redirect_uri", redirectUri);
-		params.add("code", code);
-		params.add("client_secret", clientSecret);
-
-		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
-
-		ResponseEntity<Map> response = restTemplate.postForEntity(
-			"https://kauth.kakao.com/oauth/token",
+		ResponseEntity<Map> response = restTemplate.exchange(
+			tokenUri,
+			HttpMethod.GET,
 			request,
 			Map.class
 		);
 
-		return (String) response.getBody().get("access_token");
+		if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+			return (String) response.getBody().get("access_token");
+		}
+
+		throw new RuntimeException("Failed to get Kakao access token");
 	}
 
 	// 필수 동의항목 설정 필요
