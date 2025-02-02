@@ -1,21 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { useEffect } from "react";
-
 import { ThemeProvider as NextThemesProvider } from "next-themes";
-
 import Link from "next/link";
-
-import client from "@/lib/backend/client";
-
 import NarrowHeaderContent from "@/lib/business/components/NarrowHeaderContent";
 import WideHeaderContent from "@/lib/business/components/WideHeaderContent";
-
 import { LoginMemberContext, useLoginMember } from "@/stores/auth/loginMember";
-
 import { Button } from "@/components/ui/button";
-
 import { Copyright, LogIn, MonitorCog } from "lucide-react";
 
 export function ClientLayout({
@@ -32,6 +23,7 @@ export function ClientLayout({
     logoutAndHome,
     isAdminPage,
     isUserPage,
+    checkLoginStatus
   } = useLoginMember();
 
   const loginMemberContextValue = {
@@ -45,30 +37,8 @@ export function ClientLayout({
     logoutAndHome,
     isAdminPage,
     isUserPage,
+    checkLoginStatus
   };
-
-  // useEffect(() => {
-  //   const fetchMember = () => {
-  //     client.GET("/api/v1/members/me").then((res) => {
-  //       if (res.error) {
-  //         setNoLoginMember();
-  //       } else {
-  //         setLoginMember(res.data);
-  //       }
-  //     });
-  //   };
-  //
-  //   fetchMember();
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
-  //
-  // if (isLoginMemberPending) {
-  //   return (
-  //     <div className="flex-1 flex justify-center items-center text-muted-foreground">
-  //       인증 정보 로딩중...
-  //     </div>
-  //   );
-  // }
 
   return (
     <NextThemesProvider

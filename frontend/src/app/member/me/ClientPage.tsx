@@ -3,7 +3,7 @@
 import Image from "next/image";
 
 import { useGlobalLoginMember } from "@/stores/auth/loginMember";
-
+import { useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -13,7 +13,20 @@ import {
 } from "@/components/ui/card";
 
 export default function ClientPage() {
-  const { loginMember } = useGlobalLoginMember();
+  const { loginMember, checkLoginStatus, isLoginMemberPending } = useGlobalLoginMember();
+
+  useEffect(() => {
+    checkLoginStatus();  // 컴포넌트 마운트 시 로그인 상태 체크
+  }, [checkLoginStatus]);
+
+  // 로딩 중일 때 표시할 내용
+  if (isLoginMemberPending) {
+    return (
+      <div className="flex-1 flex justify-center items-center">
+        <div>로딩 중...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 flex justify-center items-center">
@@ -25,8 +38,8 @@ export default function ClientPage() {
         <CardContent>
           <div className="flex justify-center items-center gap-4">
             <Image
-              src={loginMember.profileImgUrl}
-              alt={loginMember.nickname}
+              src={loginMember.profileImgUrl || "https://k.kakaocdn.net/dn/dpk9l1/btqmGhA2lKL/Oz0wDuJn1YV2DIn92f6DVK/img_640x640.jpg"}
+              alt={`${loginMember.nickname || '사용자'}의 프로필 이미지`}
               width={80}
               height={80}
               quality={100}
