@@ -1,9 +1,12 @@
 package com.app.backend.domain.comment.entity;
 
+import com.app.backend.domain.member.entity.Member;
+import com.app.backend.domain.post.entity.Post;
 import com.app.backend.global.entity.BaseEntity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,7 +15,7 @@ import lombok.Setter;
 
 @Entity
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
 @Table(name = "tbl_comments")
@@ -27,17 +30,14 @@ public class Comment extends BaseEntity {
 	@Column(nullable = false)
 	private String content;
 
+	@ManyToOne
+	@JoinColumn(name = "post_id")
+	private Post post;
 
+	@ManyToOne
+	@JoinColumn(name = "member_id")
+	private Member member;
 
-	//추후 수정
-
-	//@ManyToOne
-	//@JoinColumn(name = "post_id")
-	//private Long postId;
-
-	//@ManyToOne
-	//@JoinColumn(name = "member_id")
-	//private Long membersId;
 
 
 
