@@ -16,6 +16,7 @@ import com.app.backend.domain.group.exception.GroupMembershipException;
 import com.app.backend.domain.group.repository.GroupMembershipRepository;
 import com.app.backend.domain.group.repository.GroupRepository;
 import com.app.backend.domain.member.entity.Member;
+import com.app.backend.domain.member.exception.MemberErrorCode;
 import com.app.backend.domain.member.exception.MemberException;
 import com.app.backend.domain.member.repository.MemberRepository;
 import jakarta.validation.constraints.Min;
@@ -50,9 +51,9 @@ public class GroupService {
 //        Member member = memberRepository.findByIdAndDisabled(dto.getMemberId(), false)
 //                                        .orElseThrow(() -> new MemberException());
         Member member = memberRepository.findById(dto.getMemberId())
-                                        .orElseThrow(MemberException::new);
+                                        .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
         if (member.isDisabled())
-            throw new MemberException();
+            throw new MemberException(MemberErrorCode.MEMBER_IS_DISABLED);
 
         //모임 엔티티 생성
         Group group = Group.builder()
