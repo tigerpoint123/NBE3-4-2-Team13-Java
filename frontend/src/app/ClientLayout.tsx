@@ -158,16 +158,20 @@ export function ClientLayout({children,}: React.ComponentProps<typeof NextThemes
                 <Home /> LinkUs
               </Link>
             </Button>
-            <Button variant="link" asChild>
-              <Link href="/groups">
-                <Users /> 모임
-              </Link>
-            </Button>
-            <Button variant="link" asChild>
-              <Link href="/chat">
-                <MessageSquare /> 채팅
-              </Link>
-            </Button>
+            {isLogin && (
+              <>
+                <Button variant="link" asChild>
+                  <Link href="/groups">
+                    <Users /> 모임
+                  </Link>
+                </Button>
+                <Button variant="link" asChild>
+                  <Link href="/chat">
+                    <MessageSquare /> 채팅
+                  </Link>
+                </Button>
+              </>
+            )}
           </div>
           <div className="flex-grow"></div>
           <div className="flex items-center gap-2">
