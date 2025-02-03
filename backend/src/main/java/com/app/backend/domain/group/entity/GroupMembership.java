@@ -73,4 +73,30 @@ public class GroupMembership extends BaseEntity {
         group.getMembers().add(this);
     }
 
+    //============================== 모임 멤버십(GroupMembership) 수정 메서드 ==============================//
+
+    /**
+     * 모임 내 회원 권한 수정
+     *
+     * @param newGroupRole - 새로운 모임 내 권한
+     * @return this
+     */
+    public GroupMembership modifyGroupRole(@NotNull final GroupRole newGroupRole) {
+        if (groupRole != newGroupRole)
+            groupRole = newGroupRole;
+        return this;
+    }
+
+    /**
+     * 모임 내 회원 상태 수정
+     *
+     * @param newStatus - 새로운 멤버십 상태
+     * @return this
+     */
+    public GroupMembership modifyStatus(@NotNull final MembershipStatus newStatus) {
+        if (status != newStatus)
+            status = newStatus;
+        return this;
+    }
+
 }

@@ -13,6 +13,7 @@ import com.app.backend.domain.member.entity.Member;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -1302,6 +1303,393 @@ class GroupMembershipRepositoryTest extends SpringBootTestSupporter {
 
         //Then
         assertThat(findGroupMemberships).isEmpty();
+    }
+
+    @Test
+    @DisplayName("[성공] Group ID와 모임 권한(단수)으로 GroupMembership 엔티티 수 조회")
+    void countByGroupIdAndGroupRole() {
+        //Given
+        int                   size             = 20;
+        List<GroupMembership> groupMemberships = new ArrayList<>();
+        int                   j                = 0;
+        Group                 group            = null;
+
+        for (int i = 0; i < size; i++) {
+            Member member = Member.builder()
+                                  .username("testUsername%d".formatted(i))
+                                  .password("testPassword%d".formatted(i))
+                                  .nickname("testNickname%d".formatted(i))
+                                  .build();
+            em.persist(member);
+
+            if (j % 5 == 0) {
+                group = Group.builder()
+                             .name("test%d".formatted(j))
+                             .province("test province%d".formatted(j))
+                             .city("test city%d".formatted(j))
+                             .town("test town%d".formatted(j))
+                             .description("test description%d".formatted(j))
+                             .recruitStatus(RecruitStatus.RECRUITING)
+                             .maxRecruitCount(10)
+                             .build();
+                em.persist(group);
+                j += 1;
+            }
+
+            GroupMembership groupMembership = GroupMembership.builder()
+                                                             .group(group)
+                                                             .member(member)
+                                                             .groupRole(GroupRole.PARTICIPANT)
+                                                             .build();
+            em.persist(groupMembership);
+            groupMemberships.add(groupMembership);
+        }
+        afterEach();
+
+        Long groupId = 3L;
+
+        //When
+        int count = groupMembershipRepository.countByGroupIdAndGroupRole(groupId, GroupRole.PARTICIPANT);
+
+        //Then
+        int filteredCount = Math.toIntExact(
+                groupMemberships.stream().filter(groupMembership -> groupMembership.getGroupId().equals(groupId)
+                                                                    && groupMembership.getGroupRole()
+                                                                                      .equals(GroupRole.PARTICIPANT))
+                                .count()
+        );
+
+        assertThat(count).isEqualTo(filteredCount);
+    }
+
+    @Test
+    @DisplayName("[성공] Group ID와 모임 권한(단수), Disabled = false로 GroupMembership 엔티티 수 조회")
+    void countByGroupIdAndGroupRoleAndDisabled() {
+        //Given
+        int                   size             = 20;
+        List<GroupMembership> groupMemberships = new ArrayList<>();
+        int                   j                = 0;
+        Group                 group            = null;
+
+        for (int i = 0; i < size; i++) {
+            Member member = Member.builder()
+                                  .username("testUsername%d".formatted(i))
+                                  .password("testPassword%d".formatted(i))
+                                  .nickname("testNickname%d".formatted(i))
+                                  .build();
+            em.persist(member);
+
+            if (j % 5 == 0) {
+                group = Group.builder()
+                             .name("test%d".formatted(j))
+                             .province("test province%d".formatted(j))
+                             .city("test city%d".formatted(j))
+                             .town("test town%d".formatted(j))
+                             .description("test description%d".formatted(j))
+                             .recruitStatus(RecruitStatus.RECRUITING)
+                             .maxRecruitCount(10)
+                             .build();
+                em.persist(group);
+                j += 1;
+            }
+
+            GroupMembership groupMembership = GroupMembership.builder()
+                                                             .group(group)
+                                                             .member(member)
+                                                             .groupRole(GroupRole.PARTICIPANT)
+                                                             .build();
+            em.persist(groupMembership);
+            groupMemberships.add(groupMembership);
+        }
+        afterEach();
+
+        Long groupId = 3L;
+
+        //When
+        int count = groupMembershipRepository.countByGroupIdAndGroupRoleAndDisabled(groupId,
+                                                                                    GroupRole.PARTICIPANT,
+                                                                                    false);
+
+        //Then
+        int filteredCount = Math.toIntExact(
+                groupMemberships.stream()
+                                .filter(groupMembership -> groupMembership.getGroupId().equals(groupId)
+                                                           && groupMembership.getGroupRole()
+                                                                             .equals(GroupRole.PARTICIPANT)
+                                                           && !groupMembership.getDisabled())
+                                .count()
+        );
+
+        assertThat(count).isEqualTo(filteredCount);
+    }
+
+    @Test
+    @DisplayName("[성공] Group ID와 모임 권한(복수)으로 GroupMembership 엔티티 수 조회")
+    void countByGroupIdAndGroupRoleIn() {
+        //Given
+        int                   size             = 20;
+        List<GroupMembership> groupMemberships = new ArrayList<>();
+        int                   j                = 0;
+        Group                 group            = null;
+        GroupMembership       groupMembership  = null;
+
+        for (int i = 0; i < size; i++) {
+            Member member = Member.builder()
+                                  .username("testUsername%d".formatted(i))
+                                  .password("testPassword%d".formatted(i))
+                                  .nickname("testNickname%d".formatted(i))
+                                  .build();
+            em.persist(member);
+
+            if (j % 5 == 0) {
+                group = Group.builder()
+                             .name("test%d".formatted(j))
+                             .province("test province%d".formatted(j))
+                             .city("test city%d".formatted(j))
+                             .town("test town%d".formatted(j))
+                             .description("test description%d".formatted(j))
+                             .recruitStatus(RecruitStatus.RECRUITING)
+                             .maxRecruitCount(10)
+                             .build();
+                em.persist(group);
+                j += 1;
+
+                groupMembership = GroupMembership.builder()
+                                                 .group(group)
+                                                 .member(member)
+                                                 .groupRole(GroupRole.LEADER)
+                                                 .build();
+                em.persist(groupMembership);
+            } else {
+                groupMembership = GroupMembership.builder()
+                                                 .group(group)
+                                                 .member(member)
+                                                 .groupRole(GroupRole.PARTICIPANT)
+                                                 .build();
+                em.persist(groupMembership);
+            }
+
+            groupMemberships.add(groupMembership);
+        }
+        afterEach();
+
+        Long           groupId    = 3L;
+        Set<GroupRole> groupRoles = Set.of(GroupRole.LEADER, GroupRole.PARTICIPANT);
+
+        //When
+        int count = groupMembershipRepository.countByGroupIdAndGroupRoleIn(groupId, groupRoles);
+
+        //Then
+        int filteredCount = Math.toIntExact(
+                groupMemberships.stream()
+                                .filter(g -> g.getGroupId().equals(groupId) && groupRoles.contains(g.getGroupRole()))
+                                .count()
+        );
+
+        assertThat(count).isEqualTo(filteredCount);
+    }
+
+    @Test
+    @DisplayName("[성공] Group ID와 모임 권한(복수), Disabled = false로 GroupMembership 엔티티 수 조회")
+    void countByGroupIdAndGroupRoleInAndDisabled() {
+        //Given
+        int                   size             = 20;
+        List<GroupMembership> groupMemberships = new ArrayList<>();
+        int                   j                = 0;
+        Group                 group            = null;
+        GroupMembership       groupMembership  = null;
+
+        for (int i = 0; i < size; i++) {
+            Member member = Member.builder()
+                                  .username("testUsername%d".formatted(i))
+                                  .password("testPassword%d".formatted(i))
+                                  .nickname("testNickname%d".formatted(i))
+                                  .build();
+            em.persist(member);
+
+            if (j % 5 == 0) {
+                group = Group.builder()
+                             .name("test%d".formatted(j))
+                             .province("test province%d".formatted(j))
+                             .city("test city%d".formatted(j))
+                             .town("test town%d".formatted(j))
+                             .description("test description%d".formatted(j))
+                             .recruitStatus(RecruitStatus.RECRUITING)
+                             .maxRecruitCount(10)
+                             .build();
+                em.persist(group);
+                j += 1;
+
+                groupMembership = GroupMembership.builder()
+                                                 .group(group)
+                                                 .member(member)
+                                                 .groupRole(GroupRole.LEADER)
+                                                 .build();
+                em.persist(groupMembership);
+            } else {
+                groupMembership = GroupMembership.builder()
+                                                 .group(group)
+                                                 .member(member)
+                                                 .groupRole(GroupRole.PARTICIPANT)
+                                                 .build();
+                em.persist(groupMembership);
+            }
+
+            groupMemberships.add(groupMembership);
+        }
+        afterEach();
+
+        Long           groupId    = 3L;
+        Set<GroupRole> groupRoles = Set.of(GroupRole.LEADER, GroupRole.PARTICIPANT);
+
+        //When
+        int count = groupMembershipRepository.countByGroupIdAndGroupRoleInAndDisabled(groupId, groupRoles, false);
+
+        //Then
+        int filteredCount = Math.toIntExact(
+                groupMemberships.stream()
+                                .filter(g -> g.getGroupId().equals(groupId)
+                                             && groupRoles.contains(g.getGroupRole())
+                                             && !g.getDisabled())
+                                .count()
+        );
+
+        assertThat(count).isEqualTo(filteredCount);
+    }
+
+    @Test
+    @DisplayName("[성공] Group ID와 모임 내 회원 상태로 GroupMembership 엔티티 수 조회")
+    void countByGroupIdAndStatus() {
+        //Given
+        int                   size             = 20;
+        List<GroupMembership> groupMemberships = new ArrayList<>();
+        int                   j                = 0;
+        Group                 group            = null;
+        GroupMembership       groupMembership  = null;
+
+        for (int i = 0; i < size; i++) {
+            Member member = Member.builder()
+                                  .username("testUsername%d".formatted(i))
+                                  .password("testPassword%d".formatted(i))
+                                  .nickname("testNickname%d".formatted(i))
+                                  .build();
+            em.persist(member);
+
+            if (j % 5 == 0) {
+                group = Group.builder()
+                             .name("test%d".formatted(j))
+                             .province("test province%d".formatted(j))
+                             .city("test city%d".formatted(j))
+                             .town("test town%d".formatted(j))
+                             .description("test description%d".formatted(j))
+                             .recruitStatus(RecruitStatus.RECRUITING)
+                             .maxRecruitCount(10)
+                             .build();
+                em.persist(group);
+                j += 1;
+
+                groupMembership = GroupMembership.builder()
+                                                 .group(group)
+                                                 .member(member)
+                                                 .groupRole(GroupRole.LEADER)
+                                                 .build();
+                em.persist(groupMembership);
+            } else {
+                groupMembership = GroupMembership.builder()
+                                                 .group(group)
+                                                 .member(member)
+                                                 .groupRole(GroupRole.PARTICIPANT)
+                                                 .build();
+                em.persist(groupMembership);
+            }
+
+            groupMemberships.add(groupMembership);
+        }
+        afterEach();
+
+        Long groupId = 3L;
+
+        //When
+        int count = groupMembershipRepository.countByGroupIdAndStatus(groupId, MembershipStatus.PENDING);
+
+        //Then
+        int filteredCount = Math.toIntExact(
+                groupMemberships.stream()
+                                .filter(g -> g.getGroupId().equals(groupId)
+                                             && g.getStatus().equals(MembershipStatus.PENDING))
+                                .count()
+        );
+
+        assertThat(count).isEqualTo(filteredCount);
+    }
+
+    @Test
+    @DisplayName("[성공] Group ID와 모임 내 회원 상태, Disabled = false로 GroupMembership 엔티티 수 조회")
+    void countByGroupIdAndStatusAndDisabled() {
+        //Given
+        int                   size             = 20;
+        List<GroupMembership> groupMemberships = new ArrayList<>();
+        int                   j                = 0;
+        Group                 group            = null;
+        GroupMembership       groupMembership  = null;
+
+        for (int i = 0; i < size; i++) {
+            Member member = Member.builder()
+                                  .username("testUsername%d".formatted(i))
+                                  .password("testPassword%d".formatted(i))
+                                  .nickname("testNickname%d".formatted(i))
+                                  .build();
+            em.persist(member);
+
+            if (j % 5 == 0) {
+                group = Group.builder()
+                             .name("test%d".formatted(j))
+                             .province("test province%d".formatted(j))
+                             .city("test city%d".formatted(j))
+                             .town("test town%d".formatted(j))
+                             .description("test description%d".formatted(j))
+                             .recruitStatus(RecruitStatus.RECRUITING)
+                             .maxRecruitCount(10)
+                             .build();
+                em.persist(group);
+                j += 1;
+
+                groupMembership = GroupMembership.builder()
+                                                 .group(group)
+                                                 .member(member)
+                                                 .groupRole(GroupRole.LEADER)
+                                                 .build();
+                em.persist(groupMembership);
+            } else {
+                groupMembership = GroupMembership.builder()
+                                                 .group(group)
+                                                 .member(member)
+                                                 .groupRole(GroupRole.PARTICIPANT)
+                                                 .build();
+                em.persist(groupMembership);
+            }
+
+            groupMemberships.add(groupMembership);
+        }
+        afterEach();
+
+        Long groupId = 3L;
+
+        //When
+        int count = groupMembershipRepository.countByGroupIdAndStatusAndDisabled(groupId,
+                                                                                 MembershipStatus.PENDING,
+                                                                                 false);
+
+        //Then
+        int filteredCount = Math.toIntExact(
+                groupMemberships.stream()
+                                .filter(g -> g.getGroupId().equals(groupId)
+                                             && g.getStatus().equals(MembershipStatus.PENDING)
+                                             && !g.getDisabled())
+                                .count()
+        );
+
+        assertThat(count).isEqualTo(filteredCount);
     }
 
 }
