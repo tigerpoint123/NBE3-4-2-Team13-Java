@@ -28,7 +28,7 @@ class ChatRoomServiceTest {
 	private ChatRoomService chatRoomService;
 
 	@Test
-	@DisplayName("채팅방 목록 조회")
+	@DisplayName("[성공] 채팅방 목록 조회")
 	void getChatRoomsByMemberId() {
 		//given
 		Long MemberId = 1L;

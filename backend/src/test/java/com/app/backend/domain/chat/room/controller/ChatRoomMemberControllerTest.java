@@ -57,7 +57,7 @@ class ChatRoomMemberControllerTest {
 	private GroupMembershipRepository groupMembershipRepository;
 
 	@Test
-	@DisplayName("채팅방 목록 조회")
+	@DisplayName("[성공] 채팅방 목록 조회")
 	void getChatRoomsByMemberId() throws Exception {
 		// given
 
