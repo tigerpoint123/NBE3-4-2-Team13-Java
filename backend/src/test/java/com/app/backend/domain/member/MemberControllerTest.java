@@ -36,7 +36,7 @@ import jakarta.transaction.Transactional;
 
 @SpringBootTest           // 전체 애플리케이션 컨텍스트 로드
 @AutoConfigureMockMvc     // MockMvc 자동 구성
-// @Transactional           // 테스트 후 롤백
+@Transactional           // 테스트 후 롤백
 @ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 public class MemberControllerTest {
@@ -46,10 +46,6 @@ public class MemberControllerTest {
 	private MemberRepository memberRepository;
 	@Autowired
 	private ObjectMapper objectMapper;  // JSON 변환을 위한 객체
-	@Mock
-	private KakaoAuthService kakaoAuthService;
-	@Autowired
-	private KakaoController kakaoController;
 	@Autowired
 	private JwtProvider jwtProvider;
 
