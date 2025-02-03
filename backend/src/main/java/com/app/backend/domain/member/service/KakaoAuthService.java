@@ -91,11 +91,10 @@ public class KakaoAuthService {
 			Map.class
 		);
 
-		if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+		if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null)
 			return (String) response.getBody().get("access_token");
-		}
 
-		throw new RuntimeException("Failed to get Kakao access token");
+		throw new ServiceException("500", "카카오 토큰 발행 실패");
 	}
 
 	// 필수 동의항목 설정 필요
@@ -122,7 +121,7 @@ public class KakaoAuthService {
 			);
 		} catch (Exception e) {
 			log.error("카카오 API 호출 실패: {}", e.getMessage());
-			throw new AuthenticationException("카카오 인증에 실패했습니다.");
+			throw new ServiceException("500", "카카오 인증에 실패했습니다.");
 		}
 	}
 
