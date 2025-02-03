@@ -3,8 +3,10 @@ package com.app.backend.domain.group.repository;
 import com.app.backend.domain.group.entity.GroupMembership;
 import com.app.backend.domain.group.entity.GroupMembershipId;
 import com.app.backend.domain.group.entity.GroupRole;
+import com.app.backend.domain.group.entity.MembershipStatus;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface GroupMembershipRepository extends JpaRepository<GroupMembership, GroupMembershipId>,
@@ -35,5 +37,17 @@ public interface GroupMembershipRepository extends JpaRepository<GroupMembership
     List<GroupMembership> findAllByMemberIdAndGroupRoleAndDisabled(Long memberId,
                                                                    GroupRole groupRole,
                                                                    Boolean disabled);
+
+    int countByGroupIdAndGroupRole(Long groupId, GroupRole groupRole);
+
+    int countByGroupIdAndGroupRoleAndDisabled(Long groupId, GroupRole groupRole, Boolean disabled);
+
+    int countByGroupIdAndGroupRoleIn(Long groupId, Set<GroupRole> groupRoles);
+
+    int countByGroupIdAndGroupRoleInAndDisabled(Long groupId, Set<GroupRole> groupRoles, Boolean disabled);
+
+    int countByGroupIdAndStatus(Long groupId, MembershipStatus status);
+
+    int countByGroupIdAndStatusAndDisabled(Long groupId, MembershipStatus status, Boolean disabled);
 
 }
