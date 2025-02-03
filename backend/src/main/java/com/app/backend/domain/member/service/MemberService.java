@@ -1,5 +1,6 @@
 package com.app.backend.domain.member.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -86,6 +87,7 @@ public class MemberService {
             .orElseThrow(() -> new IllegalArgumentException("유효하지 않는 토큰입니다"));  // 토큰 검증
     }
 
+
     @Transactional
     public MemberModifyResponseDto modifyMember(Member member, MemberModifyRequestDto request) {
         Member modifiedMember = Member.builder()
@@ -103,5 +105,12 @@ public class MemberService {
         ).orElseThrow(() -> new ServiceException("400", "회원정보 수정에 실패했습니다"));
 
         return MemberModifyResponseDto.of(savedMember);
+    }
+
+    public Optional<List<Member>> findAllMembers(String token) {
+        return Optional.ofNullable(token)
+            .map(t -> t.startsWith("Bearer ") ? t.substring(7) : t)
+            .filter(jwtProvider::validateToken)
+            .map(validateToken -> memberRepository.findAll());
     }
 }

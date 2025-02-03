@@ -36,7 +36,7 @@ import jakarta.transaction.Transactional;
 
 @SpringBootTest           // 전체 애플리케이션 컨텍스트 로드
 @AutoConfigureMockMvc     // MockMvc 자동 구성
-@Transactional           // 테스트 후 롤백
+// @Transactional           // 테스트 후 롤백
 @ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 public class MemberControllerTest {
@@ -124,31 +124,31 @@ public class MemberControllerTest {
 		);
 	}
 
-	@Test
-	@DisplayName("카카오 로그인")
-	void 카카오로그인() throws Exception {
-		// // given
-		// KakaoUserInfo kakaoUserInfo = new KakaoUserInfo("123", "kakao_123");
-		// when(kakaoAuthService.getKakaoUserInfo(anyString()))
-		// 	.thenReturn(kakaoUserInfo);
-		//
-		// //when
-		// mvc.perform(post("/api/v1/members/kakao/callback")
-		// 		.contentType(MediaType.APPLICATION_JSON)
-		// 		.content(objectMapper.writeValueAsString(
-		// 			new KakaoLoginRequestDto("1", "김호남", "KAKAO"))))
-		// 	.andExpect(status().isOk())
-		// 	.andExpect(jsonPath("$.accessToken").exists())
-		// 	.andExpect(jsonPath("$.refreshToken").exists())
-		// 	.andDo(print());  // 결과 출력
-		//
-		// // then
-		// Member savedMember = memberRepository.findByUsernameAndDisabled(setupUsername, false)
-		// 	.orElseThrow(() -> new IllegalArgumentException("가입되지 않은 사용자입니다"));
-		//
-		// assertAll(
-		// );
-	}
+	// @Test
+	// @DisplayName("카카오 로그인")
+	// void 카카오로그인() throws Exception {
+	// 	// given
+	// 	KakaoUserInfo kakaoUserInfo = new KakaoUserInfo("123", "kakao_123");
+	// 	when(kakaoAuthService.getKakaoUserInfo(anyString()))
+	// 		.thenReturn(kakaoUserInfo);
+	//
+	// 	//when
+	// 	mvc.perform(post("/api/v1/members/kakao/callback")
+	// 			.contentType(MediaType.APPLICATION_JSON)
+	// 			.content(objectMapper.writeValueAsString(
+	// 				new KakaoLoginRequestDto("1", "김호남", "KAKAO"))))
+	// 		.andExpect(status().isOk())
+	// 		.andExpect(jsonPath("$.accessToken").exists())
+	// 		.andExpect(jsonPath("$.refreshToken").exists())
+	// 		.andDo(print());  // 결과 출력
+	//
+	// 	// then
+	// 	Member savedMember = memberRepository.findByUsernameAndDisabled(setupUsername, false)
+	// 		.orElseThrow(() -> new IllegalArgumentException("가입되지 않은 사용자입니다"));
+	//
+	// 	assertAll(
+	// 	);
+	// }
 
 	@Test
 	@DisplayName("개인정보조회")
@@ -195,4 +195,19 @@ public class MemberControllerTest {
 		);
 	}
 
+	@Test
+	@DisplayName("모든 회원 조회")
+	void 모든회원조회() throws Exception {
+		// given
+		Member member = memberRepository.findByUsernameAndDisabled(setupUsername, false)
+			.orElseThrow(() -> new IllegalArgumentException("가입되지 않은 사용자입니다"));
+		String accessToken = "Bearer " + jwtProvider.generateAccessToken(member);
+
+		// when
+		mvc.perform(get("/api/v1/members/findAll")
+				.header("Authorization", accessToken)
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andDo(print());
+	}
 }
