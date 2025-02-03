@@ -1,8 +1,10 @@
 package com.app.backend.domain.member.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -130,5 +132,14 @@ public class MemberService {
             .build();
 
         memberRepository.save(member);
+    }
+
+    @Transactional
+    @Scheduled(fixedRate = 10000) // 10초마다 실행
+    public void cleanupDisabledMembers() {
+        log.info("비활성화된 회원 정보 삭제 작업 시작");
+        LocalDateTime cutoffDate = LocalDateTime.now().minusSeconds(30);
+        int deletedCount = memberRepository.deleteByDisabledIsTrueAndModifiedAtLessThan(cutoffDate);
+        log.info("삭제된 회원 수: {}", deletedCount);
     }
 }
