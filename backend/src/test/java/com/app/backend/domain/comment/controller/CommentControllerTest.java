@@ -49,10 +49,6 @@ public class CommentControllerTest {
 	@BeforeEach
 	void setUp() {
 
-		commentRepository.deleteAll();
-		postRepository.deleteAll();
-		memberRepository.deleteAll();
-
 		// 테스트용
 		testMember = Member.builder()
 			.username("testUser")
