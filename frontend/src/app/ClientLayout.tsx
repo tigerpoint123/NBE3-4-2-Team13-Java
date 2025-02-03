@@ -1,7 +1,7 @@
 "use client";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import * as React from "react";
-import { Moon, Sun, Home, LogIn, LogOut, Settings, User } from "lucide-react";
+import { Moon, Sun, Home, LogIn, LogOut, Settings, User, Users, MessageSquare } from "lucide-react";
 import { useTheme } from "next-themes";
 import { LoginMemberContext, useLoginMember } from "@/stores/auth/LoginMember";
 import { Button } from "@/components/ui/button";
@@ -156,6 +156,16 @@ export function ClientLayout({children,}: React.ComponentProps<typeof NextThemes
             <Button variant="link" asChild>
               <Link href="/">
                 <Home /> LinkUs
+              </Link>
+            </Button>
+            <Button variant="link" asChild>
+              <Link href="/groups">
+                <Users /> 모임
+              </Link>
+            </Button>
+            <Button variant="link" asChild>
+              <Link href="/chat">
+                <MessageSquare /> 채팅
               </Link>
             </Button>
           </div>
