@@ -55,11 +55,9 @@ public class MemberService {
     }
 
     public MemberLoginResponseDto login(MemberLoginRequestDto request) {
-        // 사용자 찾기
         Member member = memberRepository.findByUsernameAndDisabled(request.username(), disabled)
                 .orElseThrow(() -> new IllegalArgumentException("가입되지 않은 사용자입니다."));
 
-        // 비밀번호 확인
         if(!passwordEncoder.matches(request.password(), member.getPassword()))
             throw new IllegalArgumentException("잘못된 비밀번호입니다");
 
@@ -67,7 +65,6 @@ public class MemberService {
         String accessToken = jwtProvider.generateAccessToken(member);
         String refreshToken = jwtProvider.generateRefreshToken();
 
-        // refresh token 저장
         member.updateRefreshToken(refreshToken);
         memberRepository.save(member);
 
@@ -111,6 +108,12 @@ public class MemberService {
         return Optional.ofNullable(token)
             .map(t -> t.startsWith("Bearer ") ? t.substring(7) : t)
             .filter(jwtProvider::validateToken)
+            .filter(validateToken -> {
+                String role = jwtProvider.getRole(validateToken);
+                if(!role.contains("ADMIN"))
+                    throw new IllegalArgumentException("관리자 권한이 없습니다");
+                return true;
+            })
             .map(validateToken -> memberRepository.findAll());
     }
 }
