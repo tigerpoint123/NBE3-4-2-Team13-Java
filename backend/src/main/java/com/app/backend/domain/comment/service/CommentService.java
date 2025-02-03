@@ -1,6 +1,5 @@
 package com.app.backend.domain.comment.service;
 
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -61,9 +60,10 @@ public class CommentService {
 
 	// 댓글 삭제
 	@Transactional
-	public void deleteComment(Long id, Long memberId) {
+	public void deleteComment(Long commentId, Long memberId) {
 
-		Comment comment = commentRepository.findByIdAndDisabled(id, false)
+		// 댓글 조회
+		Comment comment = commentRepository.findByIdAndDisabled(commentId, false)
 			.orElseThrow(() -> new CommentException(CommentErrorCode.COMMENT_NOT_FOUND));
 
 
