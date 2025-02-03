@@ -1,17 +1,20 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faThumbsUp, faPerson } from "@fortawesome/free-solid-svg-icons";
 import { Button } from "@/components/ui/button";
+import { MessageCircle } from "lucide-react";
 
 export default function Home() {
+  const socialLoginForKakaoUrl = `http://localhost:8080/oauth2/authorization/kakao`;
+  const redirectUrlAfterSocialLogin = "http://localhost:3000";
+
   return (
-    <div>
-      <h1>안녕하세요.</h1>
-      <div>
-        <FontAwesomeIcon icon={faThumbsUp} className="fa-fw text-4xl text-[#af0000] hover:text-[#000000]" />
-        <FontAwesomeIcon icon={faPerson} className="fa-fw text-4xl text-[#af0000] hover:text-[#000000]" />
-        <button>버튼</button>
-        <Button variant="outline">Button</Button>
-      </div>
+    <div className="flex-1 flex justify-center items-center">
+      <Button variant="outline" asChild>
+        <a
+          href={`${socialLoginForKakaoUrl}?redirectUrl=${redirectUrlAfterSocialLogin}`}
+        >
+          <MessageCircle />
+          <span className="font-bold">카카오 로그인</span>
+        </a>
+      </Button>
     </div>
   );
 }
