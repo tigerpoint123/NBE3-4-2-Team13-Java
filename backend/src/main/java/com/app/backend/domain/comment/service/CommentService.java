@@ -58,4 +58,20 @@ public class CommentService {
 		return CommentResponse.from(comment);
 
 	}
+
+	// 댓글 삭제
+	@Transactional
+	public void deleteComment(Long id, Long memberId) {
+
+		Comment comment = commentRepository.findByIdAndDisabled(id, false)
+			.orElseThrow(() -> new CommentException(CommentErrorCode.COMMENT_NOT_FOUND));
+
+
+		// 댓글 작성자만 삭제 가능
+		if (!comment.getMember().getId().equals(memberId)) {
+			throw new CommentException(CommentErrorCode.COMMENT_ACCESS_DENIED);
+		}
+
+		comment.delete();
+	}
 }

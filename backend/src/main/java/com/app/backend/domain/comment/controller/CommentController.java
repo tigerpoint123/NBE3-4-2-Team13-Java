@@ -3,6 +3,7 @@ package com.app.backend.domain.comment.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,6 +42,21 @@ public class CommentController {
 			"201",
 			"%d번 댓글이 작성되었습니다.".formatted(response.getId()),
 			response
+		);
+	}
+
+	//댓글 삭제
+	@DeleteMapping("/{id}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public ApiResponse<Void> deleteComment(@PathVariable(name = "id") Long commentId,
+		@AuthenticationPrincipal MemberDetails memberDetails){
+
+		commentService.deleteComment(commentId, memberDetails.getId());
+
+		return ApiResponse.of(
+			true,
+			"204",
+			"%d번 댓글이 삭제되었습니다.".formatted(commentId)
 		);
 	}
 }
