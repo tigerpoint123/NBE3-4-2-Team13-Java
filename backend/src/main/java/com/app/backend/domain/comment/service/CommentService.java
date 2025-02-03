@@ -3,7 +3,6 @@ package com.app.backend.domain.comment.service;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.app.backend.domain.comment.dto.request.CommentCreateRequest;
 import com.app.backend.domain.comment.dto.response.CommentResponse;
@@ -31,7 +30,7 @@ public class CommentService {
 
 	// 댓글 작성
 	@Transactional
-	public CommentResponse createComment(long id, CommentCreateRequest req) {
+	public CommentResponse createComment(Long postId, Long memberId, CommentCreateRequest req) {
 
 		//댓글 내용이 없으면 댓글 작성 실패
 		if (req.getContent() == null || req.getContent().trim().isEmpty()) {
@@ -39,12 +38,12 @@ public class CommentService {
 		}
 
 		//게시물 조회
-		Post post = postRepository.findById(id)
+		Post post = postRepository.findByIdAndDisabled(postId, false)
 			.orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
 
+
 		//사용자 조회
-		String username = SecurityContextHolder.getContext().getAuthentication().getName();
-		Member member = memberRepository.findByUsernameAndDisabled(username, false)
+		Member member = memberRepository.findByIdAndDisabled(memberId, false)
 			.orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
 

@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.app.backend.domain.comment.repository.CommentRepository;
 import com.app.backend.domain.member.entity.Member;
+import com.app.backend.domain.member.entity.MemberDetails;
 import com.app.backend.domain.member.repository.MemberRepository;
 import com.app.backend.domain.post.entity.Post;
 import com.app.backend.domain.post.entity.PostStatus;
@@ -41,6 +43,7 @@ public class CommentControllerTest {
 
 	private Long testPostId;
 	private Member testMember;
+
 
 	@BeforeEach
 	void setUp() {
@@ -70,6 +73,7 @@ public class CommentControllerTest {
 	@Test
 	@DisplayName("댓글 작성")
 	void createComment() throws Exception {
+		MemberDetails memberDetails = new MemberDetails(testMember);
 
 		ResultActions resultActions = mvc
 			.perform(
@@ -79,10 +83,9 @@ public class CommentControllerTest {
 							"content": "test"
 						}
 						""")
-					.contentType(
-						new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)
-					)
-					.with(user(testMember.getUsername()))
+					.contentType(MediaType.APPLICATION_JSON)
+					.with(user(memberDetails)) // 로그인된 사용자 정보
+
 			)
 			.andDo(print());
 
@@ -99,6 +102,8 @@ public class CommentControllerTest {
 	@DisplayName("댓글 작성 실패 (내용 공백)")
 	void createComment2() throws Exception {
 
+		MemberDetails memberDetails = new MemberDetails(testMember);
+
 		ResultActions resultActions = mvc
 			.perform(
 				post("/api/v1/comment/" + testPostId)
@@ -107,10 +112,8 @@ public class CommentControllerTest {
 							"content": ""
 						}
 						""")
-					.contentType(
-						new MediaType(MediaType.APPLICATION_JSON)
-					)
-					.with(user(testMember.getUsername()))
+					.contentType(MediaType.APPLICATION_JSON)
+					.with(user(memberDetails))
 			)
 			.andDo(print());
 
