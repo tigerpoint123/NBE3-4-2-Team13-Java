@@ -116,4 +116,19 @@ public class MemberService {
             })
             .map(validateToken -> memberRepository.findAll());
     }
+
+    @Transactional
+    public void deleteMember(String token) {
+        Member member = getCurrentMember(token);
+        member = Member.builder()
+            .id(member.getId())
+            .username(member.getUsername())
+            .password(member.getPassword())
+            .nickname(member.getNickname())
+            .role(member.getRole())
+            .disabled(true)
+            .build();
+
+        memberRepository.save(member);
+    }
 }
