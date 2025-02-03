@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.*;
 public class ApiMemberController {
 	private final MemberService memberService;
 
-	//회원가입
+	@Operation(summary = "관리자 회원가입", description = "관리자 회원 가입을 진행합니다")
 	@PostMapping
 	public ApiResponse<MemberJoinResponseDto> join(
 		@RequestBody @Valid MemberJoinRequestDto request
@@ -44,7 +44,7 @@ public class ApiMemberController {
 		);
 	}
 
-	// 로그인
+	@Operation(summary = "관리자 로그인", description = "관리자 로그인을 진행합니다")
 	@PostMapping("/login")
 	public ApiResponse<MemberLoginResponseDto> login(
 		@RequestBody MemberLoginRequestDto request) {
@@ -69,7 +69,7 @@ public class ApiMemberController {
 		);
 	}
 
-	// 개인정보 수정
+	@Operation(summary = "개인정보 수정", description = "관리자 회원 정보를 수정합니다")
 	@PatchMapping("/modify")
 	public ApiResponse<MemberModifyResponseDto> modifyMemberInfo(
 		@RequestHeader(value = "Authorization") String token,
@@ -80,7 +80,7 @@ public class ApiMemberController {
 		return ApiResponse.of(true, "MEMBER_MODIFY_SUCCESS", "회원정보 수정에 성공했습니다", response);
 	}
 
-	// 관리자의 모든 회원 조회 - 관리자인지 검증 아직 안함
+	@Operation(summary = "모든 회원 조회", description = "관리자가 모든 회원을 조회합니다")
 	@GetMapping("/findAll")
 	public ApiResponse<Optional<List<Member>>> findAll(
 		@RequestHeader("Authorization") String token
@@ -93,7 +93,7 @@ public class ApiMemberController {
 			allMembers);
 	}
 
-	// 회원 탈퇴 soft delete
+	@Operation(summary = "회원 탈퇴 (soft delete)", description = "가입자가 회원 탈퇴를 하면 disabled 상태가 됩니다")
 	@DeleteMapping
 	public ApiResponse<Void> deleteMember(
 		@RequestHeader("Authorization") String token
