@@ -1,7 +1,7 @@
 "use client";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import * as React from "react";
-import { Moon, Sun, Home, LogIn, LogOut, Settings, User } from "lucide-react";
+import { Moon, Sun, Home, LogIn, LogOut, Settings, User, Users, MessageSquare } from "lucide-react";
 import { useTheme } from "next-themes";
 import { LoginMemberContext, useLoginMember } from "@/stores/auth/LoginMember";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import Cookies from "js-cookie";
 
 function ModeToggle() {
   const { setTheme } = useTheme();
@@ -132,6 +133,9 @@ export function ClientLayout({children,}: React.ComponentProps<typeof NextThemes
   }
 
   const logout = () => {
+    // 쿠키 삭제
+    Cookies.remove('accessToken');  
+
     // 나중에는 fetch(DELETE http://localhost:8080/api/v1/members/logout) 가 선행된 후 removeLoginMember(); 가 실행되는 구조로 변경될 예정이다.
     removeLoginMember();
     router.replace("/");
@@ -154,6 +158,20 @@ export function ClientLayout({children,}: React.ComponentProps<typeof NextThemes
                 <Home /> LinkUs
               </Link>
             </Button>
+            {isLogin && (
+              <>
+                <Button variant="link" asChild>
+                  <Link href="/groups">
+                    <Users /> 모임
+                  </Link>
+                </Button>
+                <Button variant="link" asChild>
+                  <Link href="/chat">
+                    <MessageSquare /> 채팅
+                  </Link>
+                </Button>
+              </>
+            )}
           </div>
           <div className="flex-grow"></div>
           <div className="flex items-center gap-2">
