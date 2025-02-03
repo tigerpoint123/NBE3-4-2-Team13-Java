@@ -46,10 +46,6 @@ public class MemberControllerTest {
 	private MemberRepository memberRepository;
 	@Autowired
 	private ObjectMapper objectMapper;  // JSON 변환을 위한 객체
-	@Mock
-	private KakaoAuthService kakaoAuthService;
-	@Autowired
-	private KakaoController kakaoController;
 	@Autowired
 	private JwtProvider jwtProvider;
 
@@ -57,15 +53,17 @@ public class MemberControllerTest {
 	private static final String setupUsername = "testID";
 	private static final String setupPassword = "testPW";
 	private static final String setupNickname = "김호남";
+	private static final String setupRole = "ADMIN";
 
 	private static final String newUsername = "username";
 	private static final String newPassword = "password";
 	private static final String newNickname = "김영남";
+	private static final String newRole = "USER";
 
 	@BeforeEach
 	void 셋업() throws Exception {
 		//given
-		MemberJoinRequestDto request = new MemberJoinRequestDto(setupUsername, setupPassword, setupNickname);
+		MemberJoinRequestDto request = new MemberJoinRequestDto(setupUsername, setupPassword, setupNickname, setupRole);
 
 		//when
 		mvc.perform(post("/api/v1/members")
@@ -79,7 +77,7 @@ public class MemberControllerTest {
 	@DisplayName("회원가입")
 	void 회원가입() throws Exception {
 		//given
-		MemberJoinRequestDto request = new MemberJoinRequestDto(newUsername, newPassword, newNickname);
+		MemberJoinRequestDto request = new MemberJoinRequestDto(newUsername, newPassword, newNickname, newRole);
 
 		//when
 		mvc.perform(post("/api/v1/members")
@@ -124,31 +122,31 @@ public class MemberControllerTest {
 		);
 	}
 
-	@Test
-	@DisplayName("카카오 로그인")
-	void 카카오로그인() throws Exception {
-		// // given
-		// KakaoUserInfo kakaoUserInfo = new KakaoUserInfo("123", "kakao_123");
-		// when(kakaoAuthService.getKakaoUserInfo(anyString()))
-		// 	.thenReturn(kakaoUserInfo);
-		//
-		// //when
-		// mvc.perform(post("/api/v1/members/kakao/callback")
-		// 		.contentType(MediaType.APPLICATION_JSON)
-		// 		.content(objectMapper.writeValueAsString(
-		// 			new KakaoLoginRequestDto("1", "김호남", "KAKAO"))))
-		// 	.andExpect(status().isOk())
-		// 	.andExpect(jsonPath("$.accessToken").exists())
-		// 	.andExpect(jsonPath("$.refreshToken").exists())
-		// 	.andDo(print());  // 결과 출력
-		//
-		// // then
-		// Member savedMember = memberRepository.findByUsernameAndDisabled(setupUsername, false)
-		// 	.orElseThrow(() -> new IllegalArgumentException("가입되지 않은 사용자입니다"));
-		//
-		// assertAll(
-		// );
-	}
+	// @Test
+	// @DisplayName("카카오 로그인")
+	// void 카카오로그인() throws Exception {
+	// 	// given
+	// 	KakaoUserInfo kakaoUserInfo = new KakaoUserInfo("123", "kakao_123");
+	// 	when(kakaoAuthService.getKakaoUserInfo(anyString()))
+	// 		.thenReturn(kakaoUserInfo);
+	//
+	// 	//when
+	// 	mvc.perform(post("/api/v1/members/kakao/callback")
+	// 			.contentType(MediaType.APPLICATION_JSON)
+	// 			.content(objectMapper.writeValueAsString(
+	// 				new KakaoLoginRequestDto("1", "김호남", "KAKAO"))))
+	// 		.andExpect(status().isOk())
+	// 		.andExpect(jsonPath("$.accessToken").exists())
+	// 		.andExpect(jsonPath("$.refreshToken").exists())
+	// 		.andDo(print());  // 결과 출력
+	//
+	// 	// then
+	// 	Member savedMember = memberRepository.findByUsernameAndDisabled(setupUsername, false)
+	// 		.orElseThrow(() -> new IllegalArgumentException("가입되지 않은 사용자입니다"));
+	//
+	// 	assertAll(
+	// 	);
+	// }
 
 	@Test
 	@DisplayName("개인정보조회")
@@ -195,4 +193,23 @@ public class MemberControllerTest {
 		);
 	}
 
+	@Test
+	@DisplayName("모든 회원 조회 - 관리자만")
+	void 모든회원조회() throws Exception {
+		// given
+		Member member = memberRepository.findByUsernameAndDisabled(setupUsername, false)
+			.orElseThrow(() -> new IllegalArgumentException("가입되지 않은 사용자입니다"));
+
+		if (!member.getRole().equals("ADMIN")) {
+			fail("관리자 권한이 없습니다.");
+		}
+		String accessToken = "Bearer " + jwtProvider.generateAccessToken(member);
+
+		// when
+		mvc.perform(get("/api/v1/members/findAll")
+				.header("Authorization", accessToken)
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andDo(print());
+	}
 }

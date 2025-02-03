@@ -1,5 +1,8 @@
 package com.app.backend.domain.member.controller;
 
+import java.util.List;
+import java.util.Optional;
+
 import com.app.backend.domain.member.dto.request.MemberJoinRequestDto;
 import com.app.backend.domain.member.dto.request.MemberLoginRequestDto;
 import com.app.backend.domain.member.dto.request.MemberModifyRequestDto;
@@ -77,6 +80,7 @@ public class ApiMemberController {
         );
     }
 
+    // 개인정보 수정
     @PatchMapping("/modify")
     public ApiResponse<MemberModifyResponseDto> modifyMemberInfo(
         @RequestHeader(value = "Authorization") String token,
@@ -87,4 +91,16 @@ public class ApiMemberController {
         return ApiResponse.of(true, "MEMBER_MODIFY_SUCCESS", "회원정보 수정에 성공했습니다", response);
     }
 
+    // 관리자의 모든 회원 조회 - 관리자인지 검증 아직 안함
+    @GetMapping("/findAll")
+    public ApiResponse<Optional<List<Member>>> findAll(
+        @RequestHeader("Authorization") String token
+    ) {
+        Optional<List<Member>> allMembers = memberService.findAllMembers(token);
+        return ApiResponse.of(
+            true,
+            "MEMBER_FIND_ALL_SUCCESS",
+            "모든 회원을 조회했습니다",
+            allMembers);
+    }
 }

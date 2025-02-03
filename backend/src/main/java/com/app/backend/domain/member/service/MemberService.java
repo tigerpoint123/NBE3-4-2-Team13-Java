@@ -1,5 +1,6 @@
 package com.app.backend.domain.member.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,11 +33,11 @@ public class MemberService {
     public MemberJoinResponseDto createMember(String username, String password, String nickname) {
         memberRepository.findByUsernameAndDisabled(username, disabled)
                 .ifPresent(a -> {
-                    throw new ServiceException("409-1", "이미 존재하는 username 입니다.");
+                    throw new ServiceException("409-C006", "이미 존재하는 username 입니다.");
                 });
         memberRepository.findByNicknameAndDisabled(nickname, disabled)
                 .ifPresent(a->{
-                    throw new ServiceException("409-2", "이미 존재하는 닉네임입니다");
+                    throw new ServiceException("409-C006", "이미 존재하는 닉네임입니다");
                 });
 
         Member member = Member.builder()
@@ -54,19 +55,16 @@ public class MemberService {
     }
 
     public MemberLoginResponseDto login(MemberLoginRequestDto request) {
-        // 사용자 찾기
         Member member = memberRepository.findByUsernameAndDisabled(request.username(), disabled)
-                .orElseThrow(() -> new IllegalArgumentException("가입되지 않은 사용자입니다."));
+                .orElseThrow(() -> new ServiceException("404-C005", "가입되지 않은 사용자입니다."));
 
-        // 비밀번호 확인
         if(!passwordEncoder.matches(request.password(), member.getPassword()))
-            throw new IllegalArgumentException("잘못된 비밀번호입니다");
+            throw new ServiceException("400-C001", "잘못된 비밀번호입니다");
 
         // 토큰 생성
         String accessToken = jwtProvider.generateAccessToken(member);
         String refreshToken = jwtProvider.generateRefreshToken();
 
-        // refresh token 저장
         member.updateRefreshToken(refreshToken);
         memberRepository.save(member);
 
@@ -81,10 +79,11 @@ public class MemberService {
             .map(validateToken -> {
                 Long memberId = jwtProvider.getMemberId(validateToken);
                 return this.memberRepository.findByIdAndDisabled(memberId, false)
-                    .orElseThrow(() -> new IllegalArgumentException("가입되지 않은 사용자입니다"));
+                    .orElseThrow(() -> new ServiceException("404-C005", "가입되지 않은 사용자입니다."));
             })
-            .orElseThrow(() -> new IllegalArgumentException("유효하지 않는 토큰입니다"));  // 토큰 검증
+            .orElseThrow(() -> new ServiceException("400-C002", "유효하지 않는 토큰입니다"));  // 토큰 검증
     }
+
 
     @Transactional
     public MemberModifyResponseDto modifyMember(Member member, MemberModifyRequestDto request) {
@@ -103,5 +102,18 @@ public class MemberService {
         ).orElseThrow(() -> new ServiceException("400", "회원정보 수정에 실패했습니다"));
 
         return MemberModifyResponseDto.of(savedMember);
+    }
+
+    public Optional<List<Member>> findAllMembers(String token) {
+        return Optional.ofNullable(token)
+            .map(t -> t.startsWith("Bearer ") ? t.substring(7) : t)
+            .filter(jwtProvider::validateToken)
+            .filter(validateToken -> {
+                String role = jwtProvider.getRole(validateToken);
+                if(!role.contains("ADMIN"))
+                    throw new ServiceException("403-C004", "관리자 권한이 없습니다");
+                return true;
+            })
+            .map(validateToken -> memberRepository.findAll());
     }
 }
