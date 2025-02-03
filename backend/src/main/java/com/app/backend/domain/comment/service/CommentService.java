@@ -1,9 +1,22 @@
 package com.app.backend.domain.comment.service;
 
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.app.backend.domain.comment.dto.request.CommentCreateRequest;
+import com.app.backend.domain.comment.dto.response.CommentResponse;
+import com.app.backend.domain.comment.entity.Comment;
+import com.app.backend.domain.comment.exception.CommentErrorCode;
+import com.app.backend.domain.comment.exception.CommentException;
 import com.app.backend.domain.comment.repository.CommentRepository;
+import com.app.backend.domain.member.entity.Member;
+import com.app.backend.domain.member.repository.MemberRepository;
+import com.app.backend.domain.post.entity.Post;
+import com.app.backend.domain.post.exception.PostErrorCode;
+import com.app.backend.domain.post.exception.PostException;
+import com.app.backend.domain.post.repository.post.PostRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -12,4 +25,37 @@ import lombok.RequiredArgsConstructor;
 public class CommentService {
 
 	private final CommentRepository commentRepository;
+	private final PostRepository postRepository;
+	private final MemberRepository memberRepository;
+
+	// 댓글 작성
+	@Transactional
+	public CommentResponse createComment(long id, CommentCreateRequest req) {
+
+		//댓글 내용이 없으면 댓글 작성 실패
+		if (req.getContent() == null || req.getContent().trim().isEmpty()) {
+			throw new CommentException(CommentErrorCode.COMMENT_INVALID_CONTENT);
+		}
+
+		//게시물 조회
+		Post post = postRepository.findById(id)
+			.orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
+
+		//사용자 조회
+		String username = SecurityContextHolder.getContext().getAuthentication().getName();
+		Member member = memberRepository.findByUsernameAndDisabled(username, false)
+			.orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+
+		Comment comment = Comment.builder()
+			.content(req.getContent())
+			.post(post)
+			.member(member)
+			.build();
+
+		commentRepository.save(comment);
+
+		return CommentResponse.from(comment);
+
+	}
 }
