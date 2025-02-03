@@ -58,5 +58,51 @@ export default {
   		}
   	}
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [require("tailwindcss-animate"), 
+	function ({ addVariant } : { addVariant: any}) {
+		const groupVariantPrefixes = ["p1", "p2", "p3"];
+  
+		function escapeClassName(className: string) {
+		  return className.replace(/[\[\]\(\)\+\*\#\/\%]/g, '\\$&');
+		}
+		// group-on 변형 추가 함수
+		const addGroupOnVariant = (name = "") => {
+		  const selector = name ? `group\\/${name}` : "group";
+		  const variantName = name ? `group-on/${name}` : "group-on";
+		  addVariant(variantName, ({ modifySelectors }: { modifySelectors: any }) => {
+			modifySelectors(({ className }: { className: any }) => {
+			  return `.${selector}.on .${escapeClassName(
+				variantName
+			  )}\\:${escapeClassName(className)}`;
+			});
+		  });
+		};
+		// peer-on 변형 추가 함수
+		const addPeerOnVariant = (name = "") => {
+		  const selector = name ? `peer\\/${name}` : "peer";
+		  const variantName = name ? `peer-on/${name}` : "peer-on";
+		  addVariant(variantName, ({ modifySelectors }: { modifySelectors: any }) => {
+			modifySelectors(({ className }: { className: any }) => {
+			  return `.${selector}.on ~ .${escapeClassName(
+				variantName
+			  )}\\:${escapeClassName(className)}`;
+			});
+		  });
+		};
+		// 기본 group-on, peer-on 변형 추가
+		addGroupOnVariant();
+		addPeerOnVariant();
+		// 특정 그룹과 피어에 대한 변형 추가
+		groupVariantPrefixes.forEach((name) => {
+		  addGroupOnVariant(name);
+		  addPeerOnVariant(name);
+		});
+		// on 클래스에 대한 변형 추가
+		addVariant("on", ({ modifySelectors }: { modifySelectors: any }) => {
+		  modifySelectors(({ className }: { className: any }) => {
+			return `.on.on\\:${escapeClassName(className)}`;
+		  });
+		});
+	  },
+  ],
 } satisfies Config;
