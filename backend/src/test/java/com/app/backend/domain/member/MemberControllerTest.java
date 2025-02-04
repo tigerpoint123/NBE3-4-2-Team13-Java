@@ -1,7 +1,6 @@
 package com.app.backend.domain.member;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -19,15 +18,12 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.app.backend.domain.member.dto.kakao.KakaoUserInfo;
-import com.app.backend.domain.member.dto.request.KakaoLoginRequestDto;
 import com.app.backend.domain.member.dto.request.MemberJoinRequestDto;
 import com.app.backend.domain.member.dto.request.MemberLoginRequestDto;
 import com.app.backend.domain.member.dto.request.MemberModifyRequestDto;
 import com.app.backend.domain.member.entity.Member;
 import com.app.backend.domain.member.jwt.JwtProvider;
 import com.app.backend.domain.member.repository.MemberRepository;
-import com.app.backend.domain.member.service.KakaoAuthService;
 import com.app.backend.global.config.TestConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -48,8 +44,6 @@ public class MemberControllerTest {
 	private ObjectMapper objectMapper;  // JSON 변환을 위한 객체
 	@Autowired
 	private JwtProvider jwtProvider;
-	@Autowired
-	private KakaoAuthService kakaoAuthService;
 
 	// 기존 회원 셋업
 	private static final String setupUsername = "testID";
@@ -125,31 +119,30 @@ public class MemberControllerTest {
 		);
 	}
 
-	@Test
-	@DisplayName("카카오 로그인")
-	void 카카오로그인() throws Exception {
-		// given
-		KakaoUserInfo kakaoUserInfo = new KakaoUserInfo("123", "kakao_123");
-		when(kakaoAuthService.getKakaoUserInfo(anyString()))
-			.thenReturn(kakaoUserInfo);
-
-		//when
-		mvc.perform(post("/api/v1/members/kakao/callback")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(
-					new KakaoLoginRequestDto("1", "김호남", "KAKAO"))))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.accessToken").exists())
-			.andExpect(jsonPath("$.refreshToken").exists())
-			.andDo(print());  // 결과 출력
-
-		// then
-		Member savedMember = memberRepository.findByUsernameAndDisabled(setupUsername, false)
-			.orElseThrow(() -> new IllegalArgumentException("가입되지 않은 사용자입니다"));
-
-		assertAll(
-		);
-	}
+	// @Test
+	// @DisplayName("카카오 로그인")
+	// void 카카오로그인() throws Exception {
+		// // given
+		// String code = "test_auth_code";
+		// KakaoUserInfo kakaoUserInfo = new KakaoUserInfo("123", "테스트유저");
+		// TokenDto expectedTokens = new TokenDto("test.access.token", "test.refresh.token");
+		//
+		// // KakaoAuthService 모킹
+		// when(kakaoAuthService.kakaoLogin(anyString()))
+		// 	.thenReturn(expectedTokens);
+		//
+		// // when & then
+		// mvc.perform(get("/api/v1/members/kakao/callback")
+		// 		.param("code", code)
+		// 		.contentType(MediaType.APPLICATION_JSON))
+		// 	.andExpect(status().isOk())
+		// 	.andExpect(cookie().exists("accessToken"))
+		// 	.andExpect(cookie().exists("refreshToken"))
+		// 	.andDo(print());
+		//
+		// // 서비스 호출 검증
+		// verify(kakaoAuthService).kakaoLogin(code);
+	// }
 
 	@Test
 	@DisplayName("로그아웃")

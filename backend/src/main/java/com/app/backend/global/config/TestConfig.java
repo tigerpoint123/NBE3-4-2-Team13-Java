@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @TestConfiguration
 public class TestConfig {
+
 	@Bean
 	@Primary  // 테스트 환경에서 이 구현체 우선 사용
 	public CommonUtil commonUtil() {
