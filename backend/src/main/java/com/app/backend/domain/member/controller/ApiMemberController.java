@@ -26,6 +26,8 @@ import com.app.backend.global.dto.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -53,13 +55,32 @@ public class ApiMemberController {
 	@Operation(summary = "관리자 로그인", description = "관리자 로그인을 진행합니다")
 	@PostMapping("/login")
 	public ApiResponse<MemberLoginResponseDto> login(
-		@RequestBody MemberLoginRequestDto request) {
-		MemberLoginResponseDto response = memberService.login(request);
+		@RequestBody MemberLoginRequestDto request,
+		HttpServletResponse response
+	) {
+		MemberLoginResponseDto loginResult = memberService.login(request);
+
+		// 쿠키 설정
+		Cookie accessTokenCookie = new Cookie("accessToken", loginResult.accessToken());
+		Cookie refreshTokenCookie = new Cookie("refreshToken", loginResult.refreshToken());
+
+		// 보안 설정
+		accessTokenCookie.setHttpOnly(true);
+		accessTokenCookie.setSecure(true);
+		accessTokenCookie.setPath("/");
+		accessTokenCookie.setDomain("localhost:3000");
+		accessTokenCookie.setMaxAge(1800); // 30분
+
+		String cookieHeader = String.format("%s; SameSite=Lax", accessTokenCookie.toString());
+		response.setHeader("Set-Cookie", cookieHeader);
+		response.addCookie(accessTokenCookie);
+		response.addCookie(refreshTokenCookie);
+
 		return ApiResponse.of(
 			true,
 			"MEMBER_LOGIN_SUCCESS",
 			"로그인이 성공적으로 완료되었습니다.",
-			response
+			loginResult
 		);
 	}
 
@@ -77,7 +98,7 @@ public class ApiMemberController {
 	}
 
 	@Operation(summary = "개인정보 조회", description = "JWT 토큰을 이용해 회원 정보를 조회합니다.")
-	@Parameter(name = "Authorization", description = "Bearer JWT token", required = true, in = ParameterIn.HEADER)
+	// @Parameter(name = "Authorization", description = "Bearer JWT token", required = true, in = ParameterIn.HEADER)
 	@GetMapping("/info")
 	public ApiResponse<MemberDetails> getMemberInfo(
 		@RequestHeader(value = "Authorization") String token

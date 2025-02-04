@@ -87,7 +87,6 @@ public class MemberControllerTest {
 			.andDo(print());  // 결과 출력
 
 		//then
-		// DB에 실제로 저장되었는지 확인
 		Member savedMember = memberRepository.findByUsernameAndDisabled(newUsername, false)
 			.orElseThrow(() -> new RuntimeException("회원이 저장되지 않았습니다."));
 
@@ -147,6 +146,25 @@ public class MemberControllerTest {
 	// 	assertAll(
 	// 	);
 	// }
+
+	@Test
+	@DisplayName("로그아웃")
+	void 로그아웃() {
+		// given
+		Member member = memberRepository.findByUsernameAndDisabled(setupUsername, false)
+			.orElseThrow(() -> new IllegalArgumentException("가입되지 않은 사용자입니다"));
+		String accessToken = "Bearer " + jwtProvider.generateAccessToken(member);
+
+		// when
+		assertDoesNotThrow(() -> mvc.perform(post("/api/v1/members/logout")
+				.header("Authorization", accessToken)
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.isSuccess").value(true))
+			.andExpect(jsonPath("$.code").value("MEMBER_LOGOUT_SUCCESS"))
+			.andExpect(jsonPath("$.message").value("로그아웃이 성공적으로 완료되었습니다."))
+			.andDo(print()));
+	}
 
 	@Test
 	@DisplayName("개인정보조회")
