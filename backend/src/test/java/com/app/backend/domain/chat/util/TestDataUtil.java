@@ -7,6 +7,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import com.app.backend.domain.chat.message.entity.Message;
+import com.app.backend.domain.chat.message.repository.MessageRepository;
 import com.app.backend.domain.chat.room.entity.ChatRoom;
 import com.app.backend.domain.chat.room.repository.ChatRoomRepository;
 import com.app.backend.domain.group.entity.Group;
@@ -31,6 +33,7 @@ public class TestDataUtil {
 	private final GroupRepository groupRepository;
 	private final GroupMembershipRepository groupMembershipRepository;
 	private final ChatRoomRepository chatRoomRepository;
+	private final MessageRepository messageRepository;
 
 	public Member createAndSaveMember(String username, String nickname) {
 		Member member = Member.builder()
@@ -77,5 +80,20 @@ public class TestDataUtil {
 		MemberDetails memberDetails = new MemberDetails(member);
 		SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
 			memberDetails, null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))));
+	}
+
+	public void createAndSaveMessage(Long chatRoomId, Long senderId, String senderNickname, String content) {
+		Message message = Message.builder()
+			.chatRoomId(chatRoomId)
+			.senderId(senderId)
+			.senderNickname(senderNickname)
+			.content(content)
+			.disabled(false)
+			.build();
+		messageRepository.save(message);
+	}
+
+	public void deleteAllMessages() {
+		messageRepository.deleteAll();
 	}
 }
