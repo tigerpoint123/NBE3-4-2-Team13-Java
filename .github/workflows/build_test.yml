@@ -26,6 +26,9 @@ jobs:
         working-directory: ./backend
         run: chmod +x ./gradlew
 
+      - name: Set MongoDB URI
+        run: echo "TEST_MONGO_DB_URI=${{ secrets.TEST_MONGO_DB_URI }}" >> $GITHUB_ENV
+
       - name: Build with Gradle
         working-directory: ./backend
         run: ./gradlew clean build --stacktrace --info
@@ -40,4 +43,3 @@ jobs:
         run: |
           mkdir -p testUploads
           chmod 777 testUploads
-
