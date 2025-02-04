@@ -69,7 +69,7 @@ public class CommentController {
 		return ApiResponse.of(
 			true,
 			"200",
-			"%d번 댓글이 수정되었습니다.".formatted(response.getId()),
+			"%d번 댓글이 수정되었습니다.".formatted(commentId),
 			response
 		);
 	}
