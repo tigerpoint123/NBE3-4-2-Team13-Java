@@ -1,6 +1,5 @@
 package com.app.backend.domain.meetingApplication.repository;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,5 +12,5 @@ public interface MeetingApplicationRepository extends JpaRepository<MeetingAppli
 
 	List<MeetingApplication> findByGroupIdAndDisabled(Long groupId, boolean disabled);
 
-	Optional<MeetingApplication> findByIdAndDisabled(Long meetingApplicationId, boolean disabled);
+	Optional<MeetingApplication> findByGroupIdAndIdAndDisabled(Long groupId, Long meetingApplicationId, boolean disabled);
 }

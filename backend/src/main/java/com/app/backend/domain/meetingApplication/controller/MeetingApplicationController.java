@@ -46,7 +46,7 @@ public class MeetingApplicationController {
 		);
 	}
 
-	@GetMapping("/{groupId}/meeting_application")
+	@GetMapping("/{groupId}/meeting_applications")
 	public ApiResponse<MeetingApplicationListDto> getMeetingApplications(
 		@PathVariable Long groupId,
 		@AuthenticationPrincipal MemberDetails memberDetails
@@ -61,7 +61,7 @@ public class MeetingApplicationController {
 		);
 	}
 
-	@GetMapping("/{groupId}/meeting_application/{meetingApplicationId}")
+	@GetMapping("/{groupId}/meeting_applications/{meetingApplicationId}")
 	public ApiResponse<MeetingApplicationDto> getMeetingApplication(
 		@PathVariable Long groupId,
 		@PathVariable Long meetingApplicationId,

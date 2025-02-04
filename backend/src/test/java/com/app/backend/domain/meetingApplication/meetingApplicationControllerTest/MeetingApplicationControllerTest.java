@@ -1,15 +1,11 @@
 package com.app.backend.domain.meetingApplication.meetingApplicationControllerTest;
 
-import static org.assertj.core.api.AssertionsForClassTypes.*;
-import static org.hamcrest.Matchers.*;
 import static org.mockito.BDDMockito.*;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,7 +16,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -33,8 +28,6 @@ import com.app.backend.domain.group.entity.GroupRole;
 import com.app.backend.domain.group.entity.RecruitStatus;
 import com.app.backend.domain.group.repository.GroupMembershipRepository;
 import com.app.backend.domain.group.repository.GroupRepository;
-import com.app.backend.domain.meetingApplication.dto.MeetingApplicationDto;
-import com.app.backend.domain.meetingApplication.dto.MeetingApplicationListDto;
 import com.app.backend.domain.meetingApplication.dto.MeetingApplicationReqBody;
 import com.app.backend.domain.meetingApplication.entity.MeetingApplication;
 import com.app.backend.domain.meetingApplication.exception.MeetingApplicationErrorCode;
@@ -84,7 +77,7 @@ public class MeetingApplicationControllerTest {
 			.town("test town")
 			.description("test description")
 			.recruitStatus(RecruitStatus.RECRUITING)
-			.maxRecruitCount(1)
+			.maxRecruitCount(10)
 			.build());
 
 		member = Member.builder()
@@ -198,7 +191,7 @@ public class MeetingApplicationControllerTest {
 			.build());
 
 		// When & Then
-		mvc.perform(get("/api/v1/groups/{groupId}/meeting_application", group.getId())
+		mvc.perform(get("/api/v1/groups/{groupId}/meeting_applications", group.getId())
 				.with(user(mockUser))  // 인증된 사용자 설정
 				.contentType(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
@@ -218,16 +211,6 @@ public class MeetingApplicationControllerTest {
 
 		MemberDetails mockUser = new MemberDetails(leader);
 
-		group = groupRepository.save(Group.builder()
-			.name("test group")
-			.province("test province")
-			.city("test city")
-			.town("test town")
-			.description("test description")
-			.recruitStatus(RecruitStatus.RECRUITING)
-			.maxRecruitCount(10)
-			.build());
-
 		GroupMembership groupMembership = groupMembershipRepository.save(GroupMembership.builder()
 			.group(group)
 			.member(leader)
@@ -241,7 +224,7 @@ public class MeetingApplicationControllerTest {
 			.build());
 
 		// When & Then
-		mvc.perform(get("/api/v1/groups/{groupId}/meeting_application/{meetingApplicationId}", group.getId(), 1)
+		mvc.perform(get("/api/v1/groups/{groupId}/meeting_applications/{meetingApplicationId}", group.getId(), 1)
 				.with(user(mockUser))  // 인증된 사용자 설정
 				.contentType(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())

@@ -56,6 +56,7 @@ public class MeetingApplicationService {
 		return meetingApplicationRepository.save(meetingApplication);
 	}
 
+	// 리스트 조회
 	public MeetingApplicationListDto getMeetingApplications(Long groupId, Long memberId) {
 
 		GroupMembership membership = groupMembershipRepository.findByGroupIdAndMemberId(groupId, memberId)
@@ -74,6 +75,8 @@ public class MeetingApplicationService {
 		return new MeetingApplicationListDto(applications);
 	}
 
+
+	// 상세 조회
 	public MeetingApplicationDto getMeetingApplication(Long groupId, Long meetingApplicationId, Long memberId) {
 
 		GroupMembership membership = groupMembershipRepository.findByGroupIdAndMemberId(groupId, memberId)
@@ -84,7 +87,7 @@ public class MeetingApplicationService {
 			throw new MeetingApplicationException(MeetingApplicationErrorCode.UNAUTHORIZED_ACCESS);
 		}
 
-		MeetingApplication meetingApplication = meetingApplicationRepository.findByIdAndDisabled(meetingApplicationId, false)
+		MeetingApplication meetingApplication = meetingApplicationRepository.findByGroupIdAndIdAndDisabled(groupId, meetingApplicationId, false)
 			.orElseThrow(() -> new MeetingApplicationException(MeetingApplicationErrorCode.MEETING_APPLICATION_NOT_FOUND));
 
 		return MeetingApplicationDto.from(meetingApplication);
