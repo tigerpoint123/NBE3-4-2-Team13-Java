@@ -28,10 +28,6 @@ public class CategoryService {
 
 		validateCategoryName(name); // 입력값 검증
 
-		if (categoryRepository.existsByName(name)) {
-			throw new CategoryException(CategoryErrorCode.CATEGORY_NAME_DUPLICATE);
-		}
-
 		Category category = Category.builder()
 			.name(name)
 			.build();
