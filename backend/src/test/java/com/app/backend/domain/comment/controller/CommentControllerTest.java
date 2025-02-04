@@ -355,6 +355,97 @@ public class CommentControllerTest {
 			.andExpect(jsonPath("$.message").value("댓글에 대한 권한이 없습니다"));
 	}
 
+	@Test
+	@DisplayName("댓글 페이징 조회")
+	void getCommentsWithPaging() throws Exception {
+		// 테스트 데이터 15개 한 번만 생성
+		for (int i = 1; i <= 15; i++) {
+			Comment comment = Comment.builder()
+				.content("test comment " + i)
+				.post(testPost)
+				.member(testMember)
+				.build();
+			commentRepository.save(comment);
+		}
+
+
+	mvc.perform(
+				get("/api/v1/comment/" + testPostId)
+					.param("page", "0")
+					.param("size", "10")
+					.param("sort", "createdAt,desc")
+			)
+			.andDo(print())
+
+			.andExpect(jsonPath("$.isSuccess").value(true))
+			.andExpect(jsonPath("$.code").value("200"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.content").isArray())
+			.andExpect(jsonPath("$.data.content.length()").value(10))
+			.andExpect(jsonPath("$.data.first").value(true))
+			.andExpect(jsonPath("$.data.last").value(false));
+
+
+	mvc.perform(
+				get("/api/v1/comment/" + testPostId)
+					.param("page", "1")
+					.param("size", "10")
+					.param("sort", "createdAt,desc")
+			)
+			.andDo(print())
+
+			.andExpect(jsonPath("$.isSuccess").value(true))
+			.andExpect(jsonPath("$.code").value("200"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.content").isArray())
+			.andExpect(jsonPath("$.data.content.length()").value(5))
+			.andExpect(jsonPath("$.data.first").value(false))
+			.andExpect(jsonPath("$.data.last").value(true));
+	}
+
+
+	@Test
+	@DisplayName("댓글 페이징 조회 (게시물 없음)")
+	void getComments3() throws Exception {
+		ResultActions resultActions = mvc
+			.perform(
+				get("/api/v1/comment/10000")
+					.param("page", "0")
+					.param("size", "10")
+					.param("sort", "createdAt,desc")
+			)
+			.andDo(print());
+
+		resultActions
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.isSuccess").value(false))
+			.andExpect(jsonPath("$.code").value("P001"))
+			.andExpect(jsonPath("$.message").value("게시물 정보가 존재하지 않음"));
+	}
+
+	@Test
+	@DisplayName("댓글 페이징 조회 (댓글 없음)")
+	void getComments4() throws Exception {
+		ResultActions resultActions = mvc
+			.perform(
+				get("/api/v1/comment/" + testPostId)
+					.param("page", "0")
+					.param("size", "10")
+					.param("sort", "createdAt,desc")
+			)
+			.andDo(print());
+
+		resultActions
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.isSuccess").value(true))
+			.andExpect(jsonPath("$.code").value("200"))
+			.andExpect(jsonPath("$.message").exists())
+			.andExpect(jsonPath("$.data.content").isArray())
+			.andExpect(jsonPath("$.data.first").value(true))
+			.andExpect(jsonPath("$.data.content.length()").value(0))
+			.andExpect(jsonPath("$.data.totalElements").value(0))
+			.andExpect(jsonPath("$.data.totalPages").value(0));
+	}
 
 }
 
