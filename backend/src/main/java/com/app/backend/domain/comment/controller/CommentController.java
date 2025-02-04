@@ -37,7 +37,7 @@ public class CommentController {
 
 		return ApiResponse.of(
 			true,
-			"201",
+			HttpStatus.CREATED,
 			"%d번 댓글이 작성되었습니다.".formatted(response.getId()),
 			response
 		);
@@ -53,7 +53,7 @@ public class CommentController {
 
 		return ApiResponse.of(
 			true,
-			"204",
+			HttpStatus.NO_CONTENT,
 			"%d번 댓글이 삭제되었습니다.".formatted(commentId)
 		);
 	}
@@ -68,7 +68,7 @@ public class CommentController {
 
 		return ApiResponse.of(
 			true,
-			"200",
+			HttpStatus.OK,
 			"%d번 댓글이 수정되었습니다.".formatted(commentId),
 			response
 		);
