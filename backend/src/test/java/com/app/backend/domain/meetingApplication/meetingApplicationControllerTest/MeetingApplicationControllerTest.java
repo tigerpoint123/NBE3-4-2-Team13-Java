@@ -1,4 +1,4 @@
-package com.app.backend.domain.meetingApplication;
+package com.app.backend.domain.meetingApplication.meetingApplicationControllerTest;
 
 import static org.mockito.BDDMockito.*;
 
@@ -21,11 +21,15 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import com.app.backend.domain.group.entity.Group;
+import com.app.backend.domain.group.entity.GroupMembership;
+import com.app.backend.domain.group.entity.GroupRole;
 import com.app.backend.domain.group.entity.RecruitStatus;
 import com.app.backend.domain.group.repository.GroupMembershipRepository;
 import com.app.backend.domain.group.repository.GroupRepository;
 import com.app.backend.domain.meetingApplication.dto.MeetingApplicationReqBody;
 import com.app.backend.domain.meetingApplication.entity.MeetingApplication;
+import com.app.backend.domain.meetingApplication.exception.MeetingApplicationErrorCode;
+import com.app.backend.domain.meetingApplication.exception.MeetingApplicationException;
 import com.app.backend.domain.meetingApplication.service.MeetingApplicationService;
 import com.app.backend.domain.member.entity.Member;
 import com.app.backend.domain.member.entity.MemberDetails;
@@ -44,7 +48,7 @@ public class MeetingApplicationControllerTest {
 	private GroupRepository groupRepository;
 
 	@Autowired
-	private MemberRepository memberRepository; // 추가
+	private MemberRepository memberRepository;
 
 	@Autowired
 	private GroupMembershipRepository groupMembershipRepository;
@@ -120,7 +124,42 @@ public class MeetingApplicationControllerTest {
 	@Test
 	@DisplayName("신청 폼 제출 - 그룹 정원 초과 시 예외 처리")
 	void t2() throws Exception {
+		// Given
+		groupMembershipRepository.save(GroupMembership.builder()
+			.group(group)
+			.member(member)
+			.groupRole(GroupRole.LEADER)
+			.build());
 
+		// 새로운 신청 요청
+		Member newMember = Member.builder()
+			.username("newUser")
+			.nickname("newNickname")
+			.role("USER")
+			.disabled(false)
+			.build();
+		memberRepository.save(newMember);
+
+		MeetingApplicationReqBody request = new MeetingApplicationReqBody("Test Application");
+
+		// 예외를 던지도록 설정
+		given(meetingApplicationService.create(group.getId(), request, newMember.getId()))
+			.willThrow(new MeetingApplicationException(MeetingApplicationErrorCode.GROUP_MEMBER_LIMIT_EXCEEDED));
+
+		// MockUser 설정
+		MemberDetails mockUser = new MemberDetails(newMember);
+
+		// When & Then
+		mvc.perform(MockMvcRequestBuilders.post("/api/v1/groups/{groupId}", group.getId())
+				.with(user(mockUser))  // MockUser를 사용하여 로그인된 상태 시뮬레이션
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request)) // 요청 본문
+				.header("Authorization", "Bearer testToken"))
+			.andExpect(status().isConflict())  // 예외 처리에 의한 409 상태 코드 확인
+			.andExpect(result -> {
+				String responseContent = result.getResponse().getContentAsString();
+				assert(responseContent.contains("그룹 정원이 초과되었습니다."));  // 예외 메시지 확인
+			});
 	}
 
 }
