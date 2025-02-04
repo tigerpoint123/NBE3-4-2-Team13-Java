@@ -10,14 +10,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import com.app.backend.domain.chat.message.dto.response.MessageResponse;
-import com.app.backend.domain.chat.message.repository.MessageRepository;
-import com.app.backend.domain.chat.message.service.MessageService;
 import com.app.backend.domain.chat.room.entity.ChatRoom;
 import com.app.backend.domain.chat.util.TestDataUtil;
 import com.app.backend.domain.group.entity.Group;
@@ -38,9 +34,6 @@ class MessageControllerTest {
 	private MockMvc mockMvc;
 
 	@Autowired
-	private MessageService messageService;
-
-	@Autowired
 	private TestDataUtil testDataUtil;
 
 	private Long chatRoomId;
@@ -54,7 +47,7 @@ class MessageControllerTest {
 		Member savedMember2 = testDataUtil.createAndSaveMember("testUser2", "testNickname2");
 
 		// 그룹 생성 & 저장
-		Group group = testDataUtil.createAndSaveGroup(
+		testDataUtil.createAndSaveGroup(
 			"대구fc 팬 모임1",
 			"대구 광역시",
 			"북구",
@@ -70,7 +63,7 @@ class MessageControllerTest {
 		);
 
 		// 그룹과 멤버십 관계 설정
-		GroupMembership groupMembership1 = testDataUtil.createAndSaveGroupMembership(savedMember, group2, GroupRole.LEADER);
+		testDataUtil.createAndSaveGroupMembership(savedMember, group2, GroupRole.LEADER);
 		GroupMembership groupMembership2 = testDataUtil.createAndSaveGroupMembership(savedMember2, group2, GroupRole.PARTICIPANT);
 		testDataUtil.saveGroupMembership(groupMembership2.modifyStatus(MembershipStatus.APPROVED));
 

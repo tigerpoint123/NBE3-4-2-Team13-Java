@@ -57,8 +57,8 @@ class ChatRoomMemberControllerTest {
 		);
 
 		// 그룹과 멤버십 관계 설정
-		GroupMembership groupMembership1 = testDataUtil.createAndSaveGroupMembership(savedMember, group1, GroupRole.LEADER);
-		GroupMembership groupMembership2 = testDataUtil.createAndSaveGroupMembership(savedMember, group2, GroupRole.LEADER);
+		testDataUtil.createAndSaveGroupMembership(savedMember, group1, GroupRole.LEADER);
+		testDataUtil.createAndSaveGroupMembership(savedMember, group2, GroupRole.LEADER);
 
 		// 채팅방 생성 및 그룹에 연결
 		ChatRoom chatRoom1 = testDataUtil.createAndSaveChatRoom(group1);
@@ -82,6 +82,6 @@ class ChatRoomMemberControllerTest {
 			.andExpect(jsonPath("$.data[0].groupName").value("대구fc 팬 모임1"))
 			.andExpect(jsonPath("$.data[1].chatRoomId").value(chatRoom2.getId()))
 			.andExpect(jsonPath("$.data[1].groupId").value(group2.getId()))
-			.andExpect(jsonPath("$.data[1].groupName").value("대구fc 팬 모임2"));;
+			.andExpect(jsonPath("$.data[1].groupName").value("대구fc 팬 모임2"));
 	}
 }
