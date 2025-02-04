@@ -1,5 +1,6 @@
 package com.app.backend.domain.member.controller;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +22,7 @@ import com.app.backend.domain.member.dto.response.MemberModifyResponseDto;
 import com.app.backend.domain.member.entity.Member;
 import com.app.backend.domain.member.entity.MemberDetails;
 import com.app.backend.domain.member.service.MemberService;
+import com.app.backend.domain.member.util.CommonUtil;
 import com.app.backend.global.dto.response.ApiResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,6 +38,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1/members")
 public class ApiMemberController {
 	private final MemberService memberService;
+	private final CommonUtil util;
 
 	@Operation(summary = "관리자 회원가입", description = "관리자 회원 가입을 진행합니다")
 	@PostMapping
@@ -57,24 +60,14 @@ public class ApiMemberController {
 	public ApiResponse<MemberLoginResponseDto> login(
 		@RequestBody MemberLoginRequestDto request,
 		HttpServletResponse response
-	) {
+	) throws IOException {
 		MemberLoginResponseDto loginResult = memberService.login(request);
 
 		// 쿠키 설정
 		Cookie accessTokenCookie = new Cookie("accessToken", loginResult.accessToken());
 		Cookie refreshTokenCookie = new Cookie("refreshToken", loginResult.refreshToken());
 
-		// 보안 설정
-		accessTokenCookie.setHttpOnly(true);
-		accessTokenCookie.setSecure(true);
-		accessTokenCookie.setPath("/");
-		accessTokenCookie.setDomain("localhost:3000");
-		accessTokenCookie.setMaxAge(1800); // 30분
-
-		String cookieHeader = String.format("%s; SameSite=Lax", accessTokenCookie.toString());
-		response.setHeader("Set-Cookie", cookieHeader);
-		response.addCookie(accessTokenCookie);
-		response.addCookie(refreshTokenCookie);
+		util.setCookies(accessTokenCookie, refreshTokenCookie, response);
 
 		return ApiResponse.of(
 			true,
@@ -87,9 +80,13 @@ public class ApiMemberController {
 	@Operation(summary = "로그아웃", description = "클라이언트의 토큰 무효화 처리")
 	@PostMapping("/logout")
 	public ApiResponse<Void> logout (
-		@RequestHeader(value = "Authorization") String token
+		@RequestHeader(value = "Authorization") String token,
+		HttpServletResponse response
 	) {
 		memberService.logout(token);
+
+		util.invalidateCookies(response);
+
 		return ApiResponse.of(
 			true,
 			"MEMBER_LOGOUT_SUCCESS",

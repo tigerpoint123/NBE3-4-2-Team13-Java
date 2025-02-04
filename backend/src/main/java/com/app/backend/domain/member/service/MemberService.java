@@ -20,6 +20,8 @@ import com.app.backend.domain.member.exception.MemberException;
 import com.app.backend.domain.member.jwt.JwtProvider;
 import com.app.backend.domain.member.repository.MemberRepository;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -78,9 +80,13 @@ public class MemberService {
 
 	@Transactional
 	public void logout(String token) {
-		Member member = getCurrentMember(token);
-		member.updateRefreshToken(null);
-		memberRepository.save(member);
+		try {
+			Member member = getCurrentMember(token);
+			member.updateRefreshToken(null);
+			memberRepository.save(member);
+		} catch (Exception e) {
+			throw new MemberException(MemberErrorCode.MEMBER_FAILED_LOGOUT);
+		}
 	}
 
 	public Member getCurrentMember(String accessToken) {

@@ -1,7 +1,6 @@
 package com.app.backend.domain.member;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -10,7 +9,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -19,17 +17,12 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.app.backend.domain.member.controller.KakaoController;
-import com.app.backend.domain.member.dto.kakao.KakaoUserInfo;
-import com.app.backend.domain.member.dto.request.KakaoLoginRequestDto;
 import com.app.backend.domain.member.dto.request.MemberJoinRequestDto;
 import com.app.backend.domain.member.dto.request.MemberLoginRequestDto;
 import com.app.backend.domain.member.dto.request.MemberModifyRequestDto;
 import com.app.backend.domain.member.entity.Member;
 import com.app.backend.domain.member.jwt.JwtProvider;
 import com.app.backend.domain.member.repository.MemberRepository;
-import com.app.backend.domain.member.service.KakaoAuthService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.transaction.Transactional;
