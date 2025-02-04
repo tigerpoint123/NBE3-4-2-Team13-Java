@@ -20,7 +20,8 @@ public enum MemberErrorCode implements DomainErrorCode {
 	MEMBER_FAILED_TO_MODIFY(HttpStatus.BAD_REQUEST, "MB006", "회원 정보 수정 실패"),
 	MEMBER_NO_ADMIN_PERMISSION(HttpStatus.FORBIDDEN, "MB007", "관리자 권한이 없음"),
 	MEMBER_FAILED_TO_KAKAO_TOKEN(HttpStatus.BAD_REQUEST, "MB008", "카카오 토큰 발급 실패"),
-	MEMBER_FAILED_TO_KAKAO_AUTH(HttpStatus.BAD_REQUEST, "MB009", "카카오 인증 실패");
+	MEMBER_FAILED_TO_KAKAO_AUTH(HttpStatus.BAD_REQUEST, "MB009", "카카오 인증 실패"),
+	MEMBER_FAILED_LOGOUT(HttpStatus.BAD_REQUEST, "MB010", "로그아웃 실패");
 
 	private final HttpStatus status;
 	private final String code;

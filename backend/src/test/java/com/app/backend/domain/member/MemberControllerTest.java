@@ -1,7 +1,6 @@
 package com.app.backend.domain.member;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -10,26 +9,21 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.app.backend.domain.member.controller.KakaoController;
-import com.app.backend.domain.member.dto.kakao.KakaoUserInfo;
-import com.app.backend.domain.member.dto.request.KakaoLoginRequestDto;
 import com.app.backend.domain.member.dto.request.MemberJoinRequestDto;
 import com.app.backend.domain.member.dto.request.MemberLoginRequestDto;
 import com.app.backend.domain.member.dto.request.MemberModifyRequestDto;
 import com.app.backend.domain.member.entity.Member;
 import com.app.backend.domain.member.jwt.JwtProvider;
 import com.app.backend.domain.member.repository.MemberRepository;
-import com.app.backend.domain.member.service.KakaoAuthService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.transaction.Transactional;
@@ -39,6 +33,7 @@ import jakarta.transaction.Transactional;
 @Transactional           // 테스트 후 롤백
 @ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
+@Import(TestConfig.class)
 public class MemberControllerTest {
 	@Autowired
 	private MockMvc mvc;
@@ -87,7 +82,6 @@ public class MemberControllerTest {
 			.andDo(print());  // 결과 출력
 
 		//then
-		// DB에 실제로 저장되었는지 확인
 		Member savedMember = memberRepository.findByUsernameAndDisabled(newUsername, false)
 			.orElseThrow(() -> new RuntimeException("회원이 저장되지 않았습니다."));
 
@@ -110,6 +104,8 @@ public class MemberControllerTest {
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request)))
 			.andExpect(status().isOk())  // HTTP 상태코드 검증
+			.andExpect(cookie().exists("accessToken"))    // 쿠키 존재 검증
+			.andExpect(cookie().exists("refreshToken"))   // 쿠키 존재 검증
 			.andDo(print());  // 결과 출력
 
 		// then
@@ -125,28 +121,46 @@ public class MemberControllerTest {
 	// @Test
 	// @DisplayName("카카오 로그인")
 	// void 카카오로그인() throws Exception {
-	// 	// given
-	// 	KakaoUserInfo kakaoUserInfo = new KakaoUserInfo("123", "kakao_123");
-	// 	when(kakaoAuthService.getKakaoUserInfo(anyString()))
-	// 		.thenReturn(kakaoUserInfo);
-	//
-	// 	//when
-	// 	mvc.perform(post("/api/v1/members/kakao/callback")
-	// 			.contentType(MediaType.APPLICATION_JSON)
-	// 			.content(objectMapper.writeValueAsString(
-	// 				new KakaoLoginRequestDto("1", "김호남", "KAKAO"))))
-	// 		.andExpect(status().isOk())
-	// 		.andExpect(jsonPath("$.accessToken").exists())
-	// 		.andExpect(jsonPath("$.refreshToken").exists())
-	// 		.andDo(print());  // 결과 출력
-	//
-	// 	// then
-	// 	Member savedMember = memberRepository.findByUsernameAndDisabled(setupUsername, false)
-	// 		.orElseThrow(() -> new IllegalArgumentException("가입되지 않은 사용자입니다"));
-	//
-	// 	assertAll(
-	// 	);
+		// // given
+		// String code = "test_auth_code";
+		// KakaoUserInfo kakaoUserInfo = new KakaoUserInfo("123", "테스트유저");
+		// TokenDto expectedTokens = new TokenDto("test.access.token", "test.refresh.token");
+		//
+		// // KakaoAuthService 모킹
+		// when(kakaoAuthService.kakaoLogin(anyString()))
+		// 	.thenReturn(expectedTokens);
+		//
+		// // when & then
+		// mvc.perform(get("/api/v1/members/kakao/callback")
+		// 		.param("code", code)
+		// 		.contentType(MediaType.APPLICATION_JSON))
+		// 	.andExpect(status().isOk())
+		// 	.andExpect(cookie().exists("accessToken"))
+		// 	.andExpect(cookie().exists("refreshToken"))
+		// 	.andDo(print());
+		//
+		// // 서비스 호출 검증
+		// verify(kakaoAuthService).kakaoLogin(code);
 	// }
+
+	@Test
+	@DisplayName("로그아웃")
+	void 로그아웃() {
+		// given
+		Member member = memberRepository.findByUsernameAndDisabled(setupUsername, false)
+			.orElseThrow(() -> new IllegalArgumentException("가입되지 않은 사용자입니다"));
+		String accessToken = "Bearer " + jwtProvider.generateAccessToken(member);
+
+		// when
+		assertDoesNotThrow(() -> mvc.perform(post("/api/v1/members/logout")
+				.header("Authorization", accessToken)
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.isSuccess").value(true))
+			.andExpect(jsonPath("$.code").value("MEMBER_LOGOUT_SUCCESS"))
+			.andExpect(jsonPath("$.message").value("로그아웃이 성공적으로 완료되었습니다."))
+			.andDo(print()));
+	}
 
 	@Test
 	@DisplayName("개인정보조회")
