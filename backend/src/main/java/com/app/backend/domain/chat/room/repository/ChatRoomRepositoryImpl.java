@@ -62,6 +62,7 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom {
 		QGroupMembership groupMembership = QGroupMembership.groupMembership;
 		QMember member = QMember.member;
 
+		// 채팅방 정보 조회 (단일 결과)
 		ChatRoomDetailResponse chatRoomDetailResponse = jpaQueryFactory
 			.select(Projections.constructor(
 				ChatRoomDetailResponse.class,
@@ -71,27 +72,39 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom {
 					group.id,
 					group.name,
 					groupMembership.member.id.countDistinct().intValue() // APPROVED 멤버 수
-				),
-				Projections.list(
-					Projections.constructor(
-						MemberChatResponseDto.class,
-						member.id,
-						member.nickname,
-						groupMembership.groupRole
-					)
 				)
 			))
 			.from(chatRoom)
 			.join(chatRoom.group, group)
 			.leftJoin(groupMembership).on(
 				groupMembership.group.eq(group)
-					.and(groupMembership.status.eq(MembershipStatus.APPROVED)) // 여기서 필터링
+					.and(groupMembership.status.eq(MembershipStatus.APPROVED)) // 필터링
 			)
-			.leftJoin(groupMembership.member, member)
 			.where(chatRoom.id.eq(id))
-			.groupBy(chatRoom.id, group.id, group.name, member.id, member.nickname, groupMembership.groupRole)
-			.fetchOne();
+			.groupBy(chatRoom.id, group.id, group.name)
+			.fetchOne();  // 하나의 채팅방 정보만 조회
 
-		return Optional.ofNullable(chatRoomDetailResponse);
+		if (chatRoomDetailResponse == null) {
+			return Optional.empty(); // 채팅방이 없으면 빈 Optional 반환
+		}
+
+		// 멤버 정보 조회 (List로 반환)
+		List<MemberChatResponseDto> members = jpaQueryFactory
+			.select(Projections.constructor(
+				MemberChatResponseDto.class,
+				member.id,
+				member.nickname,
+				groupMembership.groupRole
+			))
+			.from(groupMembership)
+			.join(groupMembership.member, member)
+			.where(groupMembership.group.id.eq(id)
+				.and(groupMembership.status.eq(MembershipStatus.APPROVED)))
+			.fetch(); // 멤버 정보는 List로 반환
+
+		// 채팅방 정보에 멤버 정보 추가
+		chatRoomDetailResponse.addMembers(members);
+
+		return Optional.of(chatRoomDetailResponse); // 최종 반환
 	}
 }
