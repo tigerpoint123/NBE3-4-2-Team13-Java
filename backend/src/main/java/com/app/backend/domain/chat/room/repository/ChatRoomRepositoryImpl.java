@@ -98,7 +98,7 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom {
 			))
 			.from(groupMembership)
 			.join(groupMembership.member, member)
-			.where(groupMembership.group.id.eq(id)
+			.where(groupMembership.group.id.eq(chatRoomDetailResponse.getGroup().groupId())
 				.and(groupMembership.status.eq(MembershipStatus.APPROVED)))
 			.fetch(); // 멤버 정보는 List로 반환
 
