@@ -76,6 +76,13 @@ public class MemberService {
 		return MemberLoginResponseDto.of(member, accessToken, refreshToken);
 	}
 
+	@Transactional
+	public void logout(String token) {
+		Member member = getCurrentMember(token);
+		member.updateRefreshToken(null);
+		memberRepository.save(member);
+	}
+
 	public Member getCurrentMember(String accessToken) {
 		return Optional.ofNullable(accessToken)
 			.map(t -> t.startsWith("Bearer ") ? t.substring(7) : t)

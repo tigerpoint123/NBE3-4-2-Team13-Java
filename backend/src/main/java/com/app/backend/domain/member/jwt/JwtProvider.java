@@ -83,7 +83,7 @@ public class JwtProvider {
 			memberDetails.getAuthorities()
 		);
 	}
-
+	// 토큰을 통해 id 추출
 	public Long getMemberId(String token) {
 		Claims claims = Jwts.parser()
 			.verifyWith(key)  // 저장된 키 사용
@@ -93,28 +93,14 @@ public class JwtProvider {
 		return claims.get("id", Long.class);
 	}
 
-	// 권한 검증
-	public String getRole(String validateToken) {
-		Claims claims = parseClaims(validateToken);
+	// 토큰을 통해 role 추출
+	public String getRole(String token) {
+		Claims claims = Jwts.parser()
+			.verifyWith(key)  // 저장된 키 사용
+			.build()
+			.parseSignedClaims(token)
+			.getPayload();
 		return claims.get("role", String.class);
 	}
 
-	private Claims parseClaims(String token) {
-		try {
-			return Jwts.parser()
-				.verifyWith(key)
-				.build()
-				.parseSignedClaims(token)
-				.getPayload();
-		} catch (ExpiredJwtException e) {
-			log.error("만료된 JWT 토큰입니다.");
-			throw e;
-		} catch (UnsupportedJwtException e) {
-			log.error("지원되지 않는 JWT 토큰입니다.");
-			throw e;
-		} catch (IllegalArgumentException e) {
-			log.error("JWT 토큰이 잘못되었습니다.");
-			throw e;
-		}
-	}
 }

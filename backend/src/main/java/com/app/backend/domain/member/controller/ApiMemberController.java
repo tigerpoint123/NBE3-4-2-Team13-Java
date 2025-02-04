@@ -3,6 +3,15 @@ package com.app.backend.domain.member.controller;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.app.backend.domain.member.dto.request.MemberJoinRequestDto;
 import com.app.backend.domain.member.dto.request.MemberLoginRequestDto;
 import com.app.backend.domain.member.dto.request.MemberModifyRequestDto;
@@ -15,13 +24,10 @@ import com.app.backend.domain.member.service.MemberService;
 import com.app.backend.global.dto.response.ApiResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import io.swagger.v3.oas.annotations.Parameter;
-
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -54,6 +60,19 @@ public class ApiMemberController {
 			"MEMBER_LOGIN_SUCCESS",
 			"로그인이 성공적으로 완료되었습니다.",
 			response
+		);
+	}
+
+	@Operation(summary = "로그아웃", description = "클라이언트의 토큰 무효화 처리")
+	@PostMapping("/logout")
+	public ApiResponse<Void> logout (
+		@RequestHeader(value = "Authorization") String token
+	) {
+		memberService.logout(token);
+		return ApiResponse.of(
+			true,
+			"MEMBER_LOGOUT_SUCCESS",
+			"로그아웃이 성공적으로 완료되었습니다."
 		);
 	}
 
