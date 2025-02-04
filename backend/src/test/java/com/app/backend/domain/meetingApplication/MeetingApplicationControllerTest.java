@@ -1,10 +1,10 @@
 package com.app.backend.domain.meetingApplication;
 
 import static org.mockito.BDDMockito.*;
+
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,6 +13,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -21,6 +22,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import com.app.backend.domain.group.entity.Group;
 import com.app.backend.domain.group.entity.RecruitStatus;
+import com.app.backend.domain.group.repository.GroupMembershipRepository;
 import com.app.backend.domain.group.repository.GroupRepository;
 import com.app.backend.domain.meetingApplication.dto.MeetingApplicationReqBody;
 import com.app.backend.domain.meetingApplication.entity.MeetingApplication;
@@ -44,6 +46,9 @@ public class MeetingApplicationControllerTest {
 	@Autowired
 	private MemberRepository memberRepository; // 추가
 
+	@Autowired
+	private GroupMembershipRepository groupMembershipRepository;
+
 	@MockitoBean
 	private MeetingApplicationService meetingApplicationService;
 
@@ -54,7 +59,7 @@ public class MeetingApplicationControllerTest {
 	private Member member;
 
 	@BeforeEach
-	void setUp() {
+	void setup() {
 		group = groupRepository.save(Group.builder()
 			.name("test group")
 			.province("test province")
@@ -62,15 +67,18 @@ public class MeetingApplicationControllerTest {
 			.town("test town")
 			.description("test description")
 			.recruitStatus(RecruitStatus.RECRUITING)
-			.maxRecruitCount(10)
+			.maxRecruitCount(1)
 			.build());
 
-		member = memberRepository.save(Member.builder()
+		member = Member.builder()
 			.username("testUser")
-			.nickname("test_nickname")
+			.nickname("testNickname")
 			.role("USER")
 			.disabled(false)
-			.build());
+			.build();
+
+		groupRepository.save(group);
+		memberRepository.save(member);
 	}
 
 	@Test
@@ -108,4 +116,11 @@ public class MeetingApplicationControllerTest {
 		verify(meetingApplicationService, times(1)).create(group.getId(), request, member.getId());
 
 	}
+
+	@Test
+	@DisplayName("신청 폼 제출 - 그룹 정원 초과 시 예외 처리")
+	void t2() throws Exception {
+
+	}
+
 }
