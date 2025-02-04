@@ -122,6 +122,7 @@ public class CommentControllerTest {
 		resultActions
 			.andExpect(handler().handlerType(CommentController.class))
 			.andExpect(handler().methodName("createComment"))
+			.andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.isSuccess").value(false))
 			.andExpect(jsonPath("$.code").value("CM004"))
 			.andExpect(jsonPath("$.message").value("댓글 내용이 유효하지 않습니다"));
@@ -278,6 +279,7 @@ public class CommentControllerTest {
 		resultActions
 			.andExpect(handler().handlerType(CommentController.class))
 			.andExpect(handler().methodName("updateComment"))
+			.andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.isSuccess").value(false))
 			.andExpect(jsonPath("$.code").value("CM004"))
 			.andExpect(jsonPath("$.message").value("댓글 내용이 유효하지 않습니다"));
