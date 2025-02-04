@@ -37,11 +37,11 @@ public class MeetingApplicationController {
 		MeetingApplicationDto meetingApplicationDto = MeetingApplicationDto.from(meetingApplication);
 
 		return ApiResponse.of(
-				true,
-				"201",
-				"%d번 모임에 성공적으로 가입 신청을 하셨습니다.".formatted(meetingApplication.getGroup().getId()),
-				meetingApplicationDto
-			);
+			true,
+			"201",
+			"%d번 모임에 성공적으로 가입 신청을 하셨습니다.".formatted(meetingApplication.getGroup().getId()),
+			meetingApplicationDto
+		);
 	}
 }
 

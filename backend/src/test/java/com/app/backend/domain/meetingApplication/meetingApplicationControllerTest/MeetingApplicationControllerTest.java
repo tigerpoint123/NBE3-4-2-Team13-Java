@@ -131,7 +131,6 @@ public class MeetingApplicationControllerTest {
 			.groupRole(GroupRole.LEADER)
 			.build());
 
-		// 새로운 신청 요청
 		Member newMember = Member.builder()
 			.username("newUser")
 			.nickname("newNickname")
@@ -142,23 +141,21 @@ public class MeetingApplicationControllerTest {
 
 		MeetingApplicationReqBody request = new MeetingApplicationReqBody("Test Application");
 
-		// 예외를 던지도록 설정
 		given(meetingApplicationService.create(group.getId(), request, newMember.getId()))
 			.willThrow(new MeetingApplicationException(MeetingApplicationErrorCode.GROUP_MEMBER_LIMIT_EXCEEDED));
 
-		// MockUser 설정
 		MemberDetails mockUser = new MemberDetails(newMember);
 
 		// When & Then
 		mvc.perform(MockMvcRequestBuilders.post("/api/v1/groups/{groupId}", group.getId())
-				.with(user(mockUser))  // MockUser를 사용하여 로그인된 상태 시뮬레이션
+				.with(user(mockUser))
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(request)) // 요청 본문
+				.content(objectMapper.writeValueAsString(request))
 				.header("Authorization", "Bearer testToken"))
-			.andExpect(status().isConflict())  // 예외 처리에 의한 409 상태 코드 확인
+			.andExpect(status().isConflict())
 			.andExpect(result -> {
 				String responseContent = result.getResponse().getContentAsString();
-				assert(responseContent.contains("그룹 정원이 초과되었습니다."));  // 예외 메시지 확인
+				assert(responseContent.contains("그룹 정원이 초과되었습니다."));
 			});
 	}
 
