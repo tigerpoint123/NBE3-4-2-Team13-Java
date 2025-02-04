@@ -13,10 +13,10 @@ public class CommonUtil {
 	public void setCookies(Cookie accessTokenCookie, Cookie refreshTokenCookie, HttpServletResponse response) throws
 		IOException {
 		// 보안 설정
-		accessTokenCookie.setHttpOnly(false);
+		accessTokenCookie.setHttpOnly(true);
 		accessTokenCookie.setSecure(true);
 		accessTokenCookie.setPath("/");
-		accessTokenCookie.setDomain("localhost");
+		accessTokenCookie.setDomain("localhost:3000");
 		accessTokenCookie.setMaxAge(1800); // 30분
 
 		String cookieHeader = String.format("%s; SameSite=Lax", accessTokenCookie.toString());
