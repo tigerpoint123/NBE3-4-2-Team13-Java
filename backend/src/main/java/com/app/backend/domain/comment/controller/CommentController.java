@@ -3,6 +3,7 @@ package com.app.backend.domain.comment.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -54,6 +55,22 @@ public class CommentController {
 			true,
 			"204",
 			"%d번 댓글이 삭제되었습니다.".formatted(commentId)
+		);
+	}
+
+	//댓글 수정
+	@PatchMapping("/{id}")
+	public ApiResponse<CommentResponse> updateComment(@PathVariable(name = "id") Long commentId,
+		@RequestBody CommentCreateRequest req,
+		@AuthenticationPrincipal MemberDetails memberDetails){
+
+		CommentResponse response = commentService.updateComment(commentId, memberDetails.getId(),req);
+
+		return ApiResponse.of(
+			true,
+			"200",
+			"%d번 댓글이 수정되었습니다.".formatted(response.getId()),
+			response
 		);
 	}
 }

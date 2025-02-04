@@ -74,4 +74,29 @@ public class CommentService {
 
 		comment.delete();
 	}
+
+	// 댓글 수정
+	@Transactional
+	public CommentResponse updateComment(Long commentId, Long memberId, CommentCreateRequest req) {
+
+
+		Comment comment = commentRepository.findByIdAndDisabled(commentId, false)
+			.orElseThrow(() -> new CommentException(CommentErrorCode.COMMENT_NOT_FOUND));
+
+		//댓글 내용이 없으면 실패
+		if(req.getContent() == null || req.getContent().trim().isEmpty()) {
+			throw new CommentException(CommentErrorCode.COMMENT_INVALID_CONTENT);
+		}
+
+		// 댓글 작성자만 수정 가능
+		if (!comment.getMember().getId().equals(memberId)) {
+			throw new CommentException(CommentErrorCode.COMMENT_ACCESS_DENIED);
+		}
+
+		comment.update(req.getContent());
+
+		return CommentResponse.from(comment);
+
+
+	}
 }
