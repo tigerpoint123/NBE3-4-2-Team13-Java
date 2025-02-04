@@ -24,7 +24,6 @@ import com.app.backend.domain.member.dto.request.MemberModifyRequestDto;
 import com.app.backend.domain.member.entity.Member;
 import com.app.backend.domain.member.jwt.JwtProvider;
 import com.app.backend.domain.member.repository.MemberRepository;
-import com.app.backend.global.config.TestConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.transaction.Transactional;

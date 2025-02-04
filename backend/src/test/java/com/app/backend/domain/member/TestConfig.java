@@ -1,4 +1,4 @@
-package com.app.backend.global.config;
+package com.app.backend.domain.member;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
