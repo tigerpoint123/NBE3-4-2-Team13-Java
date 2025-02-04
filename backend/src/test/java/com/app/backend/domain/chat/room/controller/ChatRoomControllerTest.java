@@ -58,21 +58,21 @@ class ChatRoomControllerTest {
 		testDataUtil.saveGroupMembership(groupMembership2.modifyStatus(MembershipStatus.APPROVED));
 
 		// 채팅방 생성 및 그룹에 연결
-		ChatRoom chatRoom1 = testDataUtil.createAndSaveChatRoom(group1);
-		group1.setChatRoom(chatRoom1);
+		ChatRoom chatRoom = testDataUtil.createAndSaveChatRoom(group1);
+		group1.setChatRoom(chatRoom);
 
 		// 권한 처리
 		testDataUtil.setAuthentication(savedMember);
 
 		// when
-		ResultActions resultActions = mockMvc.perform(get("/api/v1/chatrooms/1"));
+		ResultActions resultActions = mockMvc.perform(get("/api/v1/chatrooms/{chatRoomId}", chatRoom.getId()));
 
 		// then
 		resultActions.andExpect(status().isOk())
 			.andExpect(jsonPath("$.isSuccess").value(true))
 			.andExpect(jsonPath("$.code").value("200"))
 			.andExpect(jsonPath("$.message").value("채팅방 상세 조회 성공"))
-			.andExpect(jsonPath("$.data.chatRoomId").value(1))
+			.andExpect(jsonPath("$.data.chatRoomId").value(chatRoom.getId()))
 			.andExpect(jsonPath("$.data.group.groupId").value(group1.getId()))
 			.andExpect(jsonPath("$.data.group.groupName").value("대구fc 팬 모임1"))
 			.andExpect(jsonPath("$.data.group.participantCount").value(2))

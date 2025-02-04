@@ -77,11 +77,11 @@ class ChatRoomMemberControllerTest {
 			.andExpect(jsonPath("$.message").value("채팅방 목록 조회 성공"))
 			.andExpect(jsonPath("$.data").isArray())
 			.andExpect(jsonPath("$.data.length()").value(2)) // 두 개의 채팅방
-			.andExpect(jsonPath("$.data[0].chatRoomId").value(1))
-			.andExpect(jsonPath("$.data[0].groupId").value(1))
+			.andExpect(jsonPath("$.data[0].chatRoomId").value(chatRoom1.getId()))
+			.andExpect(jsonPath("$.data[0].groupId").value(group1.getId()))
 			.andExpect(jsonPath("$.data[0].groupName").value("대구fc 팬 모임1"))
-			.andExpect(jsonPath("$.data[1].chatRoomId").value(2))
-			.andExpect(jsonPath("$.data[1].groupId").value(2))
+			.andExpect(jsonPath("$.data[1].chatRoomId").value(chatRoom2.getId()))
+			.andExpect(jsonPath("$.data[1].groupId").value(group2.getId()))
 			.andExpect(jsonPath("$.data[1].groupName").value("대구fc 팬 모임2"));;
 	}
 }
