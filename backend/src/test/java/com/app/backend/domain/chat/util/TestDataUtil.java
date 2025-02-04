@@ -81,19 +81,4 @@ public class TestDataUtil {
 		SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
 			memberDetails, null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))));
 	}
-
-	public void createAndSaveMessage(Long chatRoomId, Long senderId, String senderNickname, String content) {
-		Message message = Message.builder()
-			.chatRoomId(chatRoomId)
-			.senderId(senderId)
-			.senderNickname(senderNickname)
-			.content(content)
-			.disabled(false)
-			.build();
-		messageRepository.save(message);
-	}
-
-	public void deleteAllMessages() {
-		messageRepository.deleteAll();
-	}
 }

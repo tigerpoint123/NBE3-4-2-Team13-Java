@@ -14,6 +14,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import com.app.backend.domain.chat.message.entity.Message;
+import com.app.backend.domain.chat.message.repository.MessageRepository;
 import com.app.backend.domain.chat.room.entity.ChatRoom;
 import com.app.backend.domain.chat.util.TestDataUtil;
 import com.app.backend.domain.group.entity.Group;
@@ -32,6 +34,9 @@ class MessageControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
+
+	@Autowired
+	private MessageRepository messageRepository;
 
 	@Autowired
 	private TestDataUtil testDataUtil;
@@ -79,14 +84,14 @@ class MessageControllerTest {
 			Long senderId = (i % 2 == 0) ? savedMember.getId() : savedMember2.getId(); // 번갈아가며 보낸 사람 설정
 			String senderNickname = (i % 2 == 0) ? savedMember.getNickname() : savedMember2.getNickname(); // 닉네임 설정
 
-			testDataUtil.createAndSaveMessage(chatRoom.getId(), senderId, senderNickname, messageContent);
+			createAndSaveMessage(chatRoom.getId(), senderId, senderNickname, messageContent);
 		}
 	}
 
 	@AfterEach
 	void tearDown() {
 		// 테스트 후 데이터 삭제
-		testDataUtil.deleteAllMessages();
+		deleteAllMessages();
 	}
 
 	@Test
@@ -107,5 +112,20 @@ class MessageControllerTest {
 			.andExpect(jsonPath("$.code").value("200"))
 			.andExpect(jsonPath("$.message").value("메세지 조회 성공"))
 			.andExpect(jsonPath("$.data.content.length()").value(20));
+	}
+
+	public void createAndSaveMessage(Long chatRoomId, Long senderId, String senderNickname, String content) {
+		Message message = Message.builder()
+			.chatRoomId(chatRoomId)
+			.senderId(senderId)
+			.senderNickname(senderNickname)
+			.content(content)
+			.disabled(false)
+			.build();
+		messageRepository.save(message);
+	}
+
+	public void deleteAllMessages() {
+		messageRepository.deleteAll();
 	}
 }
