@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.app.backend.domain.chat.room.entity.ChatRoom;
 import com.app.backend.domain.chat.util.TestDataUtil;
 import com.app.backend.domain.group.entity.Group;
-import com.app.backend.domain.group.entity.GroupMembership;
 import com.app.backend.domain.group.entity.GroupRole;
 import com.app.backend.domain.member.entity.Member;
 
