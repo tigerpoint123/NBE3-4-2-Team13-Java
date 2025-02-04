@@ -218,6 +218,141 @@ public class CommentControllerTest {
 
 	}
 
+	@Test
+	@DisplayName("댓글 수정")
+	void updateComment() throws Exception {
+
+		Comment testComment = Comment.builder()
+			.content("test")
+			.post(testPost)
+			.member(testMember)
+			.build();
+		testComment = commentRepository.save(testComment);
+
+		ResultActions resultActions = mvc
+			.perform(
+				patch("/api/v1/comment/" + testComment.getId())
+					.content("""
+						{
+							"content": "수정 댓글"
+						}
+						""")
+					.contentType(MediaType.APPLICATION_JSON)
+					.with(user(memberDetails))
+			)
+			.andDo(print());
+
+		resultActions
+			.andExpect(handler().handlerType(CommentController.class))
+			.andExpect(handler().methodName("updateComment"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.isSuccess").value(true))
+			.andExpect(jsonPath("$.code").value("200"))
+			.andExpect(jsonPath("$.message").exists());
+	}
+
+	@Test
+	@DisplayName("댓글 수정 실패 (내용 공백)")
+	void updateComment2() throws Exception {
+
+		Comment testComment = Comment.builder()
+			.content("test")
+			.post(testPost)
+			.member(testMember)
+			.build();
+		testComment = commentRepository.save(testComment);
+
+		ResultActions resultActions = mvc
+			.perform(
+				patch("/api/v1/comment/" + testComment.getId())
+					.content("""
+						{
+							"content": ""
+						}
+						""")
+					.contentType(MediaType.APPLICATION_JSON)
+					.with(user(memberDetails))
+			)
+			.andDo(print());
+
+		resultActions
+			.andExpect(handler().handlerType(CommentController.class))
+			.andExpect(handler().methodName("updateComment"))
+			.andExpect(jsonPath("$.isSuccess").value(false))
+			.andExpect(jsonPath("$.code").value("CM004"))
+			.andExpect(jsonPath("$.message").value("댓글 내용이 유효하지 않습니다"));
+	}
+
+	@Test
+	@DisplayName("댓글 수정 실패 (존재하지 않는 댓글)")
+	void updateComment3() throws Exception {
+
+		ResultActions resultActions = mvc
+			.perform(
+				patch("/api/v1/comment/10000")
+					.content("""
+						{
+							"content": "수정 댓글"
+						}
+						""")
+					.contentType(MediaType.APPLICATION_JSON)
+					.with(user(memberDetails))
+			)
+			.andDo(print());
+
+		resultActions
+			.andExpect(handler().handlerType(CommentController.class))
+			.andExpect(handler().methodName("updateComment"))
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.isSuccess").value(false))
+			.andExpect(jsonPath("$.code").value("CM001"))
+			.andExpect(jsonPath("$.message").value("댓글을 찾을 수 없습니다"));
+	}
+
+	@Test
+	@DisplayName("댓글 수정 실패 (작성자만 수정 가능)")
+	void updateComment4() throws Exception {
+
+		Comment testComment = Comment.builder()
+			.content("test")
+			.post(testPost)
+			.member(testMember)
+			.build();
+		testComment = commentRepository.save(testComment);
+
+		// 다른 사용자 생성
+		Member Member2 = Member.builder()
+			.username("other")
+			.password("password")
+			.nickname("다른사용자")
+			.role("USER")
+			.build();
+
+		memberRepository.save(Member2);
+		MemberDetails otherMemberDetails = new MemberDetails(Member2);
+
+		ResultActions resultActions = mvc
+			.perform(
+				patch("/api/v1/comment/" + testComment.getId())
+					.content("""
+						{
+							"content": "수정 댓글"
+						}
+						""")
+					.contentType(MediaType.APPLICATION_JSON)
+					.with(user(otherMemberDetails))
+			)
+			.andDo(print());
+
+		resultActions
+			.andExpect(handler().handlerType(CommentController.class))
+			.andExpect(handler().methodName("updateComment"))
+			.andExpect(status().isForbidden())
+			.andExpect(jsonPath("$.isSuccess").value(false))
+			.andExpect(jsonPath("$.code").value("CM003"))
+			.andExpect(jsonPath("$.message").value("댓글에 대한 권한이 없습니다"));
+	}
+
 
 }
 
