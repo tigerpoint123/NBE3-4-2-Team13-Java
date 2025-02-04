@@ -16,7 +16,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.app.backend.domain.chat.message.dto.response.MessageResponse;
-import com.app.backend.domain.chat.message.entity.Message;
 import com.app.backend.domain.chat.message.repository.MessageRepository;
 import com.app.backend.domain.chat.message.service.MessageService;
 import com.app.backend.domain.chat.room.entity.ChatRoom;
@@ -37,9 +36,6 @@ class MessageControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
-
-	@Autowired
-	private MessageRepository messageRepository;
 
 	@Autowired
 	private MessageService messageService;
@@ -111,9 +107,6 @@ class MessageControllerTest {
 		ResultActions resultActions = mockMvc.perform(get("/api/v1/chatrooms/{chatRoomId}/messages", chatRoomId)
 			.param("page", String.valueOf(page))
 			.param("size", String.valueOf(size)));
-
-		Page<MessageResponse> messages = messageService.getMessagesByChatRoomId(chatRoomId, 0, 20);
-		System.out.println("messages.getContent().size() = " + messages.getContent().size());
 
 		// then
 		resultActions.andExpect(status().isOk())
