@@ -47,16 +47,33 @@ public class MeetingApplicationController {
 	}
 
 	@GetMapping("/{groupId}/meeting_application")
-	public ApiResponse<MeetingApplicationListDto> getMeetingApplication(
-		@PathVariable Long groupId
+	public ApiResponse<MeetingApplicationListDto> getMeetingApplications(
+		@PathVariable Long groupId,
+		@AuthenticationPrincipal MemberDetails memberDetails
 	) {
-		MeetingApplicationListDto applications = meetingApplicationService.getMeetingApplications(groupId);
+		MeetingApplicationListDto applications = meetingApplicationService.getMeetingApplications(groupId, memberDetails.getId());
 
 		return ApiResponse.of(
 			true,
 			HttpStatus.OK,
 			"meeting application 조회 성공",
 			applications
+		);
+	}
+
+	@GetMapping("/{groupId}/meeting_application/{meetingApplicationId}")
+	public ApiResponse<MeetingApplicationDto> getMeetingApplication(
+		@PathVariable Long groupId,
+		@PathVariable Long meetingApplicationId,
+		@AuthenticationPrincipal MemberDetails memberDetails
+	) {
+		MeetingApplicationDto meetingApplication = meetingApplicationService.getMeetingApplication(groupId, meetingApplicationId, memberDetails.getId());
+
+		return ApiResponse.of(
+			true,
+			HttpStatus.OK,
+			"meeting application 상세 조회 성공",
+			meetingApplication
 		);
 	}
 }

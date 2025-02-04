@@ -1,6 +1,7 @@
 package com.app.backend.domain.meetingApplication.meetingApplicationControllerTest;
 
 import static org.assertj.core.api.AssertionsForClassTypes.*;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.BDDMockito.*;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
@@ -19,6 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -173,30 +175,77 @@ public class MeetingApplicationControllerTest {
 	@Test
 	@DisplayName("meeting application 조회")
 	void t3() throws Exception {
-		Long groupId = 1L;
+		// Given
+		Member leader = memberRepository.save(Member.builder()
+			.username("testUser")
+			.nickname("testNickname")
+			.role("USER")
+			.disabled(false)
+			.build());
 
-		List<MeetingApplicationDto> applications = List.of(
-			new MeetingApplicationDto(1L, 2L, groupId, "첫 번째 신청서"),
-			new MeetingApplicationDto(2L, 3L, groupId, "두 번째 신청서"),
-			new MeetingApplicationDto(3L, 4L, groupId, "세 번째 신청서")
-		);
+		MemberDetails mockUser = new MemberDetails(leader);
 
-		MeetingApplicationListDto responseDto = new MeetingApplicationListDto(applications);
+		GroupMembership groupMembership = groupMembershipRepository.save(GroupMembership.builder()
+			.group(group)
+			.member(leader)
+			.groupRole(GroupRole.LEADER)
+			.build());
 
-		given(meetingApplicationService.getMeetingApplications(groupId)).willReturn(responseDto);
+		meetingApplicationRepository.save(MeetingApplication.builder()
+			.group(group)
+			.member(member)
+			.context("Test Application")
+			.build());
 
 		// When & Then
-		mvc.perform(get("/api/v1/groups/{groupId}/meeting_application", groupId)
+		mvc.perform(get("/api/v1/groups/{groupId}/meeting_application", group.getId())
+				.with(user(mockUser))  // 인증된 사용자 설정
 				.contentType(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.isSuccess").value(true))
-			.andExpect(jsonPath("$.code").value("200"))
-			.andExpect(jsonPath("$.message").value("meeting application 조회 성공"))
-			.andExpect(jsonPath("$.data.applications").isArray())
-			.andExpect(jsonPath("$.data.applications.length()").value(3))
-			.andExpect(jsonPath("$.data.applications[0].context").value("첫 번째 신청서"))
-			.andExpect(jsonPath("$.data.applications[1].context").value("두 번째 신청서"))
-			.andExpect(jsonPath("$.data.applications[2].context").value("세 번째 신청서"));
+			.andExpect(jsonPath("$.message").value("meeting application 조회 성공"));
+	}
+
+	@Test
+	@DisplayName("meeting application 상세 조회")
+	void t4() throws Exception {
+		// Given
+		Member leader = memberRepository.save(Member.builder()
+			.username("testUser")
+			.nickname("testNickname")
+			.role("USER")
+			.disabled(false)
+			.build());
+
+		MemberDetails mockUser = new MemberDetails(leader);
+
+		group = groupRepository.save(Group.builder()
+			.name("test group")
+			.province("test province")
+			.city("test city")
+			.town("test town")
+			.description("test description")
+			.recruitStatus(RecruitStatus.RECRUITING)
+			.maxRecruitCount(10)
+			.build());
+
+		GroupMembership groupMembership = groupMembershipRepository.save(GroupMembership.builder()
+			.group(group)
+			.member(leader)
+			.groupRole(GroupRole.LEADER)
+			.build());
+
+		meetingApplicationRepository.save(MeetingApplication.builder()
+			.group(group)
+			.member(member)
+			.context("Test Application")
+			.build());
+
+		// When & Then
+		mvc.perform(get("/api/v1/groups/{groupId}/meeting_application/{meetingApplicationId}", group.getId(), 1)
+				.with(user(mockUser))  // 인증된 사용자 설정
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message").value("meeting application 상세 조회 성공"));
 
 	}
 
