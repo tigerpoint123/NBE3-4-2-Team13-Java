@@ -1,10 +1,15 @@
 package com.app.backend.domain.meetingApplication.meetingApplicationControllerTest;
 
+import static org.assertj.core.api.AssertionsForClassTypes.*;
 import static org.mockito.BDDMockito.*;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,10 +31,13 @@ import com.app.backend.domain.group.entity.GroupRole;
 import com.app.backend.domain.group.entity.RecruitStatus;
 import com.app.backend.domain.group.repository.GroupMembershipRepository;
 import com.app.backend.domain.group.repository.GroupRepository;
+import com.app.backend.domain.meetingApplication.dto.MeetingApplicationDto;
+import com.app.backend.domain.meetingApplication.dto.MeetingApplicationListDto;
 import com.app.backend.domain.meetingApplication.dto.MeetingApplicationReqBody;
 import com.app.backend.domain.meetingApplication.entity.MeetingApplication;
 import com.app.backend.domain.meetingApplication.exception.MeetingApplicationErrorCode;
 import com.app.backend.domain.meetingApplication.exception.MeetingApplicationException;
+import com.app.backend.domain.meetingApplication.repository.MeetingApplicationRepository;
 import com.app.backend.domain.meetingApplication.service.MeetingApplicationService;
 import com.app.backend.domain.member.entity.Member;
 import com.app.backend.domain.member.entity.MemberDetails;
@@ -52,6 +60,9 @@ public class MeetingApplicationControllerTest {
 
 	@Autowired
 	private GroupMembershipRepository groupMembershipRepository;
+
+	@Autowired
+	private MeetingApplicationRepository meetingApplicationRepository;
 
 	@MockitoBean
 	private MeetingApplicationService meetingApplicationService;
@@ -159,6 +170,34 @@ public class MeetingApplicationControllerTest {
 			});
 	}
 
+	@Test
+	@DisplayName("meeting application 조회")
+	void t3() throws Exception {
+		Long groupId = 1L;
 
+		List<MeetingApplicationDto> applications = List.of(
+			new MeetingApplicationDto(1L, 2L, groupId, "첫 번째 신청서"),
+			new MeetingApplicationDto(2L, 3L, groupId, "두 번째 신청서"),
+			new MeetingApplicationDto(3L, 4L, groupId, "세 번째 신청서")
+		);
+
+		MeetingApplicationListDto responseDto = new MeetingApplicationListDto(applications);
+
+		given(meetingApplicationService.getMeetingApplications(groupId)).willReturn(responseDto);
+
+		// When & Then
+		mvc.perform(get("/api/v1/groups/{groupId}/meeting_application", groupId)
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.isSuccess").value(true))
+			.andExpect(jsonPath("$.code").value("200"))
+			.andExpect(jsonPath("$.message").value("meeting application 조회 성공"))
+			.andExpect(jsonPath("$.data.applications").isArray())
+			.andExpect(jsonPath("$.data.applications.length()").value(3))
+			.andExpect(jsonPath("$.data.applications[0].context").value("첫 번째 신청서"))
+			.andExpect(jsonPath("$.data.applications[1].context").value("두 번째 신청서"))
+			.andExpect(jsonPath("$.data.applications[2].context").value("세 번째 신청서"));
+
+	}
 
 }
