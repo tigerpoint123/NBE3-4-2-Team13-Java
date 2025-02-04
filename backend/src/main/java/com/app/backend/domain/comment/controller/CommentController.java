@@ -1,8 +1,13 @@
 package com.app.backend.domain.comment.controller;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -70,6 +75,22 @@ public class CommentController {
 			true,
 			HttpStatus.OK,
 			"%d번 댓글이 수정되었습니다.".formatted(commentId),
+			response
+		);
+	}
+
+	//게시물에 대한 댓글 조회 페이징
+	@GetMapping("/{id}")
+	public ApiResponse<Page<CommentResponse>> getComments(
+		@PathVariable(name = "id") Long postId,
+		@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+	) {
+		Page<CommentResponse> response = commentService.getComments(postId, pageable);
+
+		return ApiResponse.of(
+			true,
+			HttpStatus.OK,
+			"댓글이 조회되었습니다.",
 			response
 		);
 	}

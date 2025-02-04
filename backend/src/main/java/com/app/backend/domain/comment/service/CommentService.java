@@ -1,5 +1,7 @@
 package com.app.backend.domain.comment.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -98,5 +100,16 @@ public class CommentService {
 		return CommentResponse.from(comment);
 
 
+	}
+
+	public Page<CommentResponse> getComments(Long postId, Pageable pageable) {
+
+		Post post = postRepository.findByIdAndDisabled(postId, false)
+			.orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
+
+		Page<Comment> comments = commentRepository.findByPostAndDisabled(post, false, pageable);
+
+
+		return comments.map(CommentResponse::from);
 	}
 }

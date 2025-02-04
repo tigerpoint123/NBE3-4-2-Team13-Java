@@ -12,8 +12,9 @@ import lombok.Getter;
 public class CommentResponse {
 	private Long id;
 	private String content;
-	private Long postId; // 게시글 번호
-	private Long memberId; // 회원 번호
+	private Long postId;
+	private Long memberId;
+	private String nickname;
 	private LocalDateTime createdAt;
 	private LocalDateTime modifiedAt;
 
@@ -24,6 +25,7 @@ public class CommentResponse {
 			.content(comment.getContent())
 			.postId(comment.getPost().getId())
 			.memberId(comment.getMember().getId())
+			.nickname(comment.getMember().getNickname())
 			.createdAt(comment.getCreatedAt())
 			.modifiedAt(comment.getModifiedAt())
 			.build();
