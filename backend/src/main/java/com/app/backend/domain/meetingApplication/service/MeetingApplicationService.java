@@ -1,5 +1,8 @@
 package com.app.backend.domain.meetingApplication.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -7,6 +10,8 @@ import com.app.backend.domain.group.entity.Group;
 import com.app.backend.domain.group.entity.MembershipStatus;
 import com.app.backend.domain.group.repository.GroupMembershipRepository;
 import com.app.backend.domain.group.repository.GroupRepository;
+import com.app.backend.domain.meetingApplication.dto.MeetingApplicationDto;
+import com.app.backend.domain.meetingApplication.dto.MeetingApplicationListDto;
 import com.app.backend.domain.meetingApplication.dto.MeetingApplicationReqBody;
 import com.app.backend.domain.meetingApplication.entity.MeetingApplication;
 import com.app.backend.domain.meetingApplication.exception.MeetingApplicationErrorCode;
@@ -47,5 +52,14 @@ public class MeetingApplicationService {
 			.build();
 
 		return meetingApplicationRepository.save(meetingApplication);
+	}
+
+	public MeetingApplicationListDto getMeetingApplications(Long groupId) {
+		List<MeetingApplicationDto> applications = meetingApplicationRepository.findByGroupIdAndDisabled(groupId, false)
+			.stream()
+			.map(MeetingApplicationDto::from)  // 엔티티 -> DTO 변환
+			.collect(Collectors.toList());
+
+		return new MeetingApplicationListDto(applications);
 	}
 }

@@ -2,6 +2,7 @@ package com.app.backend.domain.meetingApplication.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.app.backend.domain.meetingApplication.dto.MeetingApplicationDto;
+import com.app.backend.domain.meetingApplication.dto.MeetingApplicationListDto;
 import com.app.backend.domain.meetingApplication.dto.MeetingApplicationReqBody;
 import com.app.backend.domain.meetingApplication.entity.MeetingApplication;
 import com.app.backend.domain.meetingApplication.service.MeetingApplicationService;
@@ -41,6 +43,20 @@ public class MeetingApplicationController {
 			"201",
 			"%d번 모임에 성공적으로 가입 신청을 하셨습니다.".formatted(meetingApplication.getGroup().getId()),
 			meetingApplicationDto
+		);
+	}
+
+	@GetMapping("/{groupId}/meeting_application")
+	public ApiResponse<MeetingApplicationListDto> getMeetingApplication(
+		@PathVariable Long groupId
+	) {
+		MeetingApplicationListDto applications = meetingApplicationService.getMeetingApplications(groupId);
+
+		return ApiResponse.of(
+			true,
+			HttpStatus.OK,
+			"meeting application 조회 성공",
+			applications
 		);
 	}
 }
