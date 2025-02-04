@@ -104,7 +104,6 @@ public class MemberControllerTest {
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request)))
 			.andExpect(status().isOk())  // HTTP 상태코드 검증
-			.andExpect(cookie().exists("accessToken"))    // 쿠키 존재 검증
 			.andExpect(cookie().exists("refreshToken"))   // 쿠키 존재 검증
 			.andDo(print());  // 결과 출력
 

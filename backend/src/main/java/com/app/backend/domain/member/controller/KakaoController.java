@@ -1,14 +1,11 @@
 package com.app.backend.domain.member.controller;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
-import javax.security.sasl.AuthenticationException;
-
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.Mapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -48,12 +45,13 @@ public class KakaoController {
 		@RequestParam("code") String code, HttpServletResponse response
 	) throws IOException {
 		TokenDto tokenDto = kakaoAuthService.kakaoLogin(code);
-		// 쿠키에 토큰 저장
-		Cookie accessTokenCookie = new Cookie("accessToken", tokenDto.accessToken());
+		// refreshToken만 쿠키에 저장
 		Cookie refreshTokenCookie = new Cookie("refreshToken", tokenDto.refreshToken());
+		// Access Token은 응답 본문에 포함
+		Map<String, String> responseBody = new HashMap<>();
+		responseBody.put("accessToken", tokenDto.accessToken());
+		util.setCookies(refreshTokenCookie, response);
 
-		util.setCookies(accessTokenCookie, refreshTokenCookie, response);
-
-		return ResponseEntity.status(HttpStatus.OK).body(null);
+		return ResponseEntity.ok(responseBody);
 	}
 }
