@@ -58,7 +58,6 @@ public class KakaoAuthService {
 		String accessToken = jwtProvider.generateAccessToken(member);
 		String refreshToken = jwtProvider.generateRefreshToken();
 		
-		member.updateRefreshToken(refreshToken);
 		memberRepository.save(member);
 
 		return new TokenDto(accessToken, refreshToken);

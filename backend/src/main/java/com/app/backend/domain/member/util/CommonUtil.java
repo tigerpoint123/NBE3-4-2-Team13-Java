@@ -25,25 +25,16 @@ public class CommonUtil {
 
 	public void invalidateCookies(HttpServletResponse response) {
 		// 기존 쿠키 무효화
-		Cookie accessTokenCookie = new Cookie("accessToken", null);
 		Cookie refreshTokenCookie = new Cookie("refreshToken", null);
 
 		// 쿠키 설정
-		accessTokenCookie.setHttpOnly(false);
-		accessTokenCookie.setSecure(true);
-		accessTokenCookie.setPath("/");
-		accessTokenCookie.setMaxAge(0);  // 즉시 만료
-
 		refreshTokenCookie.setHttpOnly(true);
 		refreshTokenCookie.setSecure(true);
 		refreshTokenCookie.setPath("/");
 		refreshTokenCookie.setMaxAge(0);  // 즉시 만료
 
 		// SameSite 설정
-		String accessTokenCookieHeader = String.format("%s; SameSite=Lax", accessTokenCookie.toString());
 		String refreshTokenCookieHeader = String.format("%s; SameSite=Lax", refreshTokenCookie.toString());
-
-		response.setHeader("Set-Cookie", accessTokenCookieHeader);
 		response.addHeader("Set-Cookie", refreshTokenCookieHeader);
 	}
 }

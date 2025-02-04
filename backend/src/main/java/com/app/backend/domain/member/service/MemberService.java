@@ -71,7 +71,6 @@ public class MemberService {
 		String accessToken = jwtProvider.generateAccessToken(member);
 		String refreshToken = jwtProvider.generateRefreshToken();
 
-		member.updateRefreshToken(refreshToken);
 		memberRepository.save(member);
 
 		// 응답
@@ -82,7 +81,6 @@ public class MemberService {
 	public void logout(String token) {
 		try {
 			Member member = getCurrentMember(token);
-			member.updateRefreshToken(null);
 			memberRepository.save(member);
 		} catch (Exception e) {
 			throw new MemberException(MemberErrorCode.MEMBER_FAILED_LOGOUT);
