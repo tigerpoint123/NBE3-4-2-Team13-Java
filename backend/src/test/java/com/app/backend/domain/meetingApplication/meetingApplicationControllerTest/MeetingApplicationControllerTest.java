@@ -130,13 +130,26 @@ public class MeetingApplicationControllerTest {
 	@Test
 	@DisplayName("신청 폼 제출 - 그룹 정원 초과 시 예외 처리")
 	void t2() throws Exception {
-		// Given
+		// Given: 그룹의 정원을 1명으로 설정
+		Group oneMemberGroup = Group.builder()
+			.name("test group")
+			.province("test province")
+			.city("test city")
+			.town("test town")
+			.description("test description")
+			.recruitStatus(RecruitStatus.RECRUITING)
+			.maxRecruitCount(1)
+			.build();
+		groupRepository.save(oneMemberGroup);  // 그룹 저장
+
+		// 그룹에 첫 번째 멤버를 추가
 		groupMembershipRepository.save(GroupMembership.builder()
-			.group(group)
+			.group(oneMemberGroup)  // 정원 1명인 그룹에 멤버 추가
 			.member(member)
-			.groupRole(GroupRole.LEADER)
+			.groupRole(GroupRole.LEADER)  // 그룹 역할 LEADER로 설정
 			.build());
 
+		// 새로운 회원을 만들고 저장
 		Member newMember = Member.builder()
 			.username("newUser")
 			.nickname("newNickname")
@@ -145,20 +158,23 @@ public class MeetingApplicationControllerTest {
 			.build();
 		memberRepository.save(newMember);
 
+		// 신청 폼 데이터
 		MeetingApplicationReqBody request = new MeetingApplicationReqBody("Test Application");
 
-		given(meetingApplicationService.create(group.getId(), request, newMember.getId()))
+		// 정원 초과로 예외 발생
+		given(meetingApplicationService.create(oneMemberGroup.getId(), request, newMember.getId()))
 			.willThrow(new MeetingApplicationException(MeetingApplicationErrorCode.GROUP_MEMBER_LIMIT_EXCEEDED));
 
+		// 인증된 사용자 설정
 		MemberDetails mockUser = new MemberDetails(newMember);
 
 		// When & Then
-		mvc.perform(MockMvcRequestBuilders.post("/api/v1/groups/{groupId}", group.getId())
+		mvc.perform(MockMvcRequestBuilders.post("/api/v1/groups/{groupId}", oneMemberGroup.getId())
 				.with(user(mockUser))
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request))
 				.header("Authorization", "Bearer testToken"))
-			.andExpect(status().isConflict())
+			.andExpect(status().isConflict())  // 상태 코드 409 Conflict
 			.andExpect(result -> {
 				String responseContent = result.getResponse().getContentAsString();
 				assert(responseContent.contains("그룹 정원이 초과되었습니다."));
