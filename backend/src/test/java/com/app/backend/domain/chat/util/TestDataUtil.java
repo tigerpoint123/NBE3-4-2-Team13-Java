@@ -7,6 +7,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import com.app.backend.domain.category.entity.Category;
+import com.app.backend.domain.category.repository.CategoryRepository;
 import com.app.backend.domain.chat.room.entity.ChatRoom;
 import com.app.backend.domain.chat.room.repository.ChatRoomRepository;
 import com.app.backend.domain.group.entity.Group;
@@ -31,6 +33,7 @@ public class TestDataUtil {
 	private final GroupRepository groupRepository;
 	private final GroupMembershipRepository groupMembershipRepository;
 	private final ChatRoomRepository chatRoomRepository;
+	private final CategoryRepository categoryRepository;
 
 	public Member createAndSaveMember(String username, String nickname) {
 		Member member = Member.builder()
@@ -41,7 +44,15 @@ public class TestDataUtil {
 		return memberRepository.save(member);
 	}
 
-	public Group createAndSaveGroup(String name, String province, String city, String town, String description) {
+	public Category createAndSaveCategory(String categoryName) {
+		Category category = Category.builder()
+			.name(categoryName)
+			.build();
+		return categoryRepository.save(category);
+	}
+
+	public Group createAndSaveGroup(String name, String province, String city, String town, String description,
+		Category category) {
 		Group group = Group.builder()
 			.name(name)
 			.province(province)
@@ -50,6 +61,7 @@ public class TestDataUtil {
 			.description(description)
 			.recruitStatus(RecruitStatus.RECRUITING)
 			.maxRecruitCount(10)
+			.category(category)
 			.build();
 		return groupRepository.save(group);
 	}

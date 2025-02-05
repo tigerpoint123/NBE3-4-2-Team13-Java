@@ -12,6 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import com.app.backend.domain.category.entity.Category;
 import com.app.backend.domain.chat.room.entity.ChatRoom;
 import com.app.backend.domain.chat.util.TestDataUtil;
 import com.app.backend.domain.group.entity.Group;
@@ -43,13 +44,17 @@ class ChatRoomControllerTest {
 		Member savedMember = testDataUtil.createAndSaveMember("testUser", "testNickname");
 		Member savedMember2 = testDataUtil.createAndSaveMember("testUser2", "testNickname2");
 
+		// 카테고리 생성 & 저장
+		Category category = testDataUtil.createAndSaveCategory("테스트 카테고리");
+
 		// 그룹 생성 & 저장
 		Group group1 = testDataUtil.createAndSaveGroup(
 			"대구fc 팬 모임1",
 			"대구 광역시",
 			"북구",
 			"고성로 191",
-			"대팍 직관 같이가실분"
+			"대팍 직관 같이가실분",
+			category
 		);
 
 		// 그룹과 멤버십 관계 설정
