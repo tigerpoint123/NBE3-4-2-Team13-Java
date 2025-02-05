@@ -29,19 +29,39 @@ public class CommentService {
 	private final PostRepository postRepository;
 	private final MemberRepository memberRepository;
 
+	//댓글 조회
+	private Comment getCommentValidate(Long commentId){
+		return commentRepository.findByIdAndDisabled(commentId, false)
+			.orElseThrow(()-> new CommentException(CommentErrorCode.COMMENT_NOT_FOUND));
+	}
+
+	//게시물 조회
+	private Post getPostValidate(Long postId){
+		return postRepository.findByIdAndDisabled(postId, false)
+			.orElseThrow(()-> new PostException(PostErrorCode.POST_NOT_FOUND));
+	}
+
+	//댓글 작성자만 수정과 삭제 가능
+	private void validateAuthor(Comment comment, Long memberId) {
+		if (!comment.getMember().getId().equals(memberId)) {
+			throw new CommentException(CommentErrorCode.COMMENT_ACCESS_DENIED);
+		}
+	}
+
+	//댓글 내용이 없으면 댓글 작성 실패
+	private void validateCommentContent(String content) {
+		if (content == null || content.trim().isEmpty()) {
+			throw new CommentException(CommentErrorCode.COMMENT_INVALID_CONTENT);
+		}
+	}
+
 	// 댓글 작성
 	@Transactional
 	public CommentResponse createComment(Long postId, Long memberId, CommentCreateRequest req) {
 
-		//댓글 내용이 없으면 댓글 작성 실패
-		if (req.getContent() == null || req.getContent().trim().isEmpty()) {
-			throw new CommentException(CommentErrorCode.COMMENT_INVALID_CONTENT);
-		}
+		validateCommentContent(req.getContent());
 
-		//게시물 조회
-		Post post = postRepository.findByIdAndDisabled(postId, false)
-			.orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
-
+		Post post = getPostValidate(postId);
 
 		//사용자 조회
 		Member member = memberRepository.findByIdAndDisabled(memberId, false)
@@ -64,15 +84,9 @@ public class CommentService {
 	@Transactional
 	public void deleteComment(Long commentId, Long memberId) {
 
-		// 댓글 조회
-		Comment comment = commentRepository.findByIdAndDisabled(commentId, false)
-			.orElseThrow(() -> new CommentException(CommentErrorCode.COMMENT_NOT_FOUND));
+		Comment comment = getCommentValidate(commentId);
 
-
-		// 댓글 작성자만 삭제 가능
-		if (!comment.getMember().getId().equals(memberId)) {
-			throw new CommentException(CommentErrorCode.COMMENT_ACCESS_DENIED);
-		}
+		validateAuthor(comment, memberId);
 
 		comment.delete();
 	}
@@ -81,19 +95,11 @@ public class CommentService {
 	@Transactional
 	public CommentResponse updateComment(Long commentId, Long memberId, CommentCreateRequest req) {
 
+		Comment comment = getCommentValidate(commentId);
 
-		Comment comment = commentRepository.findByIdAndDisabled(commentId, false)
-			.orElseThrow(() -> new CommentException(CommentErrorCode.COMMENT_NOT_FOUND));
+		validateCommentContent(req.getContent());
 
-		//댓글 내용이 없으면 실패
-		if(req.getContent() == null || req.getContent().trim().isEmpty()) {
-			throw new CommentException(CommentErrorCode.COMMENT_INVALID_CONTENT);
-		}
-
-		// 댓글 작성자만 수정 가능
-		if (!comment.getMember().getId().equals(memberId)) {
-			throw new CommentException(CommentErrorCode.COMMENT_ACCESS_DENIED);
-		}
+		validateAuthor(comment, memberId);
 
 		comment.update(req.getContent());
 
@@ -102,13 +108,12 @@ public class CommentService {
 
 	}
 
+	// 댓글 조회
 	public Page<CommentResponse> getComments(Long postId, Pageable pageable) {
 
-		Post post = postRepository.findByIdAndDisabled(postId, false)
-			.orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
+		Post post = getPostValidate(postId);
 
 		Page<Comment> comments = commentRepository.findByPostAndDisabled(post, false, pageable);
-
 
 		return comments.map(CommentResponse::from);
 	}
