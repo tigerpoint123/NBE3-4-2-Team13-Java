@@ -1,5 +1,7 @@
 package com.app.backend.domain.meetingApplication.service;
 
+import static com.app.backend.domain.group.entity.GroupRole.*;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,13 +49,31 @@ public class MeetingApplicationService {
 			throw new MeetingApplicationException(MeetingApplicationErrorCode.GROUP_MEMBER_LIMIT_EXCEEDED);
 		}
 
-		MeetingApplication meetingApplication = MeetingApplication.builder()
-			.context(request.context())
-			.group(group)
-			.member(member)
-			.build();
+		// REJECTED, LEAVE 사용자의 groupMembership status 수정
+		GroupMembership groupMembership = groupMembershipRepository.findByGroupIdAndMemberId(groupId, memberId)
+			.map(existingMembership -> {
+				if (existingMembership.getStatus() == MembershipStatus.REJECTED ||
+					existingMembership.getStatus() == MembershipStatus.LEAVE) {
+					existingMembership.modifyStatus(MembershipStatus.PENDING);
+					return groupMembershipRepository.save(existingMembership);// 상태 업데이트
+				}
+				throw new MeetingApplicationException(MeetingApplicationErrorCode.ALREADY_IN_GROUP);
+			})
+			.orElseGet(() -> groupMembershipRepository.save( // 새로운 멤버십 생성
+				GroupMembership.builder()
+					.group(group)
+					.member(member)
+					.groupRole(PARTICIPANT)
+					.build()
+			));
 
-		return meetingApplicationRepository.save(meetingApplication);
+		return meetingApplicationRepository.save(
+			MeetingApplication.builder()
+				.context(request.context())
+				.group(group)
+				.member(member)
+				.build()
+		);
 	}
 
 	// 리스트 조회
