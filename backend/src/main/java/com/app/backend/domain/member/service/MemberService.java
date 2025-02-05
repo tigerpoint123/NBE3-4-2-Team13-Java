@@ -147,7 +147,7 @@ public class MemberService {
 	}
 
 	@Transactional
-	@Scheduled(fixedRate = 10000) // 10초마다 실행
+	// @Scheduled(fixedRate = 10000) // 10초마다 실행
 	public void cleanupDisabledMembers() {
 		log.info("비활성화된 회원 정보 삭제 작업 시작");
 		LocalDateTime cutoffDate = LocalDateTime.now().minusSeconds(30);

@@ -1,7 +1,5 @@
 package com.app.backend.domain.member.util;
 
-import java.io.IOException;
-
 import org.springframework.stereotype.Component;
 
 import jakarta.servlet.http.Cookie;
@@ -10,8 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component
 public class CommonUtil {
 
-	public void setCookies(Cookie refreshTokenCookie, HttpServletResponse response) throws
-		IOException {
+	public void setCookies(Cookie refreshTokenCookie, HttpServletResponse response) {
 		refreshTokenCookie.setHttpOnly(true);
 		refreshTokenCookie.setSecure(true);
 		refreshTokenCookie.setPath("/");
@@ -20,7 +17,6 @@ public class CommonUtil {
 		String cookieHeader = String.format("%s; SameSite=Strict", refreshTokenCookie.toString());
 		response.setHeader("Set-Cookie", cookieHeader);
 		response.addCookie(refreshTokenCookie);
-		response.sendRedirect("http://localhost:3000/");
 	}
 
 	public void invalidateCookies(HttpServletResponse response) {
