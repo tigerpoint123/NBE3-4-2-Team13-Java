@@ -1,5 +1,6 @@
 package com.app.backend.domain.chat.room.controller;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -19,6 +20,7 @@ import com.app.backend.domain.chat.util.TestDataUtil;
 import com.app.backend.domain.group.entity.Group;
 import com.app.backend.domain.group.entity.GroupRole;
 import com.app.backend.domain.member.entity.Member;
+import com.app.backend.domain.member.entity.MemberDetails;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -69,11 +71,9 @@ class ChatRoomMemberControllerTest {
 		ChatRoom chatRoom1 = testDataUtil.createAndSaveChatRoom(group1);
 		ChatRoom chatRoom2 = testDataUtil.createAndSaveChatRoom(group2);
 
-		// 권한 처리
-		testDataUtil.setAuthentication(savedMember);
-
 		// when
-		ResultActions resultActions = mockMvc.perform(get("/api/v1/members/chatrooms"));
+		ResultActions resultActions = mockMvc.perform(get("/api/v1/members/chatrooms")
+			.with(user(new MemberDetails(savedMember))));
 
 		// then
 		resultActions.andExpect(status().isOk())

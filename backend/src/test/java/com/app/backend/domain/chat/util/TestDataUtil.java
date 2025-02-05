@@ -1,10 +1,5 @@
 package com.app.backend.domain.chat.util;
 
-import java.util.Collections;
-
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import com.app.backend.domain.category.entity.Category;
@@ -18,7 +13,6 @@ import com.app.backend.domain.group.entity.RecruitStatus;
 import com.app.backend.domain.group.repository.GroupMembershipRepository;
 import com.app.backend.domain.group.repository.GroupRepository;
 import com.app.backend.domain.member.entity.Member;
-import com.app.backend.domain.member.entity.MemberDetails;
 import com.app.backend.domain.member.repository.MemberRepository;
 
 import jakarta.transaction.Transactional;
@@ -83,11 +77,5 @@ public class TestDataUtil {
 	public ChatRoom createAndSaveChatRoom(Group group) {
 		ChatRoom chatRoom = ChatRoom.builder().group(group).build();
 		return chatRoomRepository.save(chatRoom);
-	}
-
-	public void setAuthentication(Member member) {
-		MemberDetails memberDetails = new MemberDetails(member);
-		SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
-			memberDetails, null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))));
 	}
 }
