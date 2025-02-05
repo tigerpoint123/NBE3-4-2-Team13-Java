@@ -40,6 +40,11 @@ export default function ChatRoom() {
     const [isLoading, setIsLoading] = useState(true);
     const [newMessage, setNewMessage] = useState('');
     const clientRef = useRef<Client | null>(null);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
 
     // 소켓 연결
     const connectWebSocket = (chatRoomId: string | string[]) => {
@@ -47,9 +52,10 @@ export default function ChatRoom() {
         const client = new Client({
             webSocketFactory: () => socket,
             onConnect: () => {
+                // 새 메시지는 배열 앞에 추가
                 client.subscribe(`/topic/chatroom/${chatRoomId}`, (message) => {
                     const receivedMessage: Message = JSON.parse(message.body);
-                    setMessages((prevMessages) => [...prevMessages, receivedMessage]);
+                    setMessages((prevMessages) => [receivedMessage, ...prevMessages]);
                 });
                 console.log(`웹소켓 연결 성공 -> chatRoom: ${chatRoomId}`);
             },
@@ -62,6 +68,10 @@ export default function ChatRoom() {
         client.activate();
         clientRef.current = client;
     };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
 
     useEffect(() => {
         const fetchChatRoomData = async () => {
@@ -83,10 +93,10 @@ export default function ChatRoom() {
         fetchChatRoomData();
         connectWebSocket(chatRoomId);
 
-        // cleanup 함수 추가
+        // cleanup 함수 수정
         return () => {
-            // 웹소켓 연결 해제
             if (clientRef.current) {
+                console.log(`웹소켓 연결 종료 -> chatRoom: ${chatRoomId}`);
                 clientRef.current.deactivate();
                 clientRef.current = null;
             }
@@ -137,7 +147,8 @@ export default function ChatRoom() {
     const groupMessagesByDate = (messages: Message[]) => {
         const groups: { [key: string]: Message[] } = {};
         
-        messages.forEach(message => {
+        // 배열을 뒤집어서 처리
+        [...messages].reverse().forEach(message => {
             const date = new Date(message.createdAt);
             const dateStr = formatDate(date);
             if (!groups[dateStr]) {
@@ -187,6 +198,7 @@ export default function ChatRoom() {
                         ))}
                     </div>
                 ))}
+                <div ref={messagesEndRef} /> {/* 스크롤 타겟 추가 */}
             </div>
 
             {/* 메시지 입력 */}
