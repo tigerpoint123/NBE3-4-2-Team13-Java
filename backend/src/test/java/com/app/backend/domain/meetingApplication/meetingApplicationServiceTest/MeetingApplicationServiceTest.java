@@ -11,6 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.app.backend.domain.category.entity.Category;
+import com.app.backend.domain.category.repository.CategoryRepository;
 import com.app.backend.domain.group.entity.Group;
 import com.app.backend.domain.group.entity.GroupMembership;
 import com.app.backend.domain.group.entity.GroupRole;
@@ -45,11 +47,26 @@ public class MeetingApplicationServiceTest {
 	@Autowired
 	private MemberRepository memberRepository;
 
+	@Autowired
+	private CategoryRepository categoryRepository;
+
 	private Group group;
 	private Member member;
+	private Category category;
 
 	@BeforeEach
 	void setUp() {
+		// repository 초기화
+		meetingApplicationRepository.deleteAll();
+		groupMembershipRepository.deleteAll();
+		groupRepository.deleteAll();
+		categoryRepository.deleteAll();
+		memberRepository.deleteAll();
+
+		category = categoryRepository.save(Category.builder()
+			.name("category")
+			.build());
+
 		group = groupRepository.save(Group.builder()
 			.name("test group")
 			.province("test province")
@@ -58,6 +75,7 @@ public class MeetingApplicationServiceTest {
 			.description("test description")
 			.recruitStatus(RecruitStatus.RECRUITING)
 			.maxRecruitCount(10)
+			.category(category)
 			.build());
 
 		member = memberRepository.save(Member.builder()
@@ -79,6 +97,7 @@ public class MeetingApplicationServiceTest {
 			.description("test description")
 			.recruitStatus(RecruitStatus.RECRUITING)
 			.maxRecruitCount(1)
+			.category(category)
 			.build());
 
 		Member member1 = memberRepository.save(Member.builder()
