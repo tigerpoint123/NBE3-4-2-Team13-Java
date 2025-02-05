@@ -7,8 +7,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import com.app.backend.domain.chat.message.entity.Message;
-import com.app.backend.domain.chat.message.repository.MessageRepository;
 import com.app.backend.domain.chat.room.entity.ChatRoom;
 import com.app.backend.domain.chat.room.repository.ChatRoomRepository;
 import com.app.backend.domain.group.entity.Group;
@@ -33,7 +31,6 @@ public class TestDataUtil {
 	private final GroupRepository groupRepository;
 	private final GroupMembershipRepository groupMembershipRepository;
 	private final ChatRoomRepository chatRoomRepository;
-	private final MessageRepository messageRepository;
 
 	public Member createAndSaveMember(String username, String nickname) {
 		Member member = Member.builder()
