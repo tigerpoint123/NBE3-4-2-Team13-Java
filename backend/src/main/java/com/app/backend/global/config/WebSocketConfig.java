@@ -23,7 +23,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
 		// 클라이언트가 연결할 엔드포인트 설정
 		registry.addEndpoint("/ws/chat")
-			.setAllowedOrigins("*")
+			.setAllowedOrigins("http://localhost:3000")
 			.withSockJS();
 	}
 }

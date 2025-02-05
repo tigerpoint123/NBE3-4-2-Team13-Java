@@ -80,6 +80,7 @@ public class SecurityConfig {
 				.requestMatchers("/api/**").permitAll()      // 없으면 스웨거 안열림 3
 				.requestMatchers("/api/v1/members/kakao/**").permitAll()
 				.requestMatchers("/oauth2/authorization/**", "/login/oauth2/code/*").permitAll()
+				.requestMatchers("/ws/**").permitAll()
 				.anyRequest().authenticated())
 			.oauth2Login(oauth2 -> oauth2
 				.authorizationEndpoint(authorizationEndpointConfig -> authorizationEndpointConfig
