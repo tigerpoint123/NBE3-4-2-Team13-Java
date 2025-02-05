@@ -34,6 +34,8 @@ public class MeetingApplicationController {
 		@RequestBody MeetingApplicationReqBody request,
 		@AuthenticationPrincipal MemberDetails memberDetails
 	) {
+		meetingApplicationService.validateGroupMemberLimit(groupId); // 인원 제한 검증
+
 		MeetingApplication meetingApplication = meetingApplicationService.create(groupId, request, memberDetails.getId());
 
 		MeetingApplicationDto meetingApplicationDto = MeetingApplicationDto.from(meetingApplication);
