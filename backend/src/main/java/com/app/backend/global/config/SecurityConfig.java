@@ -68,7 +68,6 @@ public class SecurityConfig {
 					"/oauth2/authorization/**",
 					"/login/oauth2/code/*",
 					"/api/v1/members/kakao/**",
-					"/api/v1/download/**",
 					"/api/v1/members/login",
 					"/api/v1/members/join",
 					"/api/v1/members/**",
@@ -76,7 +75,7 @@ public class SecurityConfig {
 					"/login/oauth2/**",
 					"/ws/**"
 				).permitAll()
-				// .anyRequest().authenticated()
+				.anyRequest().authenticated()
 			)
 			.headers(headers -> headers
 				.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)

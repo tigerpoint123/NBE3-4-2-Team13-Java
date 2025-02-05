@@ -144,7 +144,7 @@ public class KakaoAuthService {
 				.nickname(userInfo.nickname())
 				.provider(Member.Provider.KAKAO)
 				.oauthProviderId(userInfo.id())
-				.role("USER")
+				.role("ROLE_USER")
 				.disabled(false)
 				.build()));
 	}

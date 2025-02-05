@@ -50,7 +50,7 @@ public class MemberService {
 			.username(username)
 			.password(passwordEncoder.encode(password))
 			.nickname(nickname)
-			.role("ADMIN")
+			.role("ROLE_ADMIN")
 			.disabled(false)
 			.build();
 
