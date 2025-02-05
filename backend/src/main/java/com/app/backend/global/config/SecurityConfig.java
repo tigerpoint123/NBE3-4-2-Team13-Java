@@ -73,6 +73,7 @@ public class SecurityConfig {
 				.permissionsPolicyHeader(permissions ->
 					permissions.policy("camera=(), microphone=(), geolocation=()")))
 			.authorizeHttpRequests(request -> request
+				.requestMatchers("/api/v1/download/**").authenticated()
 				.requestMatchers("/h2-console/**").permitAll()
 				.requestMatchers("/swagger-ui/**").permitAll()      // 없으면 스웨거 안열림 1
 				.requestMatchers("/v3/api-docs/**").permitAll()      // 없으면 스웨거 안열림 2
