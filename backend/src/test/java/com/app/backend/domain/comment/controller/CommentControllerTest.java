@@ -25,6 +25,7 @@ import com.app.backend.domain.member.repository.MemberRepository;
 import com.app.backend.domain.post.entity.Post;
 import com.app.backend.domain.post.entity.PostStatus;
 import com.app.backend.domain.post.repository.post.PostRepository;
+import com.app.backend.global.annotation.CustomWithMockUser;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -357,6 +358,7 @@ public class CommentControllerTest {
 
 	@Test
 	@DisplayName("댓글 페이징 조회")
+	@CustomWithMockUser(role="USER")
 	void getCommentsWithPaging() throws Exception {
 		// 테스트 데이터 15개 한 번만 생성
 		for (int i = 1; i <= 15; i++) {
@@ -376,6 +378,7 @@ public class CommentControllerTest {
 					.param("sort", "createdAt,desc")
 			)
 			.andDo(print())
+
 
 			.andExpect(jsonPath("$.isSuccess").value(true))
 			.andExpect(jsonPath("$.code").value("200"))
@@ -406,6 +409,7 @@ public class CommentControllerTest {
 
 	@Test
 	@DisplayName("댓글 페이징 조회 (게시물 없음)")
+	@CustomWithMockUser(role="USER")
 	void getComments3() throws Exception {
 		ResultActions resultActions = mvc
 			.perform(
@@ -425,6 +429,7 @@ public class CommentControllerTest {
 
 	@Test
 	@DisplayName("댓글 페이징 조회 (댓글 없음)")
+	@CustomWithMockUser(role="USER")
 	void getComments4() throws Exception {
 		ResultActions resultActions = mvc
 			.perform(
