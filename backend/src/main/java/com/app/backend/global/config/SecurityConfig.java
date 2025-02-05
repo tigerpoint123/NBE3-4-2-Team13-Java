@@ -66,6 +66,7 @@ public class SecurityConfig {
 				.requestMatchers("/oauth2/authorization/**", "/login/oauth2/code/*").permitAll()
 				.requestMatchers("/api/v1/members/kakao/**").permitAll()
 				.requestMatchers("/api/v1/download/**").authenticated()
+				.requestMatchers("/ws/**").permitAll()
 				.anyRequest().authenticated())
 			.headers(headers -> headers
 				.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
