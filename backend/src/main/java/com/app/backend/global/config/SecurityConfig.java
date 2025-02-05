@@ -61,17 +61,27 @@ public class SecurityConfig {
 			.sessionManagement(session -> session
 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(request -> request
-				.requestMatchers("/h2-console/**").permitAll()
-				.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-				.requestMatchers("/oauth2/authorization/**", "/login/oauth2/code/*").permitAll()
-				.requestMatchers("/api/v1/members/kakao/**").permitAll()
-				.requestMatchers("/api/v1/download/**").authenticated()
-				.requestMatchers("/ws/**").permitAll()
+				.requestMatchers(
+					"/h2-console/**",
+					"/swagger-ui/**",
+					"/v3/api-docs/**",
+					"/oauth2/authorization/**",
+					"/login/oauth2/code/*",
+					"/api/v1/members/kakao/**",
+					"/api/v1/download/**",
+					"/api/v1/members/login",
+					"/api/v1/members/join",
+					"/api/v1/members/**",
+					"/oauth2/**",
+					"/login/oauth2/**",
+					"/ws/**"
+				).permitAll()
 				.anyRequest().authenticated())
 			.headers(headers -> headers
 				.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
 				.contentSecurityPolicy(csp -> csp
-					.policyDirectives("default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; object-src 'none'; base-uri 'self'; connect-src 'self' https://kauth.kakao.com https://kapi.kakao.com; frame-ancestors 'self'; form-action 'self'; block-all-mixed-content")))
+					.policyDirectives(
+						"default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; object-src 'none'; base-uri 'self'; connect-src 'self' https://kauth.kakao.com https://kapi.kakao.com; frame-ancestors 'self'; form-action 'self'; block-all-mixed-content")))
 			.oauth2Login(oauth2 -> oauth2
 				.authorizationEndpoint(authorizationEndpointConfig -> authorizationEndpointConfig
 					.baseUri("/oauth2/authorization/kakao"))  // 카카오 로그인 시작점
@@ -99,8 +109,6 @@ public class SecurityConfig {
 					} else {
 						errorMessage = "로그인 처리 중 오류가 발생했습니다.";
 					}
-
-					log.error("OAuth2 로그인 실패: {}", errorMessage);
 					String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:3000/login")
 						.queryParam("error", exception.getMessage())
 						.build().toUriString();
@@ -124,7 +132,8 @@ public class SecurityConfig {
 		configuration.setAllowedHeaders(Arrays.asList(
 			"Authorization",
 			"Content-Type",
-			"Accept"
+			"Accept",
+			"X-Requested-With"
 		));
 		configuration.setAllowCredentials(true);
 		configuration.setMaxAge(3600L);
