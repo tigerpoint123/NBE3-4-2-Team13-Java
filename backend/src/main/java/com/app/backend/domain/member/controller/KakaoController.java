@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import com.app.backend.domain.member.dto.kakao.TokenDto;
 import com.app.backend.domain.member.service.KakaoAuthService;
@@ -20,10 +19,12 @@ import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/members/kakao")
+@Slf4j
 public class KakaoController {
 	private final KakaoAuthService kakaoAuthService;
 	private final CommonUtil util;
@@ -45,12 +46,16 @@ public class KakaoController {
 		@Parameter(description = "카카오 인증 코드")
 		@RequestParam("code") String code, HttpServletResponse response
 	) throws IOException {
+		log.info("Code : {}", code);
+
 		TokenDto tokenDto = kakaoAuthService.kakaoLogin(code);
 		// refreshToken만 쿠키에 저장
 		Cookie refreshTokenCookie = new Cookie("refreshToken", tokenDto.refreshToken());
 		// Access Token은 응답 본문에 포함
 		Map<String, String> responseBody = new HashMap<>();
 		responseBody.put("accessToken", tokenDto.accessToken());
+		responseBody.put("nickname", tokenDto.nickname());
+		responseBody.put("role", "USER");
 		util.setCookies(refreshTokenCookie, response);
 
 		return ResponseEntity.ok(responseBody);

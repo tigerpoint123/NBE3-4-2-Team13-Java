@@ -44,26 +44,37 @@ public class KakaoAuthService {
 	@Value("${spring.security.oauth2.client.registration.kakao.redirect-uri}")
 	private String redirectUri;
 
-	public TokenDto kakaoLogin(String code) throws AuthenticationException {
-		// 1. 인가코드로 액세스 토큰 요청
-		String kakaoAccessToken = getKakaoAccessToken(code);
-		
-		// 2. 액세스 토큰으로 카카오 API 호출
-		KakaoUserInfo userInfo = getKakaoUserInfo(kakaoAccessToken);
+	public TokenDto kakaoLogin(String code) {
+		try {
+			// 1. 인가코드로 액세스 토큰 요청
+			String kakaoAccessToken = getKakaoAccessToken(code);
 
-		// 3. 회원가입 & 로그인 처리
-		Member member = saveOrUpdate(userInfo);
+			// 2. 액세스 토큰으로 카카오 API 호출
+			KakaoUserInfo userInfo = getKakaoUserInfo(kakaoAccessToken);
 
-		// 4. JWT 토큰 발급
-		String accessToken = jwtProvider.generateAccessToken(member);
-		String refreshToken = jwtProvider.generateRefreshToken();
-		
-		memberRepository.save(member);
+			// 3. 회원가입 & 로그인 처리
+			Member member = saveOrUpdate(userInfo);
 
-		return new TokenDto(accessToken, refreshToken);
+			// 4. JWT 토큰 발급
+			String accessToken = jwtProvider.generateAccessToken(member);
+			String refreshToken = jwtProvider.generateRefreshToken();
+
+			memberRepository.save(member);
+
+			return new TokenDto(accessToken, refreshToken, userInfo.nickname(), "USER");
+		} catch (Exception e){
+			log.error("카카오 로그인 처리 중 오류: {}", e.getMessage());
+			if (e.getMessage().contains("authorization code not found")) {
+				// 이미 사용된 코드인 경우 특별한 처리
+				log.warn("이미 사용된 인증 코드입니다.");
+			}
+			throw e;
+		}
 	}
 
 	private String getKakaoAccessToken(String code) {
+		log.info("uri : {}",redirectUri);
+
 		String tokenUri = UriComponentsBuilder
 			.fromUriString("https://kauth.kakao.com/oauth/token")
 			.queryParam("grant_type", "authorization_code")

@@ -119,11 +119,11 @@ public class SecurityConfig {
 
 		configuration.setAllowedOrigins(Arrays.asList(allowedOrigins));
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-		configuration.setAllowedHeaders(Arrays.asList("*"));
-		configuration.setExposedHeaders(Arrays.asList(
+		// 허용할 헤더 설정
+		configuration.setAllowedHeaders(Arrays.asList(
 			"Authorization",
-			"Access-Control-Allow-Origin",  // 추가
-			"Access-Control-Allow-Credentials"  // 추가
+			"Content-Type",
+			"Accept"
 		));
 		configuration.setAllowCredentials(true);
 		configuration.setMaxAge(3600L);
