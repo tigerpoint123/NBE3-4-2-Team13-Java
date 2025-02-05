@@ -18,6 +18,7 @@ import com.app.backend.domain.post.repository.post.PostRepository;
 import com.app.backend.domain.post.repository.postAttachment.PostAttachmentRepository;
 import com.app.backend.global.error.exception.DomainException;
 import com.app.backend.global.error.exception.GlobalErrorCode;
+import com.app.backend.global.redis.repository.RedisRepository;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,8 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -60,6 +60,9 @@ public class PostServiceTest {
 
     @Autowired
     private MemberRepository memberRepository;
+
+    @Autowired
+    private RedisRepository redisRepository;
 
     @Autowired
     private PostAttachmentRepository postAttachmentRepository;
@@ -87,6 +90,7 @@ public class PostServiceTest {
         em.createNativeQuery("ALTER TABLE tbl_members ALTER COLUMN member_id RESTART WITH 1").executeUpdate();
         em.createNativeQuery("ALTER TABLE tbl_groups ALTER COLUMN group_id RESTART WITH 1").executeUpdate();
         em.createNativeQuery("ALTER TABLE tbl_post_attachments ALTER COLUMN attachment_id RESTART WITH 1").executeUpdate();
+        redisRepository.delete("post:1");
     }
 
     private void dataSetting() {
@@ -395,6 +399,42 @@ public class PostServiceTest {
     }
 
     @Test
+    @DisplayName("Success : 게시글 수정 - redis")
+    void updatePost_Success5() {
+        // Given
+        MultipartFile[] files = {
+                new MockMultipartFile("file1", "test1.jpg", "image/jpeg", "file1-content".getBytes()),
+                new MockMultipartFile("file2", "test2.jpg", "image/jpeg", "file2-content".getBytes())
+        };
+
+        PostReqDto.SavePostDto savePostDto = new PostReqDto.SavePostDto("새로운 게시글", "새로운 내용", PostStatus.PUBLIC, 1L);
+
+        postService.savePost(1L, savePostDto, files);
+
+        // when1
+        postService.getPost(1L, 1L);
+
+        // Then1
+        assertTrue(redisRepository.isKeyExists("post:1"));
+
+        // When2
+        MultipartFile[] newFiles = {
+                new MockMultipartFile("file3", "test3.jpg", "image/jpeg", "file3-content".getBytes())
+        };
+
+        List<Long> removeList = new ArrayList<>();
+        removeList.add(1L);
+
+        PostReqDto.ModifyPostDto modifyPostDto =
+                new PostReqDto.ModifyPostDto(1L, "수정된 제목", "수정된 내용", PostStatus.PRIVATE, 0L, null, removeList);
+
+        Post updatedPost = postService.updatePost(1L, 1L, modifyPostDto, newFiles);
+
+        // Then2
+        assertFalse(redisRepository.isKeyExists("post:1"));
+    }
+
+    @Test
     @DisplayName("Fail : 게시글 수정 - 잘못된 post id")
     void updatePost_Fail1() {
         // Given
@@ -660,6 +700,32 @@ public class PostServiceTest {
     }
 
     @Test
+    @DisplayName("Success : 게시물 삭제 - redis")
+    public void deletePost_Success4() {
+        // Given
+        MultipartFile[] files = {
+                new MockMultipartFile("file1", "test1.jpg", "image/jpeg", generateRandomBytes(2 * 1024 * 1024)),
+                new MockMultipartFile("file2", "test2.jpg", "image/jpeg", generateRandomBytes(2 * 1024 * 1024))
+        };
+
+        PostReqDto.SavePostDto savePostDto = new PostReqDto.SavePostDto("새로운 게시글", "새로운 내용", PostStatus.PUBLIC, 1L);
+
+        postService.savePost(1L, savePostDto, files);
+
+        // when1
+        postService.getPost(1L, 1L);
+
+        // Then1
+        assertTrue(redisRepository.isKeyExists("post:1"));
+
+        // When2
+        postService.deletePost(1L, 1L);
+
+        // Then2
+        assertFalse(redisRepository.isKeyExists("post:1"));
+    }
+
+    @Test
     @DisplayName("Fail : 게시물 삭제 - MembershipStatus.APPROVED")
     public void deletePost_Fail1() {
         // Given
@@ -822,8 +888,37 @@ public class PostServiceTest {
     }
 
     @Test
+    @DisplayName("Success : 게시글 불러오기 - redis 조회기능")
+    void getPost_Success2() {
+        // Given
+        MultipartFile[] files = {
+                new MockMultipartFile("file1", "test1.jpg", "image/jpeg", "file1-content".getBytes()),
+                new MockMultipartFile("file2", "test2.jpg", "image/jpeg", "file2-content".getBytes())
+        };
+
+        PostReqDto.SavePostDto savePostDto = new PostReqDto.SavePostDto("새로운 게시글", "새로운 내용", PostStatus.PUBLIC, 1L);
+
+        Post savedPost = postService.savePost(1L, savePostDto, files);
+        Member savedMember = memberRepository.save(Member.builder().username("test").nickname("test").build());
+
+        // When
+        PostRespDto.GetPostDto respDto = postService.getPost(1L, 1L);
+
+        // Then
+        PostRespDto.GetPostDto dto = (PostRespDto.GetPostDto) redisRepository.get("post:1");
+
+        assertEquals(savedPost.getId(), dto.getPostId());
+        assertEquals(savedPost.getTitle(), dto.getTitle());
+        assertEquals(savedPost.getContent(), dto.getContent());
+        assertEquals(savedPost.getPostStatus(), dto.getPostStatus());
+        assertEquals(savedPost.getGroupId(), dto.getGroupId());
+        assertEquals(2, dto.getImages().size());
+
+    }
+
+    @Test
     @DisplayName("Success : 게시글 불러오기 - fileType 분류")
-    void getPost_Success() {
+    void getPost_Success3() {
         // Given
         MultipartFile[] files = {
                 new MockMultipartFile("file1", "test1.jpg", "image/jpeg", "file1-content".getBytes()),
@@ -846,12 +941,12 @@ public class PostServiceTest {
         assertEquals(savedPost.getPostStatus(), respDto.getPostStatus());
         assertEquals(savedPost.getGroupId(), respDto.getGroupId());
         assertEquals(2, respDto.getImages().size());
-        assertEquals(1,respDto.getDocuments().size());
+        assertEquals(1, respDto.getDocuments().size());
     }
 
     @Test
     @DisplayName("Success : 게시글 불러오기 - MembershipStatus.APPROVED")
-    void getPost_Success2() {
+    void getPost_Success4() {
         // Given
         GroupMembership approvedMembership = groupMembershipRepository.findByGroupIdAndMemberId(1L, 2L).get();
         em.persist(approvedMembership);
