@@ -76,7 +76,8 @@ public class SecurityConfig {
 					"/login/oauth2/**",
 					"/ws/**"
 				).permitAll()
-				.anyRequest().authenticated())
+				// .anyRequest().authenticated()
+			)
 			.headers(headers -> headers
 				.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
 				.contentSecurityPolicy(csp -> csp
