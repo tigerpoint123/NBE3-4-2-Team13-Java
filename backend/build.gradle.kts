@@ -65,6 +65,10 @@ dependencies {
     testImplementation("org.springframework.security:spring-security-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
+    //test lombok
+    testImplementation ("org.projectlombok:lombok")
+    testAnnotationProcessor ("org.projectlombok:lombok")
+
     // env 파일 사용 (카카오 보안 키)
     implementation("me.paulschwarz:spring-dotenv:4.0.0")
 }

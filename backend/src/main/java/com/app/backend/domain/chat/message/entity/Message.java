@@ -23,7 +23,6 @@ import lombok.NoArgsConstructor;
 public class Message {
 
 	@Id
-	@Field("chat_message_id")
 	private ObjectId id;
 
 	@Field("chat_room_id")
@@ -39,7 +38,7 @@ public class Message {
 	private String content;
 
 	@Field("disabled")
-	private Boolean disabled = false;
+	private Boolean disabled;
 
 	@CreatedDate
 	@Field("createdAt")

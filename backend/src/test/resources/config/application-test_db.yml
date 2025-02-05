@@ -25,6 +25,8 @@ spring:
     redis:
       host: localhost
       port: 6379
+    mongodb:
+      uri: ${TEST_MONGO_DB_URI}
   file:
     base-dir: ./testUploads
     img-dir: http://localhost:8080/images
