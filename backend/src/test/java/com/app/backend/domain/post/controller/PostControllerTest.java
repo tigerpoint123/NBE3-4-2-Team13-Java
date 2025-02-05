@@ -79,7 +79,7 @@ public class PostControllerTest {
 
         MemberDetails mockUser = new MemberDetails(member);
 
-        PostRespDto.GetPostDto responseDto = new PostRespDto.GetPostDto(post, member, null, null);
+        PostRespDto.GetPostDto responseDto = PostRespDto.toGetPost(post, member, null, null);
 
         given(postService.getPost(eq(post.getId()), eq(mockUser.getId()))).willReturn(responseDto);
 
@@ -151,7 +151,7 @@ public class PostControllerTest {
         MemberDetails mockUser = new MemberDetails(member);
 
         Pageable pageable = PageRequest.of(0, 10, Sort.by("createdAt").descending());
-        Page<PostRespDto.GetPostListDto> mockPage = new PageImpl<>(List.of(new PostRespDto.GetPostListDto(post)), pageable, 1);
+        Page<PostRespDto.GetPostListDto> mockPage = new PageImpl<>(List.of(PostRespDto.toGetPostList(post)), pageable, 1);
 
         given(postService.getPostsBySearch(any(), any())).willReturn(mockPage);
 
@@ -308,7 +308,7 @@ public class PostControllerTest {
         MemberDetails mockUser = new MemberDetails(member);
 
         Pageable pageable = PageRequest.of(0, 10, Sort.unsorted());
-        Page<PostRespDto.GetPostListDto> mockPage = new PageImpl<>(List.of(new PostRespDto.GetPostListDto(post)), pageable, 1);
+        Page<PostRespDto.GetPostListDto> mockPage = new PageImpl<>(List.of(PostRespDto.toGetPostList(post)), pageable, 1);
 
         given(postService.getPostsByUser(any(), any(), any())).willReturn(mockPage);
 

@@ -26,6 +26,7 @@ import com.app.backend.domain.post.repository.post.PostRepository;
 import com.app.backend.domain.post.repository.postAttachment.PostAttachmentRepository;
 import com.app.backend.global.config.FileConfig;
 import com.app.backend.global.error.exception.GlobalErrorCode;
+import com.app.backend.global.redis.repository.RedisRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,6 +37,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -45,12 +47,14 @@ public class PostService {
     private final FileConfig fileConfig;
     private final FileService fileService;
     private final PostRepository postRepository;
+    private final RedisRepository redisRepository;
     private final MemberRepository memberRepository;
     private final PostAttachmentRepository postAttachmentRepository;
     private final GroupMembershipRepository groupMembershipRepository;
 
 
     public PostRespDto.GetPostDto getPost(final Long postId, final Long memberId) {
+        String redisKey = "post:" + postId;
         Post post = getPostEntity(postId);
         GroupMembership membership = getMemberShipEntity(post.getGroupId(), memberId);
 
@@ -58,34 +62,42 @@ public class PostService {
             throw new PostException(PostErrorCode.POST_UNAUTHORIZATION);
         }
 
+        if (redisRepository.isKeyExists(redisKey)) {
+            return (PostRespDto.GetPostDto) redisRepository.get(redisKey);
+        }
+
         Member member = getMemberEntity(memberId);
 
         // document
         List<PostAttachmentRespDto.GetPostDocumentDto> documents = postAttachmentRepository
                 .findByPostIdAndFileTypeAndDisabledOrderByCreatedAtDesc(postId, FileType.DOCUMENT, false).stream()
-                .map(PostAttachmentRespDto.GetPostDocumentDto::new)
+                .map(PostAttachmentRespDto::getPostDocument)
                 .toList();
 
         // image
         List<PostAttachmentRespDto.GetPostImageDto> images = postAttachmentRepository
                 .findByPostIdAndFileTypeAndDisabledOrderByCreatedAtDesc(postId, FileType.IMAGE, false).stream()
-                .map(file -> new PostAttachmentRespDto.GetPostImageDto(file, fileConfig.getIMAGE_DIR()))
+                .map(file -> PostAttachmentRespDto.GetPostImage(file, fileConfig.getIMAGE_DIR()))
                 .toList();
 
-        return new PostRespDto.GetPostDto(post, member, images, documents);
+        PostRespDto.GetPostDto getPostDto = PostRespDto.toGetPost(post, member, images, documents);
+
+        redisRepository.save(redisKey, getPostDto, 30, TimeUnit.MINUTES);
+
+        return getPostDto;
     }
 
 
     public Page<PostRespDto.GetPostListDto> getPostsBySearch(final PostReqDto.SearchPostDto searchPost, final Pageable pageable) {
         return postRepository
                 .findAllBySearchStatus(searchPost.getGroupId(), searchPost.getSearch(), searchPost.getPostStatus(), false, pageable)
-                .map(PostRespDto.GetPostListDto::new);
+                .map(PostRespDto::toGetPostList);
     }
 
     public Page<PostRespDto.GetPostListDto> getPostsByUser(final PostReqDto.SearchPostDto searchPost, final Pageable pageable, final Long memberId) {
         return postRepository
                 .findAllByUserAndSearchStatus(searchPost.getGroupId(), memberId, searchPost.getSearch(), searchPost.getPostStatus(), false, pageable)
-                .map(PostRespDto.GetPostListDto::new);
+                .map(PostRespDto::toGetPostList);
     }
 
 
@@ -111,6 +123,7 @@ public class PostService {
 
     @Transactional
     public Post updatePost(final Long memberId, final Long postId, final PostReqDto.ModifyPostDto modifyPost, final MultipartFile[] files) {
+        String redisKey = "post:" + postId;
         GroupMembership membership = getMemberShipEntity(modifyPost.getGroupId(), memberId);
         Post post = getPostEntity(postId);
 
@@ -134,12 +147,17 @@ public class PostService {
             postAttachmentRepository.deleteByIdList(modifyPost.getRemoveIdList());
         }
 
+        if(redisRepository.isKeyExists(redisKey)) {
+            redisRepository.delete(redisKey);
+        }
+
         return post;
     }
 
 
     @Transactional
     public void deletePost(final Long memberId, final Long postId) {
+        String redisKey = "post:" + postId;
         Post post = getPostEntity(postId);
         GroupMembership membership = getMemberShipEntity(post.getGroupId(), memberId);
 
@@ -149,6 +167,10 @@ public class PostService {
 
         if (!(post.getMemberId().equals(memberId) || membership.getGroupRole().equals(GroupRole.LEADER))) {
             throw new PostException(PostErrorCode.POST_UNAUTHORIZATION);
+        }
+
+        if(redisRepository.isKeyExists(redisKey)) {
+            redisRepository.delete(redisKey);
         }
 
         postAttachmentRepository.deleteByPostId(postId);

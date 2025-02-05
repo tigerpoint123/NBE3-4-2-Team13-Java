@@ -4,7 +4,6 @@ import com.app.backend.domain.attachment.dto.resp.FileRespDto;
 import com.app.backend.domain.member.entity.MemberDetails;
 import com.app.backend.domain.post.service.postAttachment.PostAttachmentService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
