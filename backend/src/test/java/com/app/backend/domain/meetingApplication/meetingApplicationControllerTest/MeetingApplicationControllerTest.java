@@ -39,6 +39,7 @@ import com.app.backend.domain.meetingApplication.service.MeetingApplicationServi
 import com.app.backend.domain.member.entity.Member;
 import com.app.backend.domain.member.entity.MemberDetails;
 import com.app.backend.domain.member.repository.MemberRepository;
+import com.app.backend.global.annotation.CustomWithMockUser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
@@ -111,6 +112,7 @@ public class MeetingApplicationControllerTest {
 
 	@Test
 	@DisplayName("신청 폼 작성")
+	@CustomWithMockUser
 	void t1() throws Exception {
 		MemberDetails mockUser = new MemberDetails(member);
 
@@ -147,6 +149,7 @@ public class MeetingApplicationControllerTest {
 
 	@Test
 	@DisplayName("신청 폼 제출 - 그룹 정원 초과 시 예외 처리")
+	@CustomWithMockUser
 	void t2() throws Exception {
 		// Given: 그룹의 정원을 1명으로 설정
 		Group oneMemberGroup = Group.builder()
@@ -200,6 +203,7 @@ public class MeetingApplicationControllerTest {
 
 	@Test
 	@DisplayName("meeting application 조회")
+	@CustomWithMockUser
 	void t3() throws Exception {
 		// Given
 		Member leader = memberRepository.save(Member.builder()
@@ -233,6 +237,7 @@ public class MeetingApplicationControllerTest {
 
 	@Test
 	@DisplayName("meeting application 상세 조회")
+	@CustomWithMockUser
 	void t4() throws Exception {
 		// Given
 		Member leader = memberRepository.save(Member.builder()
