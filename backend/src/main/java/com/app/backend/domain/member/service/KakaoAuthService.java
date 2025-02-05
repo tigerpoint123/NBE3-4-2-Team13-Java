@@ -63,13 +63,6 @@ public class KakaoAuthService {
 		return new TokenDto(accessToken, refreshToken);
 	}
 
-	public String getKakaoLoginUrl() {
-		return String.format("https://kauth.kakao.com/oauth/authorize?client_id=%s&redirect_uri=%s&response_type=code",
-			clientId,
-			redirectUri
-		);
-	}
-
 	private String getKakaoAccessToken(String code) {
 		String tokenUri = UriComponentsBuilder
 			.fromUriString("https://kauth.kakao.com/oauth/token")
@@ -100,7 +93,7 @@ public class KakaoAuthService {
 	}
 
 	// 필수 동의항목 설정 필요
-	public KakaoUserInfo getKakaoUserInfo(String accessToken) throws AuthenticationException {
+	public KakaoUserInfo getKakaoUserInfo(String accessToken) {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setBearerAuth(accessToken);
 		
