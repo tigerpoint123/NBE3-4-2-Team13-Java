@@ -146,7 +146,7 @@ public class MeetingApplicationControllerTest {
 		groupMembershipRepository.save(GroupMembership.builder()
 			.group(oneMemberGroup)  // 정원 1명인 그룹에 멤버 추가
 			.member(member)
-			.groupRole(GroupRole.LEADER)  // 그룹 역할 LEADER로 설정
+			.groupRole(GroupRole.LEADER)  // status APPROVED로 저장됨
 			.build());
 
 		// 새로운 회원을 만들고 저장
@@ -158,14 +158,12 @@ public class MeetingApplicationControllerTest {
 			.build();
 		memberRepository.save(newMember);
 
-		// 신청 폼 데이터
 		MeetingApplicationReqBody request = new MeetingApplicationReqBody("Test Application");
 
 		// 정원 초과로 예외 발생
 		given(meetingApplicationService.create(oneMemberGroup.getId(), request, newMember.getId()))
 			.willThrow(new MeetingApplicationException(MeetingApplicationErrorCode.GROUP_MEMBER_LIMIT_EXCEEDED));
 
-		// 인증된 사용자 설정
 		MemberDetails mockUser = new MemberDetails(newMember);
 
 		// When & Then

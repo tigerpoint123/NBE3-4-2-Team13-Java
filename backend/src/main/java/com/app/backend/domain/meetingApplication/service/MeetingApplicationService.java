@@ -107,7 +107,7 @@ public class MeetingApplicationService {
 		return MeetingApplicationDto.from(meetingApplication);
 	}
 
-	// 검증 메서드
+	// 인원 제한 검증 메서드
 	public void validateGroupMemberLimit(Long groupId) {
 		Group group = groupRepository.findByIdAndDisabled(groupId, false)
 			.orElseThrow(() -> new MeetingApplicationException(MeetingApplicationErrorCode.GROUP_NOT_FOUND));
