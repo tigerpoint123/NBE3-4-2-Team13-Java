@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -44,64 +45,71 @@ public class KakaoAuthService {
 	@Value("${spring.security.oauth2.client.registration.kakao.redirect-uri}")
 	private String redirectUri;
 
-	public TokenDto kakaoLogin(String code) throws AuthenticationException {
-		// 1. 인가코드로 액세스 토큰 요청
-		String kakaoAccessToken = getKakaoAccessToken(code);
-		
-		// 2. 액세스 토큰으로 카카오 API 호출
-		KakaoUserInfo userInfo = getKakaoUserInfo(kakaoAccessToken);
+	@Transactional
+	public TokenDto kakaoLogin(String code) {
+		try {
+			// 1. 인가코드로 액세스 토큰 요청
+			String kakaoAccessToken = getKakaoAccessToken(code);
 
-		// 3. 회원가입 & 로그인 처리
-		Member member = saveOrUpdate(userInfo);
+			// 2. 액세스 토큰으로 카카오 API 호출
+			KakaoUserInfo userInfo = getKakaoUserInfo(kakaoAccessToken);
 
-		// 4. JWT 토큰 발급
-		String accessToken = jwtProvider.generateAccessToken(member);
-		String refreshToken = jwtProvider.generateRefreshToken();
-		
-		member.updateRefreshToken(refreshToken);
-		memberRepository.save(member);
+			// 3. 회원가입 & 로그인 처리
+			Member member = saveOrUpdate(userInfo);
 
-		return new TokenDto(accessToken, refreshToken);
-	}
+			// 4. JWT 토큰 발급
+			String accessToken = jwtProvider.generateAccessToken(member);
+			String refreshToken = jwtProvider.generateRefreshToken();
 
-	public String getKakaoLoginUrl() {
-		return String.format("https://kauth.kakao.com/oauth/authorize?client_id=%s&redirect_uri=%s&response_type=code",
-			clientId,
-			redirectUri
-		);
+			memberRepository.save(member);
+
+			return new TokenDto(accessToken, refreshToken, userInfo.nickname(), "USER");
+		} catch (Exception e){
+			log.error("카카오 로그인 처리 중 오류: {}", e.getMessage());
+			if (e.getMessage().contains("authorization code not found")) {
+				// 이미 사용된 코드인 경우 특별한 처리
+				log.warn("이미 사용된 인증 코드입니다.");
+			}
+			throw e;
+		}
 	}
 
 	private String getKakaoAccessToken(String code) {
-		String tokenUri = UriComponentsBuilder
-			.fromUriString("https://kauth.kakao.com/oauth/token")
-			.queryParam("grant_type", "authorization_code")
-			.queryParam("client_id", clientId)
-			.queryParam("redirect_uri", redirectUri)
-			.queryParam("code", code)
-			.queryParam("client_secret", clientSecret)
-			.build()
-			.toString();
+		try {
+			String tokenUri = UriComponentsBuilder
+				.fromUriString("https://kauth.kakao.com/oauth/token")
+				.queryParam("grant_type", "authorization_code")
+				.queryParam("client_id", clientId)
+				.queryParam("redirect_uri", redirectUri)
+				.queryParam("code", code)
+				.queryParam("client_secret", clientSecret)
+				.build()
+				.toString();
 
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-		
-		HttpEntity<?> request = new HttpEntity<>(headers);
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-		ResponseEntity<Map> response = restTemplate.exchange(
-			tokenUri,
-			HttpMethod.GET,
-			request,
-			Map.class
-		);
+			HttpEntity<?> request = new HttpEntity<>(headers);
 
-		if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null)
-			return (String) response.getBody().get("access_token");
+			ResponseEntity<Map> response = restTemplate.exchange(
+				tokenUri,
+				HttpMethod.GET,
+				request,
+				Map.class
+			);
 
-		throw new MemberException(MemberErrorCode.MEMBER_FAILED_TO_KAKAO_TOKEN);
+			if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null)
+				return (String) response.getBody().get("access_token");
+
+			throw new MemberException(MemberErrorCode.MEMBER_FAILED_TO_KAKAO_TOKEN);
+		} catch (Exception e) {
+			log.error("카카오 토큰 요청 중 오류 발생: {}", e.getMessage());
+			throw new RuntimeException("카카오 토큰 요청 실패", e);
+		}
 	}
 
 	// 필수 동의항목 설정 필요
-	public KakaoUserInfo getKakaoUserInfo(String accessToken) throws AuthenticationException {
+	public KakaoUserInfo getKakaoUserInfo(String accessToken) {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setBearerAuth(accessToken);
 		
@@ -136,7 +144,7 @@ public class KakaoAuthService {
 				.nickname(userInfo.nickname())
 				.provider(Member.Provider.KAKAO)
 				.oauthProviderId(userInfo.id())
-				.role("USER")
+				.role("ROLE_USER")
 				.disabled(false)
 				.build()));
 	}

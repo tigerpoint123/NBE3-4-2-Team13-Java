@@ -50,7 +50,7 @@ public class MemberService {
 			.username(username)
 			.password(passwordEncoder.encode(password))
 			.nickname(nickname)
-			.role("ADMIN")
+			.role("ROLE_ADMIN")
 			.disabled(false)
 			.build();
 
@@ -71,7 +71,6 @@ public class MemberService {
 		String accessToken = jwtProvider.generateAccessToken(member);
 		String refreshToken = jwtProvider.generateRefreshToken();
 
-		member.updateRefreshToken(refreshToken);
 		memberRepository.save(member);
 
 		// 응답
@@ -82,7 +81,6 @@ public class MemberService {
 	public void logout(String token) {
 		try {
 			Member member = getCurrentMember(token);
-			member.updateRefreshToken(null);
 			memberRepository.save(member);
 		} catch (Exception e) {
 			throw new MemberException(MemberErrorCode.MEMBER_FAILED_LOGOUT);
@@ -149,7 +147,7 @@ public class MemberService {
 	}
 
 	@Transactional
-	@Scheduled(fixedRate = 10000) // 10초마다 실행
+	// @Scheduled(fixedRate = 10000) // 10초마다 실행
 	public void cleanupDisabledMembers() {
 		log.info("비활성화된 회원 정보 삭제 작업 시작");
 		LocalDateTime cutoffDate = LocalDateTime.now().minusSeconds(30);

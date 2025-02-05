@@ -48,12 +48,12 @@ public class MemberControllerTest {
 	private static final String setupUsername = "testID";
 	private static final String setupPassword = "testPW";
 	private static final String setupNickname = "김호남";
-	private static final String setupRole = "ADMIN";
+	private static final String setupRole = "ROLE_ADMIN";
 
 	private static final String newUsername = "username";
 	private static final String newPassword = "password";
 	private static final String newNickname = "김영남";
-	private static final String newRole = "USER";
+	private static final String newRole = "ROLE_USER";
 
 	@BeforeEach
 	void 셋업() throws Exception {
@@ -104,7 +104,6 @@ public class MemberControllerTest {
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request)))
 			.andExpect(status().isOk())  // HTTP 상태코드 검증
-			.andExpect(cookie().exists("accessToken"))    // 쿠키 존재 검증
 			.andExpect(cookie().exists("refreshToken"))   // 쿠키 존재 검증
 			.andDo(print());  // 결과 출력
 
@@ -214,7 +213,7 @@ public class MemberControllerTest {
 		Member member = memberRepository.findByUsernameAndDisabled(setupUsername, false)
 			.orElseThrow(() -> new IllegalArgumentException("가입되지 않은 사용자입니다"));
 
-		if (!member.getRole().equals("ADMIN")) {
+		if (!member.getRole().equals("ROLE_ADMIN")) {
 			fail("관리자 권한이 없습니다.");
 		}
 		String accessToken = "Bearer " + jwtProvider.generateAccessToken(member);

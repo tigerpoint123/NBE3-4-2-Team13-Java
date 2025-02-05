@@ -1,7 +1,9 @@
 package com.app.backend.domain.member.controller;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -62,12 +64,10 @@ public class ApiMemberController {
 		HttpServletResponse response
 	) throws IOException {
 		MemberLoginResponseDto loginResult = memberService.login(request);
-
 		// 쿠키 설정
-		Cookie accessTokenCookie = new Cookie("accessToken", loginResult.accessToken());
 		Cookie refreshTokenCookie = new Cookie("refreshToken", loginResult.refreshToken());
 
-		util.setCookies(accessTokenCookie, refreshTokenCookie, response);
+		util.setCookies(refreshTokenCookie, response);
 
 		return ApiResponse.of(
 			true,

@@ -1,9 +1,12 @@
 package com.app.backend.domain.member.oauth;
 
 import com.app.backend.domain.member.entity.Member;
+import com.app.backend.domain.member.exception.MemberErrorCode;
+import com.app.backend.domain.member.exception.MemberException;
 import com.app.backend.domain.member.jwt.JwtProvider;
 import com.app.backend.domain.member.repository.MemberRepository;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -33,20 +36,28 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String oauthId = String.valueOf(oAuth2User.getAttributes().get("id"));
 
         Member member = memberRepository.findByOauthProviderId(oauthId)
-            .orElseThrow(() -> new IllegalArgumentException("찾을 수 없는 회원입니다."));
+            .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
         // 토큰 생성
         String accessToken = jwtProvider.generateAccessToken(member);
         String refreshToken = jwtProvider.generateRefreshToken();
 
-        // Refresh 토큰 저장
-        member.updateRefreshToken(refreshToken);
-        memberRepository.save(member);
+        // refreshToken 쿠키 설정
+        Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
+        refreshTokenCookie.setHttpOnly(true);
+        refreshTokenCookie.setSecure(true);
+        refreshTokenCookie.setPath("/");
+        refreshTokenCookie.setMaxAge(1800); // 30분
 
-        // 프론트엔드의 콜백 페이지로 리다이렉트
-        String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:3000/oauth/callback")
+        String cookieHeader = String.format("%s; SameSite=Strict", refreshTokenCookie.toString());
+        response.setHeader("Set-Cookie", cookieHeader);
+        response.addCookie(refreshTokenCookie);
+
+        // 프론트엔드로 리다이렉트 (회원 정보 포함)
+        String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:3000")
             .queryParam("accessToken", accessToken)
-            .queryParam("refreshToken", refreshToken)
+            .queryParam("nickname", member.getNickname())
+            .queryParam("role", member.getRole())
             .build().toUriString();
 
         getRedirectStrategy().sendRedirect(request, response, targetUrl);

@@ -17,10 +17,8 @@ public class TestConfig {
 	public CommonUtil commonUtil() {
 		return new CommonUtil() {
 			@Override
-			public void setCookies(Cookie accessTokenCookie, Cookie refreshTokenCookie,
-				HttpServletResponse response) {
+			public void setCookies(Cookie refreshTokenCookie, HttpServletResponse response) {
 				// 테스트에서는 단순히 쿠키만 추가. 리다이렉트는 생략
-				response.addCookie(accessTokenCookie);
 				response.addCookie(refreshTokenCookie);
 			}
 
