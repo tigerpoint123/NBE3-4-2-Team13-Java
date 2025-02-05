@@ -23,6 +23,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
+import com.app.backend.domain.chat.message.dto.request.MessageRequest;
 import com.app.backend.domain.chat.message.dto.response.MessageResponse;
 import com.app.backend.domain.chat.message.entity.Message;
 import com.app.backend.domain.chat.message.repository.MessageRepository;
@@ -133,6 +134,26 @@ class MessageServiceTest {
 		assertThat(result).isNotNull();
 		assertThat(result.getTotalElements()).isEqualTo(25); // 전체 메시지는 25개
 		assertThat(result.getContent()).isEmpty();
+	}
+
+	@Test
+	@DisplayName("[성공] 메세지 저장")
+	void saveMessage_Success() {
+		// given
+		MessageRequest request = new MessageRequest(2L, 1L, "user", "테스트 메세지");
+		Message message = createMessage(2L, 1L, "user", "테스트 메세지", LocalDateTime.now());
+
+		when(messageRepository.save(any(Message.class))).thenReturn(message);
+
+		// when
+		MessageResponse response = messageService.saveMessage(request);
+
+		// then
+		assertThat(response).isNotNull();
+		assertThat(response.content()).isEqualTo("테스트 메세지");
+		assertThat(response.senderNickname()).isEqualTo("user");
+
+		verify(messageRepository, times(1)).save(any(Message.class));
 	}
 
 	private Message createMessage(Long chatRoomId, Long senderId, String senderNickname, String content, LocalDateTime createdAt) {
