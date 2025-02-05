@@ -20,6 +20,7 @@ import com.app.backend.domain.category.entity.Category;
 import com.app.backend.domain.category.exception.CategoryErrorCode;
 import com.app.backend.domain.category.exception.CategoryException;
 import com.app.backend.domain.category.repository.CategoryRepository;
+import com.app.backend.global.annotation.CustomWithMockUser;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -35,6 +36,7 @@ public class CategoryControllerTest {
 
 	@Test
 	@DisplayName("카테고리 생성")
+	@CustomWithMockUser(role = "ROLE_ADMIN")
 	void t1() throws Exception {
 		String categoryName = "카테고리 new";
 
@@ -59,6 +61,7 @@ public class CategoryControllerTest {
 
 	@Test
 	@DisplayName("카테고리 생성 - 공백 입력")
+	@CustomWithMockUser(role = "ROLE_ADMIN")
 	void t2() throws Exception {
 		String requestJson = """
                 {
@@ -75,6 +78,7 @@ public class CategoryControllerTest {
 
 	@Test
 	@DisplayName("카테고리 생성 - 10자 이상")
+	@CustomWithMockUser(role = "ROLE_ADMIN")
 	void t3() throws Exception {
 		String requestJson = """
 			{
@@ -91,6 +95,7 @@ public class CategoryControllerTest {
 
 	@Test
 	@DisplayName("카테고리 생성 - 중복 이름")
+	@CustomWithMockUser(role = "ROLE_ADMIN")
 	void t4() throws Exception {
 		Category category = Category.builder()
 			.name("카테고리1")
@@ -112,6 +117,7 @@ public class CategoryControllerTest {
 
 	@Test
 	@DisplayName("카테고리 조회")
+	@CustomWithMockUser(role = "ROLE_ADMIN")
 	void t5() throws Exception {
 		for (int i = 1; i <= 11; i++) {
 			Category category = Category.builder()
@@ -136,6 +142,7 @@ public class CategoryControllerTest {
 
 	@Test
 	@DisplayName("카테고리 조회 - 페이지2")
+	@CustomWithMockUser(role = "ROLE_ADMIN")
 	void t6() throws Exception {
 		for (int i = 1; i <= 11; i++) {
 			Category category = Category.builder()
@@ -160,6 +167,7 @@ public class CategoryControllerTest {
 
 	@Test
 	@DisplayName("카테고리 수정")
+	@CustomWithMockUser(role = "ROLE_ADMIN")
 	void t7() throws Exception {
 		Category category = Category.builder()
 			.name("수정전")
@@ -188,6 +196,7 @@ public class CategoryControllerTest {
 
 	@Test
 	@DisplayName("카테고리 삭제")
+	@CustomWithMockUser(role = "ROLE_ADMIN")
 	void t8() throws Exception {
 		Category category = Category.builder()
 			.name("카테고리")
@@ -208,6 +217,7 @@ public class CategoryControllerTest {
 
 	@Test
 	@DisplayName("카테고리 삭제 후 카테고리 조회")
+	@CustomWithMockUser(role = "ROLE_ADMIN")
 	void t9() throws Exception {
 		for (int i = 1; i <= 11; i++) {
 			Category category = Category.builder()
