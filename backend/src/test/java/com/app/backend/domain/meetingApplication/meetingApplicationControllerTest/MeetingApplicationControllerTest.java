@@ -3,8 +3,10 @@ package com.app.backend.domain.meetingApplication.meetingApplicationControllerTe
 import static org.mockito.BDDMockito.*;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,6 +32,7 @@ import com.app.backend.domain.meetingApplication.dto.MeetingApplicationReqBody;
 import com.app.backend.domain.meetingApplication.entity.MeetingApplication;
 import com.app.backend.domain.meetingApplication.exception.MeetingApplicationErrorCode;
 import com.app.backend.domain.meetingApplication.exception.MeetingApplicationException;
+import com.app.backend.domain.meetingApplication.repository.MeetingApplicationRepository;
 import com.app.backend.domain.meetingApplication.service.MeetingApplicationService;
 import com.app.backend.domain.member.entity.Member;
 import com.app.backend.domain.member.entity.MemberDetails;
@@ -53,6 +56,9 @@ public class MeetingApplicationControllerTest {
 	@Autowired
 	private GroupMembershipRepository groupMembershipRepository;
 
+	@Autowired
+	private MeetingApplicationRepository meetingApplicationRepository;
+
 	@MockitoBean
 	private MeetingApplicationService meetingApplicationService;
 
@@ -71,7 +77,7 @@ public class MeetingApplicationControllerTest {
 			.town("test town")
 			.description("test description")
 			.recruitStatus(RecruitStatus.RECRUITING)
-			.maxRecruitCount(1)
+			.maxRecruitCount(10)
 			.build());
 
 		member = Member.builder()
@@ -157,6 +163,73 @@ public class MeetingApplicationControllerTest {
 				String responseContent = result.getResponse().getContentAsString();
 				assert(responseContent.contains("그룹 정원이 초과되었습니다."));
 			});
+	}
+
+	@Test
+	@DisplayName("meeting application 조회")
+	void t3() throws Exception {
+		// Given
+		Member leader = memberRepository.save(Member.builder()
+			.username("testUser")
+			.nickname("testNickname")
+			.role("USER")
+			.disabled(false)
+			.build());
+
+		MemberDetails mockUser = new MemberDetails(leader);
+
+		GroupMembership groupMembership = groupMembershipRepository.save(GroupMembership.builder()
+			.group(group)
+			.member(leader)
+			.groupRole(GroupRole.LEADER)
+			.build());
+
+		meetingApplicationRepository.save(MeetingApplication.builder()
+			.group(group)
+			.member(member)
+			.context("Test Application")
+			.build());
+
+		// When & Then
+		mvc.perform(get("/api/v1/groups/{groupId}/meeting_applications", group.getId())
+				.with(user(mockUser))  // 인증된 사용자 설정
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message").value("meeting application 조회 성공"));
+	}
+
+	@Test
+	@DisplayName("meeting application 상세 조회")
+	void t4() throws Exception {
+		// Given
+		Member leader = memberRepository.save(Member.builder()
+			.username("testUser")
+			.nickname("testNickname")
+			.role("USER")
+			.disabled(false)
+			.build());
+
+		MemberDetails mockUser = new MemberDetails(leader);
+
+		GroupMembership groupMembership = groupMembershipRepository.save(GroupMembership.builder()
+			.group(group)
+			.member(leader)
+			.groupRole(GroupRole.LEADER)
+			.build());
+
+		meetingApplicationRepository.save(MeetingApplication.builder()
+			.group(group)
+			.member(member)
+			.context("Test Application")
+			.build());
+
+		// When & Then
+		mvc.perform(get("/api/v1/groups/{groupId}/meeting_applications/{meetingApplicationId}", group.getId(), 1)
+				.with(user(mockUser))  // 인증된 사용자 설정
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message").value("meeting application 상세 조회 성공"));
+
 	}
 
 }
