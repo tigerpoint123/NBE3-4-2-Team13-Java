@@ -1,5 +1,6 @@
 package com.app.backend.domain.chat.message.controller;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -24,6 +25,7 @@ import com.app.backend.domain.group.entity.GroupMembership;
 import com.app.backend.domain.group.entity.GroupRole;
 import com.app.backend.domain.group.entity.MembershipStatus;
 import com.app.backend.domain.member.entity.Member;
+import com.app.backend.domain.member.entity.MemberDetails;
 
 import jakarta.transaction.Transactional;
 
@@ -44,12 +46,14 @@ class MessageControllerTest {
 
 	private Long chatRoomId;
 
+	private Member savedMember;
+
 	@BeforeEach
 	void setUp() {
 		// DB에 테스트용 데이터 준비 (테스트용 채팅방 및 메시지 데이터 삽입)
 
 		// 멤버 생성 & 저장
-		Member savedMember = testDataUtil.createAndSaveMember("testUser", "testNickname");
+		savedMember = testDataUtil.createAndSaveMember("testUser", "testNickname");
 		Member savedMember2 = testDataUtil.createAndSaveMember("testUser2", "testNickname2");
 
 		// 카테고리 생성 & 저장
@@ -110,7 +114,8 @@ class MessageControllerTest {
 		// when
 		ResultActions resultActions = mockMvc.perform(get("/api/v1/chatrooms/{chatRoomId}/messages", chatRoomId)
 			.param("page", String.valueOf(page))
-			.param("size", String.valueOf(size)));
+			.param("size", String.valueOf(size))
+			.with(user(new MemberDetails(savedMember))));
 
 		// then
 		resultActions.andExpect(status().isOk())

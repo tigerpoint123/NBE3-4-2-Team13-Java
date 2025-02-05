@@ -1,5 +1,6 @@
 package com.app.backend.domain.chat.room.controller;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -20,6 +21,7 @@ import com.app.backend.domain.group.entity.GroupMembership;
 import com.app.backend.domain.group.entity.GroupRole;
 import com.app.backend.domain.group.entity.MembershipStatus;
 import com.app.backend.domain.member.entity.Member;
+import com.app.backend.domain.member.entity.MemberDetails;
 
 import jakarta.transaction.Transactional;
 
@@ -66,11 +68,9 @@ class ChatRoomControllerTest {
 		ChatRoom chatRoom = testDataUtil.createAndSaveChatRoom(group1);
 		group1.setChatRoom(chatRoom);
 
-		// 권한 처리
-		testDataUtil.setAuthentication(savedMember);
-
 		// when
-		ResultActions resultActions = mockMvc.perform(get("/api/v1/chatrooms/{chatRoomId}", chatRoom.getId()));
+		ResultActions resultActions = mockMvc.perform(get("/api/v1/chatrooms/{chatRoomId}", chatRoom.getId())
+			.with(user(new MemberDetails(savedMember))));
 
 		// then
 		resultActions.andExpect(status().isOk())
@@ -97,11 +97,9 @@ class ChatRoomControllerTest {
 		// 멤버 생성 & 저장
 		Member savedMember = testDataUtil.createAndSaveMember("testUser", "testNickname");
 
-		// 권한 처리
-		testDataUtil.setAuthentication(savedMember);
-
 		// when
-		ResultActions resultActions = mockMvc.perform(get("/api/v1/chatrooms/1"));
+		ResultActions resultActions = mockMvc.perform(get("/api/v1/chatrooms/1")
+			.with(user(new MemberDetails(savedMember))));
 
 		// then
 		resultActions.andExpect(status().isNotFound())
