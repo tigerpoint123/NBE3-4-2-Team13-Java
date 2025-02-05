@@ -38,19 +38,13 @@ public class MeetingApplicationService {
 	@Transactional
 	public MeetingApplication create(Long groupId, MeetingApplicationReqBody request, Long memberId) {
 
-		Group group = groupRepository.findById(groupId)
+		Group group = groupRepository.findByIdAndDisabled(groupId, false)
 			.orElseThrow(() -> new MeetingApplicationException(MeetingApplicationErrorCode.GROUP_NOT_FOUND));
-		Member member = memberRepository.findById(memberId)
+		Member member = memberRepository.findByIdAndDisabled(memberId, false)
 			.orElseThrow(() -> new MeetingApplicationException(MeetingApplicationErrorCode.MEMBER_NOT_FOUND));
 
-		int approvedMemberCount = groupMembershipRepository.countByGroupIdAndStatusAndDisabled(groupId, MembershipStatus.APPROVED, false);
-
-		if (approvedMemberCount >= group.getMaxRecruitCount()) {
-			throw new MeetingApplicationException(MeetingApplicationErrorCode.GROUP_MEMBER_LIMIT_EXCEEDED);
-		}
-
 		// REJECTED, LEAVE 사용자의 groupMembership status 수정
-		GroupMembership groupMembership = groupMembershipRepository.findByGroupIdAndMemberId(groupId, memberId)
+		GroupMembership groupMembership = groupMembershipRepository.findByGroupIdAndMemberIdAndDisabled(groupId, memberId, false)
 			.map(existingMembership -> {
 				if (existingMembership.getStatus() == MembershipStatus.REJECTED ||
 					existingMembership.getStatus() == MembershipStatus.LEAVE) {
@@ -79,10 +73,10 @@ public class MeetingApplicationService {
 	// 리스트 조회
 	public MeetingApplicationListDto getMeetingApplications(Long groupId, Long memberId) {
 
-		GroupMembership membership = groupMembershipRepository.findByGroupIdAndMemberId(groupId, memberId)
+		GroupMembership membership = groupMembershipRepository.findByGroupIdAndMemberIdAndDisabled(groupId, memberId, false)
 			.orElseThrow(() -> new MeetingApplicationException(MeetingApplicationErrorCode.MEMBER_NOT_FOUND_IN_GROUP));
 
-		// 권한 체크
+		// 조회 권한 체크
 		if (!membership.getGroupRole().equals(GroupRole.LEADER)) {
 			throw new MeetingApplicationException(MeetingApplicationErrorCode.UNAUTHORIZED_ACCESS);
 		}
@@ -99,10 +93,10 @@ public class MeetingApplicationService {
 	// 상세 조회
 	public MeetingApplicationDto getMeetingApplication(Long groupId, Long meetingApplicationId, Long memberId) {
 
-		GroupMembership membership = groupMembershipRepository.findByGroupIdAndMemberId(groupId, memberId)
+		GroupMembership membership = groupMembershipRepository.findByGroupIdAndMemberIdAndDisabled(groupId, memberId, false)
 			.orElseThrow(() -> new MeetingApplicationException(MeetingApplicationErrorCode.MEMBER_NOT_FOUND_IN_GROUP));
 
-		// 권한 체크
+		// 조회 권한 체크
 		if (!membership.getGroupRole().equals(GroupRole.LEADER)) {
 			throw new MeetingApplicationException(MeetingApplicationErrorCode.UNAUTHORIZED_ACCESS);
 		}
@@ -111,5 +105,19 @@ public class MeetingApplicationService {
 			.orElseThrow(() -> new MeetingApplicationException(MeetingApplicationErrorCode.MEETING_APPLICATION_NOT_FOUND));
 
 		return MeetingApplicationDto.from(meetingApplication);
+	}
+
+	// 검증 메서드
+	public void validateGroupMemberLimit(Long groupId) {
+		Group group = groupRepository.findByIdAndDisabled(groupId, false)
+			.orElseThrow(() -> new MeetingApplicationException(MeetingApplicationErrorCode.GROUP_NOT_FOUND));
+
+		int approvedMemberCount = groupMembershipRepository.countByGroupIdAndStatusAndDisabled(
+			groupId, MembershipStatus.APPROVED, false
+		);
+
+		if (approvedMemberCount >= group.getMaxRecruitCount()) {
+			throw new MeetingApplicationException(MeetingApplicationErrorCode.GROUP_MEMBER_LIMIT_EXCEEDED);
+		}
 	}
 }
