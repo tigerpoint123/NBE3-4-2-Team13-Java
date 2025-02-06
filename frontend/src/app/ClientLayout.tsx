@@ -14,7 +14,6 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import Cookies from "js-cookie";
 
 function ModeToggle() {
   const { setTheme } = useTheme();
@@ -123,8 +122,9 @@ export function ClientLayout({children,}: React.ComponentProps<typeof NextThemes
   }
 
   const logout = () => {
-    // 쿠키 삭제
-    Cookies.remove('accessToken');  
+    // 로컬 스토리지에 저장된 토큰 삭제
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
 
     // 나중에는 fetch(DELETE http://localhost:8080/api/v1/members/logout) 가 선행된 후 removeLoginMember(); 가 실행되는 구조로 변경될 예정이다.
     removeLoginMember();
