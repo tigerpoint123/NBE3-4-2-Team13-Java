@@ -1,10 +1,13 @@
 "use client";
+
 import { useEffect, useState } from "react";
+import { Users } from 'lucide-react';
 
 interface ChatRoom {
   chatRoomId: number;
   groupId: number;
   groupName: string;
+  participant: number;
 }
 
 interface ApiResponse {
@@ -73,8 +76,9 @@ export default function ChatPage() {
               onClick={() => window.location.href = `/chat/${room.chatRoomId}`}
             >
               <h2 className="font-semibold">{room.groupName}</h2>
-              <p className="text-sm text-gray-500">
-                모임 ID: {room.groupId}
+              <p className="text-sm text-gray-500 flex items-center gap-1">
+                <Users className="w-4 h-4" />
+                {room.participant}
               </p>
             </div>
           ))
