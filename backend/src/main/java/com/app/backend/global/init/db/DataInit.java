@@ -22,12 +22,12 @@ public class DataInit {
     @EventListener(ApplicationReadyEvent.class)
     @Transactional
     void init() {
-        if (memberRepository.findAll().stream().noneMatch(m -> m.getRole().equals("ADMIN"))) {
+        if (memberRepository.findAll().stream().noneMatch(m -> m.getRole().equals("ROLE_ADMIN"))) {
             Member member = Member.builder()
                                   .username("admin")
                                   .password(passwordEncoder.encode("admin"))
                                   .nickname("admin")
-                                  .role("ADMIN")
+                                  .role("ROLE_ADMIN")
                                   .provider(Provider.LOCAL)
                                   .build();
             memberRepository.save(member);
