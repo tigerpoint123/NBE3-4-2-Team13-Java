@@ -16,7 +16,6 @@ export default function ClientPage() {
     useEffect(() => {
         const accessToken = localStorage.getItem('accessToken');
         if (accessToken) {
-            
             try {
                 const payload = JSON.parse(atob(accessToken.split('.')[1]));
                 console.log('사용자 정보:', payload);
@@ -30,7 +29,7 @@ export default function ClientPage() {
 
     return (
         <div className="flex-1 flex justify-center items-center">
-            {!isLogin && (
+            {(!isLogin) && (
                 <Button variant="outline" asChild>
                 <a
                     href={KAKAO_AUTH_URL}
