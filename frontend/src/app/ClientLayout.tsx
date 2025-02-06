@@ -86,6 +86,7 @@ export function ClientLayout({children,}: React.ComponentProps<typeof NextThemes
         if (response.ok) {
           const responseData = await response.json();
           
+          console.log("레이아웃 : "+responseData.data.nickname);
           if (responseData.isSuccess) {
             const memberData = responseData.data;
             setLoginMember({
@@ -94,10 +95,8 @@ export function ClientLayout({children,}: React.ComponentProps<typeof NextThemes
               password: memberData.password,
               nickname: memberData.nickname,
               createdAt: memberData.createdAt,
-              modifiedAt: memberData.modifiedAt,
               provider: memberData.provider,
               role: memberData.authorities.map((auth: any) => auth.authority), // authorities 배열에서 authority 값만 추출
-
             });
           } else {
             setNoLoginMember();
@@ -110,9 +109,9 @@ export function ClientLayout({children,}: React.ComponentProps<typeof NextThemes
         setNoLoginMember();
       }
     };
-  
     fetchLoginMember();
   }, []);
+
 
   // isLoginMemberPending 의 시작상태는 true 이다.
   // 해당값이 true 라는 것은 아직 로그인 상태인지 아닌지 판별되기 전이라는 의미이다.

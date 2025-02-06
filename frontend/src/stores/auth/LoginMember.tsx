@@ -8,7 +8,6 @@ type Member = {
     nickname: string;
     password: string;
     createdAt: string;
-    modifiedAt: string;
     provider: string;
     role: string[];
 }
@@ -38,7 +37,6 @@ function createEmptyMember(): Member {
         nickname: "",
         password: "",
         createdAt: "",
-        modifiedAt: "",
         provider: "",
         role: [],
     };

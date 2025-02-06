@@ -51,7 +51,6 @@ public class KakaoController {
 		Cookie refreshTokenCookie = new Cookie("refreshToken", tokenDto.refreshToken());
 		// Access Token은 응답 본문에 포함
 		Map<String, String> responseBody = new HashMap<>();
-		// responseBody.put("id", String.valueOf(tokenDto.id()));
 		responseBody.put("accessToken", tokenDto.accessToken());
 		responseBody.put("nickname", tokenDto.nickname());
 		responseBody.put("role", "ROLE_USER");

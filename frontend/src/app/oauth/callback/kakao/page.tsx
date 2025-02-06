@@ -53,22 +53,18 @@ export default function KakaoCallback() {
 
                     if (userResponse.ok) {
                         const userData = await userResponse.json();
-                        console.log(userData);
                         // LoginMemberContext 업데이트
                         setLoginMember({
-                            id: userData.id,
-                            username: userData.username,
-                            password: userData.password || "-",
-                            nickname: userData.nickname,
-                            createdAt: userData.createdAt,
-                            modifiedAt: userData.modifiedAt,
-                            provider: userData.provider,
-                            role: userData.authorities || []
+                            id: userData.data.id,
+                            username: userData.data.username,
+                            password: userData.data.password || "-",
+                            nickname: userData.data.nickname,
+                            createdAt: userData.data.createdAt,
+                            provider: userData.data.provider,
+                            role: userData.data.authorities || []
+
                         });
-
-
                     }
-                    
                     router.push('/');  // 성공시에만 리다이렉트
                 } else {
                     throw new Error('액세스 토큰이 없습니다.');

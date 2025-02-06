@@ -1,10 +1,8 @@
 "use client";
 import { LoginMemberContext } from "@/stores/auth/LoginMember";
-import { use } from "react";
+import { use, useEffect } from "react";
 
 export default function ClientPage() {
-    const { loginMember } = use(LoginMemberContext);
-
     // 날짜 포맷팅 함수
     const formatDate = (dateString: string) => {
         if (!dateString) return "정보 없음";
@@ -19,19 +17,21 @@ export default function ClientPage() {
     };
 
     // 권한 표시 포맷팅
-    const formatAuthorities = (authorities: string[]) => {
-        return authorities.map(auth => {
-            switch(auth) {
-                case 'ROLE_USER':
-                    return '일반 회원';
-                case 'ROLE_ADMIN':
-                    return '관리자';
-                default:
-                    return auth;
-            }
-        }).join(', ');
-    };
-    console.log(loginMember);
+    // const formatAuthorities = (authorities: Array<{authority: string}>) => {
+    //     return authorities.map(auth => {
+    //         switch(auth.authority) {
+    //             case 'ROLE_USER':
+    //                 return '일반 회원';
+    //             case 'ROLE_ADMIN':
+    //                 return '관리자';
+    //             default:
+    //                 return auth.authority;
+    //         }
+    //     }).join(', ');
+    // };
+
+    const { loginMember } = use(LoginMemberContext);
+
     return (
         <div className="container mx-auto p-4 max-w-2xl">
             <div className="bg-white rounded-lg shadow-lg p-6">
@@ -52,8 +52,8 @@ export default function ClientPage() {
                         <div className="font-semibold">가입일</div>
                         <div className="col-span-2">{formatDate(loginMember.createdAt)}</div>
 
-                        <div className="font-semibold">회원 권한</div>
-                        <div className="col-span-2">{formatAuthorities(loginMember.role)}</div>
+                        {/* <div className="font-semibold">회원 권한</div>
+                        <div className="col-span-2">{formatAuthorities(loginMember.role.map(auth => ({authority: auth})))}</div> */}
 
                         <div className="font-semibold">가입 방식</div>
                         <div className="col-span-2">{loginMember.provider}</div>

@@ -7,7 +7,7 @@ import { use, useEffect, useState } from "react"; // React Context API을 통해
 
 export default function ClientPage() {
     // frontend/src/app/ClientLayout.tsx 의 `<LoginMemberContext value={loginMemberContextValue}>` 를 통해서 공유된 value 에서 필요한 특정 값들만 가져온다.
-    const { isLogin, loginMember, setLoginMember } = use(LoginMemberContext);
+    const { isLogin } = use(LoginMemberContext);
     const [userNickname, setUserNickname] = useState("");
 
     // 프론트엔드 콜백 주소로 수정
