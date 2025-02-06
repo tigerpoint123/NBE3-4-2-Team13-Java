@@ -145,4 +145,18 @@ public class CommentService {
 
 		return CommentResponse.from(saveReply);
 	}
+
+	//대댓글 수정
+	public CommentResponse updateReply(Long commentId, Long id, CommentCreateRequest req) {
+
+		Comment comment = getCommentValidate(commentId);
+
+		validateCommentContent(req.getContent());
+
+		validateAuthor(comment, id);
+
+		comment.update(req.getContent());
+
+		return CommentResponse.from(comment);
+	}
 }
