@@ -21,7 +21,7 @@ public class ChatRoomService {
 	private final ChatRoomRepository chatRoomRepository;
 
 	public List<ChatRoomListResponse> getChatRoomsByMemberId(Long memberId) {
-		return chatRoomRepository.findAllByMemberId(memberId).stream().map(ChatRoomListResponse::from).toList();
+		return chatRoomRepository.findAllByMemberId(memberId);
 	}
 
 	public ChatRoomDetailResponse getChatRoomDetailsWithApprovedMembers(Long chatRoomId) {

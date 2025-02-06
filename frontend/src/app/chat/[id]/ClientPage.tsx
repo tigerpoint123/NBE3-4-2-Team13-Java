@@ -198,19 +198,26 @@ export default function ChatRoom() {
                         </div>
                         
                         {/* 해당 날짜의 메시지들 */}
-                        {dateMessages.map((message: Message) => (
-                            <div key={message.id} className="flex flex-col mb-2">
-                                <div className="flex items-center gap-2">
-                                    <span className="font-bold dark:text-white">{message.senderNickname}</span>
-                                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                                        {formatTime(new Date(message.createdAt))}
-                                    </span>
+                        {dateMessages.map((message: Message) => {
+                            const isMyMessage = message.senderId === loginMember.id;
+                            return (
+                                <div key={message.id} 
+                                    className={`flex flex-col mb-2 ${isMyMessage ? 'items-end' : 'items-start'}`}>
+                                    <span className="font-bold dark:text-white mb-1">{!isMyMessage && message.senderNickname}</span>
+                                    <div className={`flex items-end gap-2 ${isMyMessage ? 'flex-row-reverse' : ''}`}>
+                                        <p className={`rounded-lg p-2 max-w-[70%] whitespace-pre-wrap break-words
+                                            ${isMyMessage 
+                                                ? 'bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100' 
+                                                : 'bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-gray-100'}`}>
+                                            {message.content}
+                                        </p>
+                                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                                            {formatTime(new Date(message.createdAt))}
+                                        </span>
+                                    </div>
                                 </div>
-                                <p className="mt-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-2 max-w-[70%] dark:text-white">
-                                    {message.content}
-                                </p>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 ))}
                 <div ref={messagesEndRef} />
