@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import Cookies from "js-cookie";
 
 interface ChatRoom {
   chatRoomId: number;
@@ -23,7 +22,7 @@ export default function ChatPage() {
   useEffect(() => {
     const fetchChatRooms = async () => {
       try {
-        const token = Cookies.get('accessToken');
+        const token = localStorage.getItem("accessToken");
         const response = await fetch("http://localhost:8080/api/v1/members/chatrooms", {
           headers: {
             'Authorization': `Bearer ${token}`,
