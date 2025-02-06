@@ -9,12 +9,10 @@ export default function KakaoCallback() {
     const isCallbackProcessed = useRef(false);
     const { setLoginMember } = use(LoginMemberContext);
 
-    console.log("use Effect 실행");
     useEffect(() => {
         const handleKakaoCallback = async () => {
             // 이미 처리된 경우 return
             if (isCallbackProcessed.current) return;
-            console.log(isCallbackProcessed);
             
             try {
                 isCallbackProcessed.current = true;  // 처리 시작 표시
@@ -55,14 +53,20 @@ export default function KakaoCallback() {
 
                     if (userResponse.ok) {
                         const userData = await userResponse.json();
+                        console.log(userData);
                         // LoginMemberContext 업데이트
                         setLoginMember({
                             id: userData.id,
+                            username: userData.username,
+                            password: userData.password || "-",
                             nickname: userData.nickname,
                             createdAt: userData.createdAt,
                             modifiedAt: userData.modifiedAt,
-                            authorities: userData.authorities
+                            provider: userData.provider,
+                            role: userData.authorities || []
                         });
+
+
                     }
                     
                     router.push('/');  // 성공시에만 리다이렉트

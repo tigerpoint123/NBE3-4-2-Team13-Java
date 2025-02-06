@@ -13,9 +13,7 @@ import com.app.backend.domain.member.entity.Member;
 import com.app.backend.domain.member.entity.MemberDetails;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.UnsupportedJwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,6 +32,8 @@ public class JwtProvider {
 			.claim("name", member.getUsername())
 			.claim("id", member.getId())
 			.claim("role", member.getRole())
+			.claim("password", member.getPassword())
+			.claim("provider", member.getProvider())
 			.expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRE_TIME))
 			.signWith(key)  // 저장된 키 사용
 			.compact();
@@ -73,6 +73,8 @@ public class JwtProvider {
 			.id(claims.get("id", Long.class))
 			.username(claims.get("name", String.class))
 			.role(claims.get("role", String.class))
+			.password(claims.get("password", String.class))
+			.nickname(claims.get("nickname", String.class))
 			.build();
 		MemberDetails memberDetails = MemberDetails.of(member);
 

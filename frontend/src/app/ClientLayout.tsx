@@ -90,10 +90,14 @@ export function ClientLayout({children,}: React.ComponentProps<typeof NextThemes
             const memberData = responseData.data;
             setLoginMember({
               id: memberData.id,
+              username: memberData.username,
+              password: memberData.password,
               nickname: memberData.nickname,
-              createdAt: "", // API 응답에 없는 필드
-              modifiedAt: "", // API 응답에 없는 필드
-              authorities: memberData.authorities.map((auth: any) => auth.authority), // authorities 배열에서 authority 값만 추출
+              createdAt: memberData.createdAt,
+              modifiedAt: memberData.modifiedAt,
+              provider: memberData.provider,
+              role: memberData.authorities.map((auth: any) => auth.authority), // authorities 배열에서 authority 값만 추출
+
             });
           } else {
             setNoLoginMember();
@@ -167,7 +171,7 @@ export function ClientLayout({children,}: React.ComponentProps<typeof NextThemes
           <div className="flex items-center gap-2">
             {isLogin && (
               <Button variant="link" asChild>
-                <Link href="/member/me">
+                <Link href="/member/info">
                   <User /> 내 정보
                 </Link>
               </Button>

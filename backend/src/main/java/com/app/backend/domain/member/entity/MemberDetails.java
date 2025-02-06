@@ -13,7 +13,9 @@ import lombok.Getter;
 public class MemberDetails implements UserDetails {
 	private final Long id;
 	private final String username;
+	private final String password;
 	private final String nickname;
+	private final String provider;
 	private final String role;
 	private final boolean disabled;
 
@@ -23,6 +25,8 @@ public class MemberDetails implements UserDetails {
 		this.nickname = member.getNickname();
 		this.role = member.getRole();
 		this.disabled = member.getDisabled();
+		this.password = member.getPassword();
+		this.provider = String.valueOf(member.getProvider());
 	}
 
 	public static MemberDetails of(Member member) {
@@ -36,7 +40,7 @@ public class MemberDetails implements UserDetails {
 
 	@Override
 	public String getPassword() {
-		return "";
+		return password;
 	}
 
 	@Override
