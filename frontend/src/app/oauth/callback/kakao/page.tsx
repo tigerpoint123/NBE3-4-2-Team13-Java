@@ -1,26 +1,29 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, use } from 'react';
 import { useRouter } from 'next/navigation';
+import { LoginMemberContext } from '@/stores/auth/LoginMember';
 
 export default function KakaoCallback() {
     const router = useRouter();
     const isCallbackProcessed = useRef(false);
+    const { setLoginMember } = use(LoginMemberContext);
 
+    console.log("use Effect 실행");
     useEffect(() => {
         const handleKakaoCallback = async () => {
-            // 이미 처리된 경우 중복 실행 방지
+            // 이미 처리된 경우 return
             if (isCallbackProcessed.current) return;
+            console.log(isCallbackProcessed);
             
             try {
+                isCallbackProcessed.current = true;  // 처리 시작 표시
                 const code = new URL(window.location.href).searchParams.get('code');
                 
                 if (!code) {
                     throw new Error('인증 코드가 없습니다.');
                 }
 
-                isCallbackProcessed.current = true;  // 처리 시작 표시
-                
                 const response = await fetch(`http://localhost:8080/api/v1/members/kakao/callback?code=${code}`, {
                     method: 'GET',
                     headers: {
@@ -36,13 +39,32 @@ export default function KakaoCallback() {
                 }
 
                 const data = await response.json();
-                console.log('로그인 응답 데이터:', data);  // 응답 데이터 확인용 로그
                 
                 if (data.accessToken) {  // accessToken이 있는 경우에만 저장
                     // 응답 데이터를 localStorage에 저장
                     Object.entries(data).forEach(([key, value]) => {
                         localStorage.setItem(key, String(value));
                     });
+
+                    // accessToken으로 사용자 정보 조회
+                    const userResponse = await fetch('http://localhost:8080/api/v1/members/info', {
+                        headers: {
+                            'Authorization': `Bearer ${data.accessToken}`
+                        }
+                    });
+
+                    if (userResponse.ok) {
+                        const userData = await userResponse.json();
+                        // LoginMemberContext 업데이트
+                        setLoginMember({
+                            id: userData.id,
+                            nickname: userData.nickname,
+                            createdAt: userData.createdAt,
+                            modifiedAt: userData.modifiedAt,
+                            authorities: userData.authorities
+                        });
+                    }
+                    
                     router.push('/');  // 성공시에만 리다이렉트
                 } else {
                     throw new Error('액세스 토큰이 없습니다.');
@@ -56,10 +78,6 @@ export default function KakaoCallback() {
         };
 
         handleKakaoCallback();
-
-        return () => {
-            isCallbackProcessed.current = false;
-        };
     }, [router]);
 
     return (

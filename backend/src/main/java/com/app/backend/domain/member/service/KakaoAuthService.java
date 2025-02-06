@@ -2,9 +2,6 @@ package com.app.backend.domain.member.service;
 
 import java.util.Map;
 
-import javax.security.sasl.AuthenticationException;
-
-import org.hibernate.service.spi.ServiceException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -14,8 +11,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -63,7 +58,7 @@ public class KakaoAuthService {
 
 			memberRepository.save(member);
 
-			return new TokenDto(accessToken, refreshToken, userInfo.nickname(), "USER");
+			return new TokenDto(userInfo.id() ,accessToken, refreshToken, userInfo.nickname(), "USER");
 		} catch (Exception e){
 			log.error("카카오 로그인 처리 중 오류: {}", e.getMessage());
 			if (e.getMessage().contains("authorization code not found")) {
