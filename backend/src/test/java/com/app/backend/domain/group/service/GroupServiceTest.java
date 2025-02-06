@@ -603,7 +603,6 @@ class GroupServiceTest extends SpringBootTestSupporter {
         }
         afterEach();
 
-        Pageable pageable = PageRequest.of(0, 10);
         GroupRequest.Search dto = GroupRequest.Search.builder()
                                                      .categoryName("category")
                                                      .name("1")
@@ -613,7 +612,7 @@ class GroupServiceTest extends SpringBootTestSupporter {
                                                      .build();
 
         //When
-        Page<GroupResponse.ListInfo> responsePage = groupService.getGroupsBySearch(dto, pageable);
+        List<GroupResponse.ListInfo> responseList = groupService.getGroupsBySearch(dto);
 
         //Then
         groups = groups.stream().filter(group -> group.getCategory().getName().equals(dto.getCategoryName())
@@ -621,9 +620,8 @@ class GroupServiceTest extends SpringBootTestSupporter {
                                                  && group.getProvince().equals(dto.getProvince())
                                                  && group.getCity().equals(dto.getCity())
                                                  && group.getTown().equals(dto.getTown())).toList();
-        List<ListInfo> responseList = responsePage.getContent();
 
-        assertThat(responseList).hasSizeLessThanOrEqualTo(pageable.getPageSize());
+        assertThat(responseList).hasSize(groups.size());
         for (int i = 0; i < groups.size(); i++) {
             Group                  group       = groups.get(i);
             GroupResponse.ListInfo responseDto = responseList.get(i);
@@ -665,6 +663,7 @@ class GroupServiceTest extends SpringBootTestSupporter {
         }
         afterEach();
 
+        Pageable pageable = PageRequest.of(0, 10);
         GroupRequest.Search dto = GroupRequest.Search.builder()
                                                      .categoryName("category")
                                                      .name("1")
@@ -674,9 +673,29 @@ class GroupServiceTest extends SpringBootTestSupporter {
                                                      .build();
 
         //When
+        Page<GroupResponse.ListInfo> responsePage = groupService.getGroupsBySearch(dto, pageable);
 
         //Then
+        groups = groups.stream().filter(group -> group.getCategory().getName().equals(dto.getCategoryName())
+                                                 && group.getName().contains(dto.getName())
+                                                 && group.getProvince().equals(dto.getProvince())
+                                                 && group.getCity().equals(dto.getCity())
+                                                 && group.getTown().equals(dto.getTown())).toList();
+        List<ListInfo> responseList = responsePage.getContent();
 
+        assertThat(responseList).hasSizeLessThanOrEqualTo(pageable.getPageSize());
+        for (int i = 0; i < groups.size(); i++) {
+            Group                  group       = groups.get(i);
+            GroupResponse.ListInfo responseDto = responseList.get(i);
+
+            assertThat(responseDto.getName()).isEqualTo(group.getName());
+            assertThat(responseDto.getProvince()).isEqualTo(group.getProvince());
+            assertThat(responseDto.getCity()).isEqualTo(group.getCity());
+            assertThat(responseDto.getTown()).isEqualTo(group.getTown());
+            assertThat(responseDto.getRecruitStatus()).isEqualTo(group.getRecruitStatus().name());
+            assertThat(responseDto.getMaxRecruitCount()).isEqualTo(group.getMaxRecruitCount());
+            assertThat(responseDto.getCategoryName()).isEqualTo(category.getName());
+        }
     }
 
     @Test
