@@ -124,14 +124,39 @@ export function ClientLayout({children,}: React.ComponentProps<typeof NextThemes
     );
   }
 
-  const logout = () => {
-    // 로컬 스토리지에 저장된 토큰 삭제
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
+  const logout = async () => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      // 백엔드에 로그아웃 요청
+      const response = await fetch('http://localhost:8080/api/v1/members/logout', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'  // refreshToken이 쿠키에 있으므로 필요
+      });
 
-    // 나중에는 fetch(DELETE http://localhost:8080/api/v1/members/logout) 가 선행된 후 removeLoginMember(); 가 실행되는 구조로 변경될 예정이다.
-    removeLoginMember();
-    router.replace("/");
+      if (!response.ok) {
+        throw new Error('로그아웃 실패');
+      }
+
+      // 프론트엔드 정리
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('nickname');
+      document.cookie = 'refreshToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      removeLoginMember();
+      router.replace("/");
+      
+    } catch (error) {
+      console.error('로그아웃 중 에러 발생:', error);
+      // 백엔드 에러가 발생하더라도 프론트엔드는 로그아웃 처리
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('nickname');
+      document.cookie = 'refreshToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      removeLoginMember();
+      router.replace("/");
+    }
   };
 
   return (

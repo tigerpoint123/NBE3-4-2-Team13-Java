@@ -53,7 +53,6 @@ public class KakaoController {
 		Map<String, String> responseBody = new HashMap<>();
 		responseBody.put("accessToken", tokenDto.accessToken());
 		responseBody.put("nickname", tokenDto.nickname());
-		responseBody.put("role", "ROLE_USER");
 		util.setCookies(refreshTokenCookie, response);
 
 		return ResponseEntity.ok(responseBody);
