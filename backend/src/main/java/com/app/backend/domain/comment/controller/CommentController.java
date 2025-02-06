@@ -94,4 +94,22 @@ public class CommentController {
 			response
 		);
 	}
+
+	//대댓글 작성
+	@PostMapping("/{id}/reply")
+	@ResponseStatus(HttpStatus.CREATED)
+	public ApiResponse<CommentResponse> createReply(
+		@PathVariable(name = "id") Long commentId,
+		@RequestBody CommentCreateRequest req,
+		@AuthenticationPrincipal MemberDetails memberDetails
+	) {
+		CommentResponse response = commentService.createReply(commentId, memberDetails.getId(), req);
+
+		return ApiResponse.of(
+			true,
+			HttpStatus.CREATED,
+			"%d번 댓글에 대한 답글이 작성되었습니다.".formatted(commentId),
+			response
+		);
+	}
 }

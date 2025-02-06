@@ -117,4 +117,32 @@ public class CommentService {
 
 		return comments.map(CommentResponse::from);
 	}
+
+
+	// 대댓글 작성
+	@Transactional
+	public CommentResponse createReply(Long commentId, Long memberId, CommentCreateRequest req) {
+
+		Comment parentComment = getCommentValidate(commentId);
+
+		Member member = memberRepository.findByIdAndDisabled(memberId, false)
+			.orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+
+		validateCommentContent(req.getContent());
+
+
+		Comment reply = Comment.builder()
+			.content(req.getContent())
+			.post(parentComment.getPost())
+			.member(member)
+			.parent(parentComment)
+			.build();
+
+		Comment saveReply = commentRepository.save(reply);
+
+		parentComment.addReply(saveReply);
+
+		return CommentResponse.from(saveReply);
+	}
 }
