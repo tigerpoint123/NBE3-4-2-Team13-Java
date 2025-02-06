@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.app.backend.domain.comment.dto.request.CommentCreateRequest;
+import com.app.backend.domain.comment.dto.request.CommentReplyCreateRequest;
 import com.app.backend.domain.comment.dto.response.CommentResponse;
 import com.app.backend.domain.comment.entity.Comment;
 import com.app.backend.domain.comment.exception.CommentErrorCode;
@@ -116,5 +117,36 @@ public class CommentService {
 		Page<Comment> comments = commentRepository.findByPostAndDisabled(post, false, pageable);
 
 		return comments.map(CommentResponse::from);
+	}
+
+
+	@Transactional
+	public CommentResponse createReply(Long postId, Long memberId, CommentReplyCreateRequest req) {
+
+		Post post = getPostValidate(postId);
+
+		// 부모 댓글 확인
+		Comment parentComment = commentRepository.findByIdAndDisabled(req.getParentId(), false)
+			.orElseThrow(() -> new CommentException(CommentErrorCode.PARENT_COMMENT_NOT_FOUND));
+
+		Member member = memberRepository.findByIdAndDisabled(memberId, false)
+			.orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+		// 내용 검증
+		validateCommentContent(req.getContent());
+
+
+		Comment reply = Comment.builder()
+			.content(req.getContent())
+			.post(post)
+			.member(member)
+			.parent(parentComment)
+			.build();
+
+		Comment saveReply = commentRepository.save(reply);
+
+		parentComment.addReply(saveReply);
+
+		return CommentResponse.from(saveReply);
 	}
 }
