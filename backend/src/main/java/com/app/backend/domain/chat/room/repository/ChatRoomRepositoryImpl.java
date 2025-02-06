@@ -6,7 +6,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Repository;
 
 import com.app.backend.domain.chat.room.dto.response.ChatRoomDetailResponse;
-import com.app.backend.domain.chat.room.entity.ChatRoom;
+import com.app.backend.domain.chat.room.dto.response.ChatRoomListResponse;
 import com.app.backend.domain.chat.room.entity.QChatRoom;
 import com.app.backend.domain.group.dto.response.GroupChatResponse;
 import com.app.backend.domain.group.entity.MembershipStatus;
@@ -15,6 +15,7 @@ import com.app.backend.domain.group.entity.QGroupMembership;
 import com.app.backend.domain.member.dto.response.MemberChatResponseDto;
 import com.app.backend.domain.member.entity.QMember;
 import com.querydsl.core.types.Projections;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -32,18 +33,28 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom {
 	 * @return 채팅방 목록
 	 */
 	@Override
-	public List<ChatRoom> findAllByMemberId(final Long memberId) {
+	public List<ChatRoomListResponse> findAllByMemberId(final Long memberId) {
 		QChatRoom chatRoom = QChatRoom.chatRoom;
 		QGroup group = QGroup.group;
 		QGroupMembership groupMembership = QGroupMembership.groupMembership;
 
 		return jpaQueryFactory
-			.select(chatRoom)
+			.select(Projections.constructor(ChatRoomListResponse.class,
+				chatRoom.id,
+				group.id,
+				group.name,
+				// APPROVED 상태만 카운트
+				JPAExpressions
+					.select(groupMembership.countDistinct())
+					.from(groupMembership)
+					.where(groupMembership.group.id.eq(group.id)
+						.and(groupMembership.status.eq(MembershipStatus.APPROVED)))
+			))
 			.from(chatRoom)
 			.join(chatRoom.group, group)
 			.join(groupMembership).on(groupMembership.group.id.eq(group.id))
-			.where(groupMembership.member.id.eq(memberId))
-			.distinct()
+			.where(groupMembership.member.id.eq(memberId)) // 현재 멤버가 속한 그룹만
+			.groupBy(chatRoom.id, group.id, group.name)
 			.fetch();
 	}
 
