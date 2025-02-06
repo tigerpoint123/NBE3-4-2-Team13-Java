@@ -7,20 +7,21 @@ export default function KakaoCallback() {
     const router = useRouter();
     const isCallbackProcessed = useRef(false);
 
+    console.log("use Effect 실행");
     useEffect(() => {
         const handleKakaoCallback = async () => {
-            // 이미 처리된 경우 중복 실행 방지
+            // 이미 처리된 경우 return
             if (isCallbackProcessed.current) return;
+            console.log(isCallbackProcessed);
             
             try {
+                isCallbackProcessed.current = true;  // 처리 시작 표시
                 const code = new URL(window.location.href).searchParams.get('code');
                 
                 if (!code) {
                     throw new Error('인증 코드가 없습니다.');
                 }
 
-                isCallbackProcessed.current = true;  // 처리 시작 표시
-                
                 const response = await fetch(`http://localhost:8080/api/v1/members/kakao/callback?code=${code}`, {
                     method: 'GET',
                     headers: {
@@ -56,10 +57,6 @@ export default function KakaoCallback() {
         };
 
         handleKakaoCallback();
-
-        return () => {
-            isCallbackProcessed.current = false;
-        };
     }, [router]);
 
     return (

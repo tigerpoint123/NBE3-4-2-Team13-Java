@@ -32,7 +32,7 @@ export default function ClientPage() {
 
     return (
         <div className="flex-1 flex justify-center items-center">
-            {!hasToken && (
+            {!isLogin && (
                 <Button variant="outline" asChild>
                 <a
                     href={KAKAO_AUTH_URL}
@@ -42,7 +42,7 @@ export default function ClientPage() {
                 </a>
                 </Button>
             )}
-            {hasToken && <div>{userNickname}님 환영합니다.</div>}
+            {isLogin && <div>{loginMember.nickname}님 환영합니다.</div>}
         </div>
     );
 }
