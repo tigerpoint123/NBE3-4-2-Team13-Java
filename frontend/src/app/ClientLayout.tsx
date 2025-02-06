@@ -75,17 +75,8 @@ export function ClientLayout({children,}: React.ComponentProps<typeof NextThemes
     // 그 상황을 실감나게 흉내내기 위해서 setTimeout을 사용하였다.
     const fetchLoginMember = async () => {
       try {
-        // 쿠키에서 토큰 가져오기
-        const cookies = document.cookie.split(';');
-        const tokenCookie = cookies.find(cookie => cookie.trim().startsWith('accessToken='));
-        
-        if (!tokenCookie) {
-          setNoLoginMember();
-          return;
-        }
-  
-        const token = tokenCookie.split('=')[1].trim();
-        
+        const token = localStorage.getItem('accessToken');
+
         const response = await fetch("http://localhost:8080/api/v1/members/info", {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -93,7 +84,6 @@ export function ClientLayout({children,}: React.ComponentProps<typeof NextThemes
           },
           credentials: 'include'
         });
-  
         if (response.ok) {
           const responseData = await response.json();
           
