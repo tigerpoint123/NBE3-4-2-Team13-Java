@@ -43,6 +43,7 @@ public class CommentControllerReplyTest {
 	private Member testMember;
 	private MemberDetails memberDetails;
 	private Comment parentComment;
+	private Comment testReply;
 
 	@BeforeEach
 	void setUp() {
@@ -67,13 +68,23 @@ public class CommentControllerReplyTest {
 			.build();
 		testPost = postRepository.save(testPost);
 
-		// 테스트용 부모 댓글 생성
+		// 테스트용 댓글 생성
 		parentComment = Comment.builder()
 			.content("부모 댓글")
 			.post(testPost)
 			.member(testMember)
 			.build();
 		parentComment = commentRepository.save(parentComment);
+
+		// 테스트용 대댓글 생성
+		testReply = Comment.builder()
+			.content("test reply")
+			.post(testPost)
+			.member(testMember)
+			.parent(parentComment)
+			.build();
+		testReply = commentRepository.save(testReply);
+		parentComment.addReply(testReply);
 	}
 
 	@Test
@@ -161,5 +172,90 @@ public class CommentControllerReplyTest {
 			.andExpect(jsonPath("$.code").value("CM001"))
 			.andExpect(jsonPath("$.message").value("댓글을 찾을 수 없습니다"));
 	}
+
+	@Test
+	@DisplayName("대댓글 수정 성공")
+	void updateReply() throws Exception {
+
+		ResultActions resultActions = mvc
+			.perform(
+				patch("/api/v1/comment/"+testReply.getId()+"/reply")
+					.content("""
+						{
+							"content": "수정된 대댓글"
+						}
+						""")
+					.contentType(MediaType.APPLICATION_JSON)
+					.with(user(memberDetails))
+			)
+			.andDo(print());
+
+		resultActions
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.isSuccess").value(true))
+			.andExpect(jsonPath("$.code").value("200"))
+			.andExpect(jsonPath("$.data.content").value("수정된 대댓글"))
+			.andExpect(jsonPath("$.data.parentId").value(parentComment.getId()))
+			.andExpect(jsonPath("$.data.postId").value(testPost.getId()));
+	}
+
+	@Test
+	@DisplayName("대댓글 수정 실패 (작성자가 아닌 경우)")
+	void updateReply2() throws Exception {
+
+		Member otherMember = Member.builder()
+			.username("other")
+			.password("password")
+			.nickname("다른사용자")
+			.role("USER")
+			.build();
+		memberRepository.save(otherMember);
+		MemberDetails otherMemberDetails = new MemberDetails(otherMember);
+
+		ResultActions resultActions = mvc
+			.perform(
+				patch("/api/v1/comment/"+testReply.getId()+"/reply")
+					.content("""
+						{
+							"content": "수정된 대댓글"
+						}
+						""")
+					.contentType(MediaType.APPLICATION_JSON)
+					.with(user(otherMemberDetails))
+			)
+			.andDo(print());
+
+		resultActions
+			.andExpect(status().isForbidden())
+			.andExpect(jsonPath("$.isSuccess").value(false))
+			.andExpect(jsonPath("$.code").value("CM003"))
+			.andExpect(jsonPath("$.message").value("댓글에 대한 권한이 없습니다"));
+	}
+
+	@Test
+	@DisplayName("대댓글 수정 실패 (내용 없음)")
+	void updateReply3() throws Exception {
+
+		ResultActions resultActions = mvc
+			.perform(
+				patch("/api/v1/comment/"+testReply.getId()+"/reply")
+					.content("""
+						{
+							"content": ""
+						}
+						""")
+					.contentType(MediaType.APPLICATION_JSON)
+					.with(user(memberDetails))
+			)
+			.andDo(print());
+
+		resultActions
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.isSuccess").value(false))
+			.andExpect(jsonPath("$.code").value("CM004"))
+			.andExpect(jsonPath("$.message").value("댓글 내용이 유효하지 않습니다"));
+	}
+
+
 
 }
