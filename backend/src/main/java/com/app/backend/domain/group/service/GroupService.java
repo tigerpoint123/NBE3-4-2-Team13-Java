@@ -222,6 +222,43 @@ public class GroupService {
     }
 
     /**
+     * 카테고리와 모임 이름, 상세 주소로 모임(Group) 다 건 조회
+     *
+     * @param dto - 모임 검색 요청 DTO
+     * @return 모임 응답 DTO 목록(List)
+     */
+    public List<GroupResponse.ListInfo> getGroupsBySearch(@NotNull final GroupRequest.Search dto) {
+        return groupRepository.findAllByCategoryAndNameContainingAndRegion(dto.getCategoryName(),
+                                                                           dto.getName(),
+                                                                           dto.getProvince(),
+                                                                           dto.getCity(),
+                                                                           dto.getTown(),
+                                                                           false)
+                              .stream()
+                              .map(GroupResponse::toListInfo)
+                              .toList();
+    }
+
+    /**
+     * 카테고리와 모임 이름, 상세 주소로 모임(Group) 다 건 조회
+     *
+     * @param dto      - 모임 검색 요청 DTO
+     * @param pageable - 페이징 객체
+     * @return 모임 응답 DTO 목록(Page)
+     */
+    public Page<GroupResponse.ListInfo> getGroupsBySearch(@NotNull final GroupRequest.Search dto,
+                                                          @NotNull final Pageable pageable) {
+        return groupRepository.findAllByCategoryAndNameContainingAndRegion(dto.getCategoryName(),
+                                                                           dto.getName(),
+                                                                           dto.getProvince(),
+                                                                           dto.getCity(),
+                                                                           dto.getTown(),
+                                                                           false,
+                                                                           pageable)
+                              .map(GroupResponse::toListInfo);
+    }
+
+    /**
      * 모임(Group) 수정
      *
      * @param groupId  - 모임 ID

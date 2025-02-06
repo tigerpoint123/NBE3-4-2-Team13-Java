@@ -3,6 +3,7 @@ package com.app.backend.domain.group.controller;
 import com.app.backend.domain.group.constant.GroupMessageConstant;
 import com.app.backend.domain.group.dto.request.GroupRequest;
 import com.app.backend.domain.group.dto.response.GroupResponse;
+import com.app.backend.domain.group.dto.response.GroupResponse.ListInfo;
 import com.app.backend.domain.group.exception.GroupException;
 import com.app.backend.domain.group.exception.GroupMembershipException;
 import com.app.backend.domain.group.service.GroupMembershipService;
@@ -12,8 +13,11 @@ import com.app.backend.global.dto.response.ApiResponse;
 import com.app.backend.global.error.exception.GlobalErrorCode;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -62,8 +66,17 @@ public class GroupController {
     }
 
     @GetMapping
-    public ApiResponse<List<GroupResponse.ListInfo>> getGroups() {
-        List<GroupResponse.ListInfo> responseList = groupService.getGroups();
+    public ApiResponse<Page<ListInfo>> getGroups(@RequestBody @Valid final GroupRequest.Search requestDto,
+                                                 BindingResult bindingResult,
+                                                 @PageableDefault(size = 10,
+                                                                  page = 0,
+                                                                  sort = "createdAt",
+                                                                  direction = Direction.DESC) Pageable pageable) {
+        if (bindingResult.hasErrors())
+            throw new GroupException(GlobalErrorCode.INVALID_INPUT_VALUE);
+
+        Page<GroupResponse.ListInfo> responseList = groupService.getGroupsBySearch(requestDto, pageable);
+
         return ApiResponse.of(true, HttpStatus.OK, GroupMessageConstant.READ_GROUPS_SUCCESS, responseList);
     }
 

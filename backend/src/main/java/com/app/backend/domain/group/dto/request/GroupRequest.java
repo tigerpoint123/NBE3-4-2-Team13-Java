@@ -97,4 +97,17 @@ public class GroupRequest {
         private Long memberId;
     }
 
+    @Getter
+    @Setter
+    @Builder
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    public static class Search {
+        private String categoryName;
+        private String name;
+        private String province;
+        private String city;
+        private String town;
+    }
+
 }
