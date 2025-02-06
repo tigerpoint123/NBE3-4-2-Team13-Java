@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.app.backend.domain.comment.dto.request.CommentCreateRequest;
-import com.app.backend.domain.comment.dto.request.CommentReplyCreateRequest;
 import com.app.backend.domain.comment.dto.response.CommentResponse;
 import com.app.backend.domain.comment.service.CommentService;
 import com.app.backend.domain.member.entity.MemberDetails;
@@ -96,19 +95,20 @@ public class CommentController {
 		);
 	}
 
+	//대댓글 작성
 	@PostMapping("/{id}/reply")
 	@ResponseStatus(HttpStatus.CREATED)
 	public ApiResponse<CommentResponse> createReply(
-		@PathVariable(name = "id") Long postId,
-		@RequestBody CommentReplyCreateRequest req,
+		@PathVariable(name = "id") Long commentId,
+		@RequestBody CommentCreateRequest req,
 		@AuthenticationPrincipal MemberDetails memberDetails
 	) {
-		CommentResponse response = commentService.createReply(postId, memberDetails.getId(), req);
+		CommentResponse response = commentService.createReply(commentId, memberDetails.getId(), req);
 
 		return ApiResponse.of(
 			true,
 			HttpStatus.CREATED,
-			"%d번 댓글에 대한 답글이 작성되었습니다.".formatted(response.getId()),
+			"%d번 댓글에 대한 답글이 작성되었습니다.".formatted(commentId),
 			response
 		);
 	}

@@ -40,7 +40,6 @@ public class CommentControllerReplyTest {
 	private CommentRepository commentRepository;
 
 	private Post testPost;
-	private Long testPostId;
 	private Member testMember;
 	private MemberDetails memberDetails;
 	private Comment parentComment;
@@ -67,7 +66,6 @@ public class CommentControllerReplyTest {
 			.memberId(testMember.getId())
 			.build();
 		testPost = postRepository.save(testPost);
-		testPostId = testPost.getId();
 
 		// 테스트용 부모 댓글 생성
 		parentComment = Comment.builder()
@@ -82,28 +80,19 @@ public class CommentControllerReplyTest {
 	@DisplayName("대댓글 작성 성공")
 	void createReply() throws Exception {
 
-		Comment parentComment = Comment.builder()
-			.content("부모 댓글")
-			.post(testPost)
-			.member(testMember)
-			.build();
-		parentComment = commentRepository.save(parentComment);
-
 		ResultActions resultActions = mvc
 			.perform(
-				post("/api/v1/comment/" + testPostId + "/reply")
+				post("/api/v1/comment/" + parentComment.getId() + "/reply")
 					.content("""
 						{
-							"content": "test",
-							"parentId": %d
+							"content": "test"
 						}
-						""".formatted(parentComment.getId()))
+						""")
 
 					.contentType(MediaType.APPLICATION_JSON)
 					.with(user(memberDetails))
 			)
 			.andDo(print());
-
 
 		resultActions
 			.andExpect(handler().handlerType(CommentController.class))
@@ -111,42 +100,32 @@ public class CommentControllerReplyTest {
 			.andExpect(status().isCreated())
 			.andExpect(jsonPath("$.isSuccess").value(true))
 			.andExpect(jsonPath("$.code").value("201"))
-			.andExpect(jsonPath("$.data.id").exists())
 			.andExpect(jsonPath("$.data.content").value("test"))
-			.andExpect(jsonPath("$.data.postId").value(testPostId))
+			.andExpect(jsonPath("$.data.parentId").value(parentComment.getId()))
+			.andExpect(jsonPath("$.data.postId").value(testPost.getId()))
 			.andExpect(jsonPath("$.data.memberId").value(testMember.getId()))
 			.andExpect(jsonPath("$.data.nickname").value(testMember.getNickname()))
-			.andExpect(jsonPath("$.data.parentId").value(parentComment.getId()))
 			.andExpect(jsonPath("$.data.replies").isArray())
 			.andExpect(jsonPath("$.data.replies").isEmpty());
 	}
 
 	@Test
-	@DisplayName("대댓글 작성 실패 (내용 공백)")
+	@DisplayName("대댓글 작성 실패 (내용 없음)")
 	void createReply2() throws Exception {
-
-		Comment parentComment = Comment.builder()
-			.content("부모 댓글")
-			.post(testPost)
-			.member(testMember)
-			.build();
-		parentComment = commentRepository.save(parentComment);
 
 		ResultActions resultActions = mvc
 			.perform(
-				post("/api/v1/comment/" + testPostId + "/reply")
+				post("/api/v1/comment/" + parentComment.getId() + "/reply")
 					.content("""
 						{
-							"content": "",
-							"parentId": %d
+							"content": ""
 						}
-						""".formatted(parentComment.getId()))
+						""")
 
 					.contentType(MediaType.APPLICATION_JSON)
 					.with(user(memberDetails))
 			)
 			.andDo(print());
-
 		resultActions
 			.andExpect(handler().handlerType(CommentController.class))
 			.andExpect(handler().methodName("createReply"))
@@ -154,7 +133,6 @@ public class CommentControllerReplyTest {
 			.andExpect(jsonPath("$.isSuccess").value(false))
 			.andExpect(jsonPath("$.code").value("CM004"))
 			.andExpect(jsonPath("$.message").value("댓글 내용이 유효하지 않습니다"));
-
 	}
 
 	@Test
@@ -163,13 +141,13 @@ public class CommentControllerReplyTest {
 
 		ResultActions resultActions = mvc
 			.perform(
-				post("/api/v1/comment/" + testPostId + "/reply")
+				post("/api/v1/comment/0/reply")
 					.content("""
 						{
-							"content": "test",
-							"parentId": 10000
+							"content": "test"
 						}
 						""")
+
 					.contentType(MediaType.APPLICATION_JSON)
 					.with(user(memberDetails))
 			)
@@ -180,36 +158,8 @@ public class CommentControllerReplyTest {
 			.andExpect(handler().methodName("createReply"))
 			.andExpect(status().isNotFound())
 			.andExpect(jsonPath("$.isSuccess").value(false))
-			.andExpect(jsonPath("$.code").value("CM005"))
-			.andExpect(jsonPath("$.message").value("부모 댓글을 찾을 수 없습니다"));
-
+			.andExpect(jsonPath("$.code").value("CM001"))
+			.andExpect(jsonPath("$.message").value("댓글을 찾을 수 없습니다"));
 	}
 
-	@Test
-	@DisplayName("대댓글 작성 실패 (게시물 없음)")
-	void createReply4() throws Exception {
-
-		ResultActions resultActions = mvc
-			.perform(
-				post("/api/v1/comment/10000/reply")
-					.content("""
-						{
-							"content": "test",
-							"parentId": 1
-						}
-						""")
-					.contentType(MediaType.APPLICATION_JSON)
-					.with(user(memberDetails))
-			)
-			.andDo(print());
-
-		resultActions
-			.andExpect(handler().handlerType(CommentController.class))
-			.andExpect(handler().methodName("createReply"))
-			.andExpect(status().isNotFound())
-			.andExpect(jsonPath("$.isSuccess").value(false))
-			.andExpect(jsonPath("$.code").value("P001"))
-			.andExpect(jsonPath("$.message").value("게시물 정보가 존재하지 않음"));
-
-	}
 }

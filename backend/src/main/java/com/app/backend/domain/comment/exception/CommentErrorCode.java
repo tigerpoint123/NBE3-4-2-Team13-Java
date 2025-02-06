@@ -14,8 +14,7 @@ public enum CommentErrorCode implements DomainErrorCode {
 	COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "CM001", "댓글을 찾을 수 없습니다"),
 	COMMENT_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "CM002", "댓글 생성에 실패했습니다"),
 	COMMENT_ACCESS_DENIED(HttpStatus.FORBIDDEN, "CM003", "댓글에 대한 권한이 없습니다"),
-	COMMENT_INVALID_CONTENT(HttpStatus.BAD_REQUEST, "CM004", "댓글 내용이 유효하지 않습니다"),
-	PARENT_COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "CM005", "부모 댓글을 찾을 수 없습니다");
+	COMMENT_INVALID_CONTENT(HttpStatus.BAD_REQUEST, "CM004", "댓글 내용이 유효하지 않습니다");
 
 
 
