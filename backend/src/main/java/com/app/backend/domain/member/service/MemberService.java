@@ -4,11 +4,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.app.backend.domain.group.entity.Group;
+import com.app.backend.domain.group.entity.GroupMembership;
+import com.app.backend.domain.group.repository.GroupMembershipRepository;
 import com.app.backend.domain.member.dto.request.MemberLoginRequestDto;
 import com.app.backend.domain.member.dto.request.MemberModifyRequestDto;
 import com.app.backend.domain.member.dto.response.MemberJoinResponseDto;
@@ -20,8 +22,6 @@ import com.app.backend.domain.member.exception.MemberException;
 import com.app.backend.domain.member.jwt.JwtProvider;
 import com.app.backend.domain.member.repository.MemberRepository;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class MemberService {
 	private final MemberRepository memberRepository;
+	private final GroupMembershipRepository groupMembershipRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtProvider jwtProvider;
 	private final boolean disabled = false;
@@ -153,5 +154,19 @@ public class MemberService {
 		LocalDateTime cutoffDate = LocalDateTime.now().minusSeconds(30);
 		int deletedCount = memberRepository.deleteByDisabledIsTrueAndModifiedAtLessThan(cutoffDate);
 		log.info("삭제된 회원 수: {}", deletedCount);
+	}
+
+	public List<Group> getMyGroup(String token) {
+		return Optional.ofNullable(token)
+			.map(t -> t.startsWith("Bearer ") ? t.substring(7) : t)
+			.filter(jwtProvider::validateToken)
+			.map(validateToken -> {
+				Long id = jwtProvider.getMemberId(validateToken);
+				return groupMembershipRepository.findAllByMemberIdAndDisabled(id, false)
+					.stream()
+					.map(GroupMembership::getGroup)
+					.toList();
+			})
+			.orElse(List.of());  // 토큰이 없거나 유효하지 않은 경우 빈 리스트 반환
 	}
 }

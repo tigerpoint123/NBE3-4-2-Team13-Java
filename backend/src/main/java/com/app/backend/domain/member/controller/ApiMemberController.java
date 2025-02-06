@@ -1,9 +1,7 @@
 package com.app.backend.domain.member.controller;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.app.backend.domain.group.entity.Group;
 import com.app.backend.domain.member.dto.request.MemberJoinRequestDto;
 import com.app.backend.domain.member.dto.request.MemberLoginRequestDto;
 import com.app.backend.domain.member.dto.request.MemberModifyRequestDto;
@@ -28,8 +27,6 @@ import com.app.backend.domain.member.util.CommonUtil;
 import com.app.backend.global.dto.response.ApiResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -104,6 +101,15 @@ public class ApiMemberController {
 		return ApiResponse.of(
 			true, "MEMBER_INFO_SUCCESS", "회원정보 조회에 성공했습니다", MemberDetails.of(member)
 		);
+	}
+
+	// 소속된 그룹 조회
+	@GetMapping("/mygroups")
+	public List<Group> getMyGroup(
+		@RequestHeader(value = "Authorization") String token
+		) {
+		List<Group> list = memberService.getMyGroup(token);
+		return list;
 	}
 
 	@Operation(summary = "개인정보 수정", description = "관리자 회원 정보를 수정합니다")

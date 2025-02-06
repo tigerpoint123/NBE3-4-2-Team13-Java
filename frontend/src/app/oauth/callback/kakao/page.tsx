@@ -9,12 +9,10 @@ export default function KakaoCallback() {
     const isCallbackProcessed = useRef(false);
     const { setLoginMember } = use(LoginMemberContext);
 
-    console.log("use Effect 실행");
     useEffect(() => {
         const handleKakaoCallback = async () => {
             // 이미 처리된 경우 return
             if (isCallbackProcessed.current) return;
-            console.log(isCallbackProcessed);
             
             try {
                 isCallbackProcessed.current = true;  // 처리 시작 표시
@@ -57,14 +55,16 @@ export default function KakaoCallback() {
                         const userData = await userResponse.json();
                         // LoginMemberContext 업데이트
                         setLoginMember({
-                            id: userData.id,
-                            nickname: userData.nickname,
-                            createdAt: userData.createdAt,
-                            modifiedAt: userData.modifiedAt,
-                            authorities: userData.authorities
+                            id: userData.data.id,
+                            username: userData.data.username,
+                            password: userData.data.password || "-",
+                            nickname: userData.data.nickname,
+                            createdAt: userData.data.createdAt,
+                            provider: userData.data.provider,
+                            role: userData.data.authorities || []
+
                         });
                     }
-                    
                     router.push('/');  // 성공시에만 리다이렉트
                 } else {
                     throw new Error('액세스 토큰이 없습니다.');

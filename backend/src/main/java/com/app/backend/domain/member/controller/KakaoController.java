@@ -46,17 +46,13 @@ public class KakaoController {
 		@Parameter(description = "카카오 인증 코드")
 		@RequestParam("code") String code, HttpServletResponse response
 	) throws IOException {
-		log.info("Code : {}", code);
-
 		TokenDto tokenDto = kakaoAuthService.kakaoLogin(code);
 		// refreshToken만 쿠키에 저장
 		Cookie refreshTokenCookie = new Cookie("refreshToken", tokenDto.refreshToken());
 		// Access Token은 응답 본문에 포함
 		Map<String, String> responseBody = new HashMap<>();
-		// responseBody.put("id", String.valueOf(tokenDto.id()));
 		responseBody.put("accessToken", tokenDto.accessToken());
 		responseBody.put("nickname", tokenDto.nickname());
-		responseBody.put("role", "USER");
 		util.setCookies(refreshTokenCookie, response);
 
 		return ResponseEntity.ok(responseBody);
