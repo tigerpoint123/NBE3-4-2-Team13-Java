@@ -176,60 +176,60 @@ export default function ChatRoom() {
     };
 
     return (
-        <div className="flex flex-col h-screen">
+        <div className="flex flex-col h-[calc(100vh-4rem)]">
             {/* 채팅방 헤더 */}
-            <div className="bg-white border-b p-4">
-                <h1 className="text-xl font-bold">{chatRoomDetail?.group.groupName}</h1>
-                <p className="text-sm text-gray-500 flex items-center gap-1">
-                <Users className="w-4 h-4" /> {/* 사람 아이콘 추가 */}
-                {chatRoomDetail?.group.participantCount}명
+            <div className="bg-white dark:bg-gray-800 border-b p-4 flex-shrink-0">
+                <h1 className="text-xl font-bold dark:text-white">{chatRoomDetail?.group.groupName}</h1>
+                <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                    <Users className="w-4 h-4" />
+                    {chatRoomDetail?.group.participantCount}명
                 </p>
             </div>
-
+    
             {/* 메시지 목록 */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
                 {Object.entries(groupMessagesByDate(messages)).map(([date, dateMessages]) => (
                     <div key={date}>
                         {/* 날짜 구분선 */}
                         <div className="flex items-center my-4">
-                            <div className="flex-1 border-t border-gray-300"></div>
-                            <span className="mx-4 text-sm text-gray-500">{date}</span>
-                            <div className="flex-1 border-t border-gray-300"></div>
+                            <div className="flex-1 border-t border-gray-300 dark:border-gray-600"></div>
+                            <span className="mx-4 text-sm text-gray-500 dark:text-gray-400">{date}</span>
+                            <div className="flex-1 border-t border-gray-300 dark:border-gray-600"></div>
                         </div>
                         
                         {/* 해당 날짜의 메시지들 */}
                         {dateMessages.map((message: Message) => (
                             <div key={message.id} className="flex flex-col mb-2">
                                 <div className="flex items-center gap-2">
-                                    <span className="font-bold">{message.senderNickname}</span>
-                                    <span className="text-xs text-gray-500">
+                                    <span className="font-bold dark:text-white">{message.senderNickname}</span>
+                                    <span className="text-xs text-gray-500 dark:text-gray-400">
                                         {formatTime(new Date(message.createdAt))}
                                     </span>
                                 </div>
-                                <p className="mt-1 bg-gray-100 rounded-lg p-2 max-w-[70%]">
+                                <p className="mt-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-2 max-w-[70%] dark:text-white">
                                     {message.content}
                                 </p>
                             </div>
                         ))}
                     </div>
                 ))}
-                <div ref={messagesEndRef} /> {/* 스크롤 타겟 추가 */}
+                <div ref={messagesEndRef} />
             </div>
-
+    
             {/* 메시지 입력 */}
-            <div className="border-t p-4">
+            <div className="border-t p-4 flex-shrink-0 bg-white dark:bg-gray-800">
                 <div className="flex gap-2">
                     <input
                         type="text"
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                        className="flex-1 border rounded-lg px-4 py-2"
+                        className="flex-1 border rounded-lg px-4 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                         placeholder="메시지를 입력하세요"
                     />
                     <button 
                         onClick={sendMessage}
-                        className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+                        className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
                     >
                         전송
                     </button>
