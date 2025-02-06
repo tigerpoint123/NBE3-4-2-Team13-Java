@@ -76,12 +76,27 @@ export default function ChatRoom() {
     useEffect(() => {
         const fetchChatRoomData = async () => {
             try {
+                const token = localStorage.getItem('accessToken');
+
+                if (!token) {
+                    throw new Error('인증 토큰이 없습니다.');
+                }
+
+                // axios 요청 설정
+                const config = {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    withCredentials: true // credentials: 'include'와 동일
+                };
+
                 // 채팅방 정보 조회
-                const roomResponse = await axios.get(`http://localhost:8080/api/v1/chatrooms/${chatRoomId}`);
+                const roomResponse = await axios.get(`http://localhost:8080/api/v1/chatrooms/${chatRoomId}`, config);
                 setChatRoomDetail(roomResponse.data.data);
         
                 // 메시지 목록 조회
-                const messagesResponse = await axios.get(`http://localhost:8080/api/v1/chatrooms/${chatRoomId}/messages`);
+                const messagesResponse = await axios.get(`http://localhost:8080/api/v1/chatrooms/${chatRoomId}/messages`, config);
                 setMessages(messagesResponse.data.data.content);
             } catch (error) {
                 console.error('데이터 조회 실패:', error);
