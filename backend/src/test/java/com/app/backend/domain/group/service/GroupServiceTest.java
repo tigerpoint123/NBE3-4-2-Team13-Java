@@ -7,6 +7,7 @@ import com.app.backend.domain.category.entity.Category;
 import com.app.backend.domain.chat.room.entity.ChatRoom;
 import com.app.backend.domain.group.dto.request.GroupRequest;
 import com.app.backend.domain.group.dto.response.GroupResponse;
+import com.app.backend.domain.group.dto.response.GroupResponse.ListInfo;
 import com.app.backend.domain.group.entity.Group;
 import com.app.backend.domain.group.entity.GroupMembership;
 import com.app.backend.domain.group.entity.GroupMembershipId;
@@ -559,6 +560,128 @@ class GroupServiceTest extends SpringBootTestSupporter {
                                                  && group.getCity().equals(city)
                                                  && group.getTown().equals(town)).toList();
         List<GroupResponse.ListInfo> responseList = responsePage.getContent();
+
+        assertThat(responseList).hasSizeLessThanOrEqualTo(pageable.getPageSize());
+        for (int i = 0; i < groups.size(); i++) {
+            Group                  group       = groups.get(i);
+            GroupResponse.ListInfo responseDto = responseList.get(i);
+
+            assertThat(responseDto.getName()).isEqualTo(group.getName());
+            assertThat(responseDto.getProvince()).isEqualTo(group.getProvince());
+            assertThat(responseDto.getCity()).isEqualTo(group.getCity());
+            assertThat(responseDto.getTown()).isEqualTo(group.getTown());
+            assertThat(responseDto.getRecruitStatus()).isEqualTo(group.getRecruitStatus().name());
+            assertThat(responseDto.getMaxRecruitCount()).isEqualTo(group.getMaxRecruitCount());
+            assertThat(responseDto.getCategoryName()).isEqualTo(category.getName());
+        }
+    }
+
+    @Test
+    @DisplayName("[성공] 카테고리와 모임 이름, 상세 주소로 ListInfo DTO 목록 조회")
+    void getGroupsBySearchList() {
+        //Given
+        Category category = Category.builder()
+                                    .name("category")
+                                    .build();
+        em.persist(category);
+
+        int         size   = 20;
+        List<Group> groups = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            Group group = Group.builder()
+                               .name("test%d".formatted(i))
+                               .province("test province%d".formatted(i))
+                               .city("test city%d".formatted(i))
+                               .town("test town%d".formatted(i))
+                               .description("test description%d".formatted(i))
+                               .recruitStatus(RecruitStatus.RECRUITING)
+                               .maxRecruitCount(10)
+                               .category(category)
+                               .build();
+            groups.add(group);
+            em.persist(group);
+        }
+        afterEach();
+
+        GroupRequest.Search dto = GroupRequest.Search.builder()
+                                                     .categoryName("category")
+                                                     .name("1")
+                                                     .province("test province10")
+                                                     .city("test city10")
+                                                     .town("test town10")
+                                                     .build();
+
+        //When
+        List<GroupResponse.ListInfo> responseList = groupService.getGroupsBySearch(dto);
+
+        //Then
+        groups = groups.stream().filter(group -> group.getCategory().getName().equals(dto.getCategoryName())
+                                                 && group.getName().contains(dto.getName())
+                                                 && group.getProvince().equals(dto.getProvince())
+                                                 && group.getCity().equals(dto.getCity())
+                                                 && group.getTown().equals(dto.getTown())).toList();
+
+        assertThat(responseList).hasSize(groups.size());
+        for (int i = 0; i < groups.size(); i++) {
+            Group                  group       = groups.get(i);
+            GroupResponse.ListInfo responseDto = responseList.get(i);
+
+            assertThat(responseDto.getName()).isEqualTo(group.getName());
+            assertThat(responseDto.getProvince()).isEqualTo(group.getProvince());
+            assertThat(responseDto.getCity()).isEqualTo(group.getCity());
+            assertThat(responseDto.getTown()).isEqualTo(group.getTown());
+            assertThat(responseDto.getRecruitStatus()).isEqualTo(group.getRecruitStatus().name());
+            assertThat(responseDto.getMaxRecruitCount()).isEqualTo(group.getMaxRecruitCount());
+            assertThat(responseDto.getCategoryName()).isEqualTo(category.getName());
+        }
+    }
+
+    @Test
+    @DisplayName("[성공] 카테고리와 모임 이름, 상세 주소로 ListInfo DTO 페이징 목록 조회")
+    void getGroupsBySearchPage() {
+        //Given
+        Category category = Category.builder()
+                                    .name("category")
+                                    .build();
+        em.persist(category);
+
+        int         size   = 20;
+        List<Group> groups = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            Group group = Group.builder()
+                               .name("test%d".formatted(i))
+                               .province("test province%d".formatted(i))
+                               .city("test city%d".formatted(i))
+                               .town("test town%d".formatted(i))
+                               .description("test description%d".formatted(i))
+                               .recruitStatus(RecruitStatus.RECRUITING)
+                               .maxRecruitCount(10)
+                               .category(category)
+                               .build();
+            groups.add(group);
+            em.persist(group);
+        }
+        afterEach();
+
+        Pageable pageable = PageRequest.of(0, 10);
+        GroupRequest.Search dto = GroupRequest.Search.builder()
+                                                     .categoryName("category")
+                                                     .name("1")
+                                                     .province("test province10")
+                                                     .city("test city10")
+                                                     .town("test town10")
+                                                     .build();
+
+        //When
+        Page<GroupResponse.ListInfo> responsePage = groupService.getGroupsBySearch(dto, pageable);
+
+        //Then
+        groups = groups.stream().filter(group -> group.getCategory().getName().equals(dto.getCategoryName())
+                                                 && group.getName().contains(dto.getName())
+                                                 && group.getProvince().equals(dto.getProvince())
+                                                 && group.getCity().equals(dto.getCity())
+                                                 && group.getTown().equals(dto.getTown())).toList();
+        List<ListInfo> responseList = responsePage.getContent();
 
         assertThat(responseList).hasSizeLessThanOrEqualTo(pageable.getPageSize());
         for (int i = 0; i < groups.size(); i++) {
