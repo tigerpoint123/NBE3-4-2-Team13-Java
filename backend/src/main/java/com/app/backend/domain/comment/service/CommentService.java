@@ -147,9 +147,9 @@ public class CommentService {
 	}
 
 	//대댓글 수정
-	public CommentResponse updateReply(Long commentId, Long id, CommentCreateRequest req) {
+	public CommentResponse updateReply(Long replyId, Long id, CommentCreateRequest req) {
 
-		Comment comment = getCommentValidate(commentId);
+		Comment comment = getCommentValidate(replyId);
 
 		validateCommentContent(req.getContent());
 

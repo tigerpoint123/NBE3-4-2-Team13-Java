@@ -116,16 +116,16 @@ public class CommentController {
 	//대댓글 수정
 	@PatchMapping("/{id}/reply")
 	public ApiResponse<CommentResponse> updateReply(
-		@PathVariable(name = "id") Long commentId,
+		@PathVariable(name = "id") Long replyId,
 		@RequestBody CommentCreateRequest req,
 		@AuthenticationPrincipal MemberDetails memberDetails
 	) {
-		CommentResponse response = commentService.updateReply(commentId, memberDetails.getId(), req);
+		CommentResponse response = commentService.updateReply(replyId, memberDetails.getId(), req);
 
 		return ApiResponse.of(
 			true,
 			HttpStatus.OK,
-			"%d번 답글이 수정되었습니다.".formatted(commentId),
+			"%d번 답글이 수정되었습니다.".formatted(replyId),
 			response
 		);
 	}

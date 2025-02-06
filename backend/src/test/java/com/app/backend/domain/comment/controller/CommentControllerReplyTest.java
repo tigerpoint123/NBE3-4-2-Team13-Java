@@ -43,8 +43,6 @@ public class CommentControllerReplyTest {
 	@Autowired
 	private ObjectMapper objectMapper;
 
-	private Post testPost;
-	private Member testMember;
 	private MemberDetails memberDetails;
 	private Comment parentComment;
 	private Comment testReply;
@@ -52,7 +50,7 @@ public class CommentControllerReplyTest {
 	@BeforeEach
 	void setUp() {
 		// 테스트용 멤버 생성
-		testMember = Member.builder()
+		Member testMember = Member.builder()
 			.username("testUser")
 			.password("password")
 			.nickname("테스터")
@@ -63,7 +61,7 @@ public class CommentControllerReplyTest {
 		memberDetails = new MemberDetails(testMember);
 
 		// 테스트용 게시물 생성
-		testPost = Post.builder()
+		Post testPost = Post.builder()
 			.title("테스트 게시글")
 			.content("테스트 내용")
 			.postStatus(PostStatus.PUBLIC)
