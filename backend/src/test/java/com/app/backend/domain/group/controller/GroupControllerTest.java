@@ -33,6 +33,10 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
@@ -40,8 +44,8 @@ import org.springframework.web.method.annotation.HandlerMethodValidationExceptio
 
 class GroupControllerTest extends WebMvcTestSupporter {
 
-    GroupResponse.Detail         response;
-    List<GroupResponse.ListInfo> responseList;
+    GroupResponse.Detail response;
+    Page<ListInfo>       responsePage;
 
     @BeforeEach
     void beforeEach() {
@@ -62,11 +66,12 @@ class GroupControllerTest extends WebMvcTestSupporter {
         ReflectionUtil.setPrivateFieldValue(Group.class, group, "createdAt", LocalDateTime.now());
 
         response = GroupResponse.toDetail(group);
-        responseList = List.of(GroupResponse.toListInfo(group));
+        responsePage = new PageImpl<>(List.of(GroupResponse.toListInfo(group)), PageRequest.of(0, 10), 1);
 
         when(groupService.createGroup(anyLong(), any(GroupRequest.Create.class))).thenReturn(1L);
         when(groupService.getGroup(anyLong())).thenReturn(response);
-        when(groupService.getGroups()).thenReturn(responseList);
+        when(groupService.getGroupsBySearch(any(GroupRequest.Search.class), any(Pageable.class)))
+                .thenReturn(responsePage);
         when(groupService.modifyGroup(anyLong(), anyLong(), any(GroupRequest.Update.class))).thenReturn(response);
         when(groupService.deleteGroup(anyLong(), anyLong())).thenReturn(true);
         when(groupMembershipService.approveJoining(anyLong(), anyLong(), anyLong(), eq(true))).thenReturn(true);
@@ -205,17 +210,29 @@ class GroupControllerTest extends WebMvcTestSupporter {
     @DisplayName("[성공] 모임 목록 조회")
     void getGroups() throws Exception {
         //Given
+        GroupRequest.Search requestDto = GroupRequest.Search.builder()
+                                                            .categoryName("category")
+                                                            .name("1")
+                                                            .province("test province10")
+                                                            .city("test city10")
+                                                            .town("test town10")
+                                                            .build();
+        String requestBody = objectMapper.writeValueAsString(requestDto);
 
         //When
         ResultActions resultActions = mockMvc.perform(get("/api/v1/groups")
                                                               .accept(MediaType.APPLICATION_JSON_VALUE)
-                                                              .contentType(MediaType.APPLICATION_JSON_VALUE));
+                                                              .contentType(MediaType.APPLICATION_JSON_VALUE)
+                                                              .content(requestBody)
+                                                              .param("page", "0")
+                                                              .param("size", "10")
+                                                              .param("sort", "createdAt,DESC"));
 
         //Then
-        ApiResponse<List<ListInfo>> apiResponse = ApiResponse.of(true,
+        ApiResponse<Page<ListInfo>> apiResponse = ApiResponse.of(true,
                                                                  HttpStatus.OK,
                                                                  GroupMessageConstant.READ_GROUPS_SUCCESS,
-                                                                 responseList);
+                                                                 responsePage);
         String responseBody = objectMapper.writeValueAsString(apiResponse);
 
         resultActions.andExpect(handler().handlerType(GroupController.class))
