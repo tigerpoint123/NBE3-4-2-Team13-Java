@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 public class AppConfig {
 
     @Bean
-    public Jackson2ObjectMapperBuilderCustomizer addJavaTimeModule() {
+    public Jackson2ObjectMapperBuilderCustomizer addModules() {
         return builder -> {
             builder.modules(new JavaTimeModule());
             builder.featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
