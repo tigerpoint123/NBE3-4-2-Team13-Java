@@ -8,8 +8,9 @@ type Member = {
     nickname: string;
     password: string;
     createdAt: string;
+    modifiedAt: string;
     provider: string;
-    role: string[];
+    authorities: string[];
 }
 
 export const LoginMemberContext = createContext<{
@@ -37,8 +38,9 @@ function createEmptyMember(): Member {
         nickname: "",
         password: "",
         createdAt: "",
+        modifiedAt: "",
         provider: "",
-        role: [],
+        authorities: [],
     };
 
 
@@ -63,7 +65,7 @@ export function useLoginMember() {
 
     const isLogin = loginMember.id !== 0;
     // 권한 배열에 'ROLE_ADMIN'이 포함되어 있는지 확인
-    const isAdmin = isLogin && loginMember.role?.includes('ROLE_ADMIN') || false;
+    const isAdmin = isLogin && loginMember.authorities?.includes('ROLE_ADMIN') || false;
 
     return {
         loginMember,
