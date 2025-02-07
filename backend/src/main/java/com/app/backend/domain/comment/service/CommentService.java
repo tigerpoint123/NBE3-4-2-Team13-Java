@@ -169,4 +169,13 @@ public class CommentService {
 
 		reply.delete();
 	}
+
+	public Page<CommentResponse.ReplyList> getReplies(Long commentId, Pageable pageable) {
+
+		Comment comment = getCommentValidate(commentId);
+
+		Page<Comment> replies = commentRepository.findByParentAndDisabled(comment, false, pageable);
+
+		return replies.map(CommentResponse.ReplyList::from);
+	}
 }

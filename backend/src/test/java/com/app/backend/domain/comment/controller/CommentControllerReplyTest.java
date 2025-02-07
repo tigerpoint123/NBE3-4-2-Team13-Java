@@ -43,6 +43,8 @@ public class CommentControllerReplyTest {
 	@Autowired
 	private ObjectMapper objectMapper;
 
+	private Member testMember;
+	private Post testPost;
 	private MemberDetails memberDetails;
 	private Comment parentComment;
 	private Comment testReply;
@@ -50,7 +52,7 @@ public class CommentControllerReplyTest {
 	@BeforeEach
 	void setUp() {
 		// 테스트용 멤버 생성
-		Member testMember = Member.builder()
+		testMember = Member.builder()
 			.username("testUser")
 			.password("password")
 			.nickname("테스터")
@@ -61,7 +63,7 @@ public class CommentControllerReplyTest {
 		memberDetails = new MemberDetails(testMember);
 
 		// 테스트용 게시물 생성
-		Post testPost = Post.builder()
+		testPost = Post.builder()
 			.title("테스트 게시글")
 			.content("테스트 내용")
 			.postStatus(PostStatus.PUBLIC)
@@ -269,6 +271,67 @@ public class CommentControllerReplyTest {
 			.andExpect(jsonPath("$.isSuccess").value(false))
 			.andExpect(jsonPath("$.code").value("CM003"))
 			.andExpect(jsonPath("$.message").value("댓글에 대한 권한이 없습니다"));
+	}
+
+	@Test
+	@DisplayName("대댓글 페이징 조회 성공 (대댓글 여러개)")
+	void getReplies() throws Exception {
+
+		for (int i = 1; i <= 14; i++) {
+			Comment reply = Comment.builder()
+				.content("reply" + i)
+				.post(testPost)
+				.member(testMember)
+				.parent(parentComment)
+				.build();
+			reply = commentRepository.save(reply);
+			parentComment.addReply(reply);
+		}
+
+		ResultActions resultActions = mvc
+			.perform(
+				get("/api/v1/comment/" + parentComment.getId() + "/reply")
+					.param("page", "0")
+					.param("size", "10")
+					.param("sort", "id,desc")
+					.contentType(MediaType.APPLICATION_JSON)
+					.with(user(memberDetails))
+			)
+			.andDo(print());
+
+		resultActions
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.isSuccess").value(true))
+			.andExpect(jsonPath("$.code").value("200"))
+			.andExpect(jsonPath("$.message").exists())
+			.andExpect(jsonPath("$.data.content.length()").value(10))
+			.andExpect(jsonPath("$.data.totalElements").value(15))
+			.andExpect(jsonPath("$.data.totalPages").value(2))
+			.andExpect(jsonPath("$.data.hasNext").value(true))
+			.andExpect(jsonPath("$.data.isLast").value(false));
+
+		ResultActions resultActions2 = mvc
+			.perform(
+				get("/api/v1/comment/" + parentComment.getId() + "/reply")
+					.param("page", "1")
+					.param("size", "10")
+					.param("sort", "id,desc")
+					.contentType(MediaType.APPLICATION_JSON)
+					.with(user(memberDetails))
+
+			)
+			.andDo(print());
+
+		resultActions2
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.isSuccess").value(true))
+			.andExpect(jsonPath("$.code").value("200"))
+			.andExpect(jsonPath("$.message").exists())
+			.andExpect(jsonPath("$.data.content.length()").value(5))
+			.andExpect(jsonPath("$.data.totalElements").value(15))
+			.andExpect(jsonPath("$.data.totalPages").value(2))
+			.andExpect(jsonPath("$.data.hasNext").value(false))
+			.andExpect(jsonPath("$.data.isLast").value(true));
 	}
 
 }
