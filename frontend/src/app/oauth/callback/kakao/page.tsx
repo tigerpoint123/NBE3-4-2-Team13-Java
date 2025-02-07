@@ -37,7 +37,8 @@ export default function KakaoCallback() {
                 }
 
                 const data = await response.json();
-                
+                console.log(data);
+
                 if (data.accessToken) {  // accessToken이 있는 경우에만 저장
                     // 응답 데이터를 localStorage에 저장
                     Object.entries(data).forEach(([key, value]) => {
@@ -61,8 +62,8 @@ export default function KakaoCallback() {
                             nickname: userData.data.nickname,
                             createdAt: userData.data.createdAt,
                             provider: userData.data.provider,
-                            role: userData.data.authorities || []
-
+                            authorities: userData.data.authorities || [],
+                            modifiedAt: userData.data.modifiedAt
                         });
                     }
                     router.push('/');  // 성공시에만 리다이렉트
