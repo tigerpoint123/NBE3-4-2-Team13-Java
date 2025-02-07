@@ -23,7 +23,7 @@ public class AppAspect {
     @Aspect
     public static class PageJsonSerializerAspect {
 
-        private final ConcurrentMap<String, ObjectMapper> objectMapperMap = new ConcurrentHashMap<>();
+        private static final ConcurrentMap<String, ObjectMapper> objectMapperMap = new ConcurrentHashMap<>();
 
         @Around("@annotation(com.app.backend.global.annotation.CustomPageJsonSerializer)")
         public Object execute(ProceedingJoinPoint joinPoint) throws Throwable {
