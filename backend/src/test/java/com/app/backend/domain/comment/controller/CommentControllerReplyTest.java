@@ -93,16 +93,13 @@ public class CommentControllerReplyTest {
 	@DisplayName("대댓글 작성 성공")
 	void createReply() throws Exception {
 
+		CommentCreateRequest request = new CommentCreateRequest("test");
+
 		ResultActions resultActions = mvc
 			.perform(
 				post("/api/v1/comment/" + parentComment.getId() + "/reply")
-					.content("""
-						{
-							"content": "test"
-						}
-						""")
-
 					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsString(request))
 					.with(user(memberDetails))
 			)
 			.andDo(print());
@@ -120,16 +117,13 @@ public class CommentControllerReplyTest {
 	@DisplayName("대댓글 작성 실패 (내용 없음)")
 	void createReply2() throws Exception {
 
+		CommentCreateRequest request = new CommentCreateRequest("");
+
 		ResultActions resultActions = mvc
 			.perform(
 				post("/api/v1/comment/" + parentComment.getId() + "/reply")
-					.content("""
-						{
-							"content": ""
-						}
-						""")
-
 					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsString(request))
 					.with(user(memberDetails))
 			)
 			.andDo(print());
@@ -146,16 +140,13 @@ public class CommentControllerReplyTest {
 	@DisplayName("대댓글 작성 실패 (부모 댓글 없음)")
 	void createReply3() throws Exception {
 
+		CommentCreateRequest request = new CommentCreateRequest("test");
+
 		ResultActions resultActions = mvc
 			.perform(
 				post("/api/v1/comment/0/reply")
-					.content("""
-						{
-							"content": "test"
-						}
-						""")
-
 					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsString(request))
 					.with(user(memberDetails))
 			)
 			.andDo(print());

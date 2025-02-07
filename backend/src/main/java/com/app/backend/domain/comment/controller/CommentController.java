@@ -34,11 +34,11 @@ public class CommentController {
 	// 게시물에 대한 댓글 작성
 	@PostMapping("/{id}")
 	@ResponseStatus(HttpStatus.CREATED)
-	public ApiResponse<CommentResponse> createComment(@PathVariable(name = "id") Long postId,
+	public ApiResponse<CommentResponse.CommentDto> createComment(@PathVariable(name = "id") Long postId,
 		@RequestBody CommentCreateRequest req,
 		@AuthenticationPrincipal MemberDetails memberDetails){
 
-		CommentResponse response = commentService.createComment(postId, memberDetails.getId(), req);
+		CommentResponse.CommentDto response = commentService.createComment(postId, memberDetails.getId(), req);
 
 		return ApiResponse.of(
 			true,
@@ -65,11 +65,11 @@ public class CommentController {
 
 	//댓글 수정
 	@PatchMapping("/{id}")
-	public ApiResponse<CommentResponse> updateComment(@PathVariable(name = "id") Long commentId,
+	public ApiResponse<CommentResponse.CommentDto> updateComment(@PathVariable(name = "id") Long commentId,
 		@RequestBody CommentCreateRequest req,
 		@AuthenticationPrincipal MemberDetails memberDetails){
 
-		CommentResponse response = commentService.updateComment(commentId, memberDetails.getId(),req);
+		CommentResponse.CommentDto response = commentService.updateComment(commentId, memberDetails.getId(),req);
 
 		return ApiResponse.of(
 			true,
@@ -81,11 +81,11 @@ public class CommentController {
 
 	//게시물에 대한 댓글 조회 페이징
 	@GetMapping("/{id}")
-	public ApiResponse<Page<CommentResponse>> getComments(
+	public ApiResponse<Page<CommentResponse.CommentList>> getComments(
 		@PathVariable(name = "id") Long postId,
 		@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
 	) {
-		Page<CommentResponse> response = commentService.getComments(postId, pageable);
+		Page<CommentResponse.CommentList> response = commentService.getComments(postId, pageable);
 
 		return ApiResponse.of(
 			true,
@@ -98,12 +98,12 @@ public class CommentController {
 	//대댓글 작성
 	@PostMapping("/{id}/reply")
 	@ResponseStatus(HttpStatus.CREATED)
-	public ApiResponse<CommentResponse> createReply(
+	public ApiResponse<CommentResponse.ReplyDto> createReply(
 		@PathVariable(name = "id") Long commentId,
 		@RequestBody CommentCreateRequest req,
 		@AuthenticationPrincipal MemberDetails memberDetails
 	) {
-		CommentResponse response = commentService.createReply(commentId, memberDetails.getId(), req);
+		CommentResponse.ReplyDto response = commentService.createReply(commentId, memberDetails.getId(), req);
 
 		return ApiResponse.of(
 			true,
@@ -115,12 +115,12 @@ public class CommentController {
 
 	//대댓글 수정
 	@PatchMapping("/{id}/reply")
-	public ApiResponse<CommentResponse> updateReply(
+	public ApiResponse<CommentResponse.ReplyDto> updateReply(
 		@PathVariable(name = "id") Long replyId,
 		@RequestBody CommentCreateRequest req,
 		@AuthenticationPrincipal MemberDetails memberDetails
 	) {
-		CommentResponse response = commentService.updateReply(replyId, memberDetails.getId(), req);
+		CommentResponse.ReplyDto response = commentService.updateReply(replyId, memberDetails.getId(), req);
 
 		return ApiResponse.of(
 			true,
