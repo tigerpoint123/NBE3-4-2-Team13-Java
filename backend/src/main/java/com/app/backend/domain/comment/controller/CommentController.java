@@ -115,12 +115,12 @@ public class CommentController {
 
 	//대댓글 수정
 	@PatchMapping("/{id}/reply")
-	public ApiResponse<CommentResponse> updateReply(
+	public ApiResponse<CommentResponse.ReplyDto> updateReply(
 		@PathVariable(name = "id") Long replyId,
 		@RequestBody CommentCreateRequest req,
 		@AuthenticationPrincipal MemberDetails memberDetails
 	) {
-		CommentResponse response = commentService.updateReply(replyId, memberDetails.getId(), req);
+		CommentResponse.ReplyDto response = commentService.updateReply(replyId, memberDetails.getId(), req);
 
 		return ApiResponse.of(
 			true,

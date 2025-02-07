@@ -147,7 +147,7 @@ public class CommentService {
 	}
 
 	//대댓글 수정
-	public CommentResponse updateReply(Long replyId, Long id, CommentCreateRequest req) {
+	public CommentResponse.ReplyDto updateReply(Long replyId, Long id, CommentCreateRequest req) {
 
 		Comment comment = getCommentValidate(replyId);
 
@@ -157,6 +157,6 @@ public class CommentService {
 
 		comment.update(req.getContent());
 
-		return CommentResponse.from(comment);
+		return CommentResponse.ReplyDto.from(comment);
 	}
 }
