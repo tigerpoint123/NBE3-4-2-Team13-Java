@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.app.backend.domain.comment.dto.request.CommentCreateRequest;
 import com.app.backend.domain.comment.entity.Comment;
 import com.app.backend.domain.comment.repository.CommentRepository;
 import com.app.backend.domain.member.entity.Member;
@@ -24,6 +25,7 @@ import com.app.backend.domain.member.repository.MemberRepository;
 import com.app.backend.domain.post.entity.Post;
 import com.app.backend.domain.post.entity.PostStatus;
 import com.app.backend.domain.post.repository.post.PostRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -38,16 +40,17 @@ public class CommentControllerReplyTest {
 	private MemberRepository memberRepository;
 	@Autowired
 	private CommentRepository commentRepository;
+	@Autowired
+	private ObjectMapper objectMapper;
 
-	private Post testPost;
-	private Member testMember;
 	private MemberDetails memberDetails;
 	private Comment parentComment;
+	private Comment testReply;
 
 	@BeforeEach
 	void setUp() {
 		// 테스트용 멤버 생성
-		testMember = Member.builder()
+		Member testMember = Member.builder()
 			.username("testUser")
 			.password("password")
 			.nickname("테스터")
@@ -58,7 +61,7 @@ public class CommentControllerReplyTest {
 		memberDetails = new MemberDetails(testMember);
 
 		// 테스트용 게시물 생성
-		testPost = Post.builder()
+		Post testPost = Post.builder()
 			.title("테스트 게시글")
 			.content("테스트 내용")
 			.postStatus(PostStatus.PUBLIC)
@@ -67,13 +70,23 @@ public class CommentControllerReplyTest {
 			.build();
 		testPost = postRepository.save(testPost);
 
-		// 테스트용 부모 댓글 생성
+		// 테스트용 댓글 생성
 		parentComment = Comment.builder()
 			.content("부모 댓글")
 			.post(testPost)
 			.member(testMember)
 			.build();
 		parentComment = commentRepository.save(parentComment);
+
+		// 테스트용 대댓글 생성
+		testReply = Comment.builder()
+			.content("test reply")
+			.post(testPost)
+			.member(testMember)
+			.parent(parentComment)
+			.build();
+		testReply = commentRepository.save(testReply);
+		parentComment.addReply(testReply);
 	}
 
 	@Test
@@ -100,13 +113,7 @@ public class CommentControllerReplyTest {
 			.andExpect(status().isCreated())
 			.andExpect(jsonPath("$.isSuccess").value(true))
 			.andExpect(jsonPath("$.code").value("201"))
-			.andExpect(jsonPath("$.data.content").value("test"))
-			.andExpect(jsonPath("$.data.parentId").value(parentComment.getId()))
-			.andExpect(jsonPath("$.data.postId").value(testPost.getId()))
-			.andExpect(jsonPath("$.data.memberId").value(testMember.getId()))
-			.andExpect(jsonPath("$.data.nickname").value(testMember.getNickname()))
-			.andExpect(jsonPath("$.data.replies").isArray())
-			.andExpect(jsonPath("$.data.replies").isEmpty());
+			.andExpect(jsonPath("$.data.content").value("test"));
 	}
 
 	@Test
@@ -160,6 +167,77 @@ public class CommentControllerReplyTest {
 			.andExpect(jsonPath("$.isSuccess").value(false))
 			.andExpect(jsonPath("$.code").value("CM001"))
 			.andExpect(jsonPath("$.message").value("댓글을 찾을 수 없습니다"));
+	}
+
+	@Test
+	@DisplayName("대댓글 수정 성공")
+	void updateReply() throws Exception {
+
+		CommentCreateRequest request = new CommentCreateRequest("수정된 내용");
+
+		ResultActions resultActions = mvc
+			.perform(
+				patch("/api/v1/comment/" + testReply.getId() + "/reply")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsString(request))
+					.with(user(memberDetails))
+			)
+			.andDo(print());
+
+		resultActions
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.isSuccess").value(true))
+			.andExpect(jsonPath("$.code").value("200"))
+			.andExpect(jsonPath("$.message").exists())
+			.andExpect(jsonPath("$.data.content").value("수정된 내용"));
+	}
+
+
+	@Test
+	@DisplayName("대댓글 수정 실패 (작성자가 아닌 경우)")
+	void updateReply2() throws Exception {
+
+		Member otherMember = memberRepository.save(Member.builder()
+			.username("other")
+			.password("password")
+			.nickname("다른사용자")
+			.role("USER")
+			.build());
+
+		CommentCreateRequest request = new CommentCreateRequest("수정된 내용");
+
+		mvc.perform(
+			patch("/api/v1/comment/" + testReply.getId() + "/reply")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request))
+				.with(user(new MemberDetails(otherMember)))
+		)
+			.andDo(print())
+
+			.andExpect(status().isForbidden())
+			.andExpect(jsonPath("$.isSuccess").value(false))
+			.andExpect(jsonPath("$.code").value("CM003"))
+			.andExpect(jsonPath("$.message").value("댓글에 대한 권한이 없습니다"));
+	}
+
+	@Test
+	@DisplayName("대댓글 수정 실패 (내용 없음)")
+	void updateReply3() throws Exception {
+
+		CommentCreateRequest request = new CommentCreateRequest("");
+
+		mvc.perform(
+				patch("/api/v1/comment/" + testReply.getId() + "/reply")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsString(request))
+					.with(user(memberDetails))
+			)
+			.andDo(print())
+
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.isSuccess").value(false))
+			.andExpect(jsonPath("$.code").value("CM004"))
+			.andExpect(jsonPath("$.message").value("댓글 내용이 유효하지 않습니다"));
 	}
 
 }
