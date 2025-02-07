@@ -34,6 +34,7 @@ public class CustomPageModule extends SimpleModule {
             gen.writeBooleanField("isFirst", value.isFirst());
             gen.writeBooleanField("isLast", value.isLast());
             gen.writeObjectField("sort", value.getSort());
+            gen.writeBooleanField("empty", value.isEmpty());
             gen.writeEndObject();
         }
 
