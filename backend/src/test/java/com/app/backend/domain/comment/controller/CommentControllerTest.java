@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.app.backend.domain.comment.dto.request.CommentCreateRequest;
 import com.app.backend.domain.comment.entity.Comment;
 import com.app.backend.domain.comment.repository.CommentRepository;
 import com.app.backend.domain.member.entity.Member;
@@ -26,6 +27,7 @@ import com.app.backend.domain.post.entity.Post;
 import com.app.backend.domain.post.entity.PostStatus;
 import com.app.backend.domain.post.repository.post.PostRepository;
 import com.app.backend.global.annotation.CustomWithMockUser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -41,6 +43,8 @@ public class CommentControllerTest {
 	private MemberRepository memberRepository;
 	@Autowired
 	private CommentRepository commentRepository;
+	@Autowired
+	private ObjectMapper objectMapper;
 
 	private Post testPost;
 	private Long testPostId;
@@ -78,18 +82,14 @@ public class CommentControllerTest {
 	@Test
 	@DisplayName("댓글 작성")
 	void createComment() throws Exception {
+		CommentCreateRequest request = new CommentCreateRequest("test");
 
 		ResultActions resultActions = mvc
 			.perform(
 				post("/api/v1/comment/" + testPostId)
-					.content("""
-						{
-							"content": "test"
-						}
-						""")
 					.contentType(MediaType.APPLICATION_JSON)
-					.with(user(memberDetails)) // 로그인된 사용자 정보
-
+					.content(objectMapper.writeValueAsString(request))
+					.with(user(memberDetails))
 			)
 			.andDo(print());
 
@@ -105,17 +105,13 @@ public class CommentControllerTest {
 	@Test
 	@DisplayName("댓글 작성 실패 (내용 공백)")
 	void createComment2() throws Exception {
-
+		CommentCreateRequest request = new CommentCreateRequest("");
 
 		ResultActions resultActions = mvc
 			.perform(
 				post("/api/v1/comment/" + testPostId)
-					.content("""
-						{
-							"content": ""
-						}
-						""")
 					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsString(request))
 					.with(user(memberDetails))
 			)
 			.andDo(print());
@@ -129,11 +125,9 @@ public class CommentControllerTest {
 			.andExpect(jsonPath("$.message").value("댓글 내용이 유효하지 않습니다"));
 	}
 
-
 	@Test
 	@DisplayName("댓글 삭제")
 	void deleteComment() throws Exception {
-
 		Comment testComment = Comment.builder()
 			.content("test")
 			.post(testPost)
@@ -155,15 +149,11 @@ public class CommentControllerTest {
 			.andExpect(jsonPath("$.isSuccess").value(true))
 			.andExpect(jsonPath("$.code").value("204"))
 			.andExpect(jsonPath("$.message").exists());
-
-
 	}
-
 
 	@Test
 	@DisplayName("댓글 삭제 실패 (존재하지 않는 댓글)")
 	void deleteComment2() throws Exception {
-
 		ResultActions resultActions = mvc
 			.perform(
 				delete("/api/v1/comment/10000")
@@ -183,7 +173,6 @@ public class CommentControllerTest {
 	@Test
 	@DisplayName("댓글 삭제 실패 (작성자만 삭제 가능)")
 	void deleteComment3() throws Exception {
-
 		Comment testComment = Comment.builder()
 			.content("test")
 			.post(testPost)
@@ -206,7 +195,6 @@ public class CommentControllerTest {
 			.perform(
 				delete("/api/v1/comment/" + testComment.getId())
 					.with(user(otherMemberDetails))
-
 			)
 			.andDo(print());
 
@@ -217,13 +205,11 @@ public class CommentControllerTest {
 			.andExpect(jsonPath("$.isSuccess").value(false))
 			.andExpect(jsonPath("$.code").value("CM003"))
 			.andExpect(jsonPath("$.message").value("댓글에 대한 권한이 없습니다"));
-
 	}
 
 	@Test
 	@DisplayName("댓글 수정")
 	void updateComment() throws Exception {
-
 		Comment testComment = Comment.builder()
 			.content("test")
 			.post(testPost)
@@ -231,15 +217,13 @@ public class CommentControllerTest {
 			.build();
 		testComment = commentRepository.save(testComment);
 
+		CommentCreateRequest request = new CommentCreateRequest("수정 댓글");
+
 		ResultActions resultActions = mvc
 			.perform(
 				patch("/api/v1/comment/" + testComment.getId())
-					.content("""
-						{
-							"content": "수정 댓글"
-						}
-						""")
 					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsString(request))
 					.with(user(memberDetails))
 			)
 			.andDo(print());
@@ -256,7 +240,6 @@ public class CommentControllerTest {
 	@Test
 	@DisplayName("댓글 수정 실패 (내용 공백)")
 	void updateComment2() throws Exception {
-
 		Comment testComment = Comment.builder()
 			.content("test")
 			.post(testPost)
@@ -264,15 +247,13 @@ public class CommentControllerTest {
 			.build();
 		testComment = commentRepository.save(testComment);
 
+		CommentCreateRequest request = new CommentCreateRequest("");
+
 		ResultActions resultActions = mvc
 			.perform(
 				patch("/api/v1/comment/" + testComment.getId())
-					.content("""
-						{
-							"content": ""
-						}
-						""")
 					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsString(request))
 					.with(user(memberDetails))
 			)
 			.andDo(print());
@@ -289,16 +270,13 @@ public class CommentControllerTest {
 	@Test
 	@DisplayName("댓글 수정 실패 (존재하지 않는 댓글)")
 	void updateComment3() throws Exception {
+		CommentCreateRequest request = new CommentCreateRequest("수정 댓글");
 
 		ResultActions resultActions = mvc
 			.perform(
 				patch("/api/v1/comment/10000")
-					.content("""
-						{
-							"content": "수정 댓글"
-						}
-						""")
 					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsString(request))
 					.with(user(memberDetails))
 			)
 			.andDo(print());
@@ -315,7 +293,6 @@ public class CommentControllerTest {
 	@Test
 	@DisplayName("댓글 수정 실패 (작성자만 수정 가능)")
 	void updateComment4() throws Exception {
-
 		Comment testComment = Comment.builder()
 			.content("test")
 			.post(testPost)
@@ -323,26 +300,22 @@ public class CommentControllerTest {
 			.build();
 		testComment = commentRepository.save(testComment);
 
-		// 다른 사용자 생성
 		Member Member2 = Member.builder()
 			.username("other")
 			.password("password")
 			.nickname("다른사용자")
 			.role("USER")
 			.build();
-
 		memberRepository.save(Member2);
 		MemberDetails otherMemberDetails = new MemberDetails(Member2);
+
+		CommentCreateRequest request = new CommentCreateRequest("수정 댓글");
 
 		ResultActions resultActions = mvc
 			.perform(
 				patch("/api/v1/comment/" + testComment.getId())
-					.content("""
-						{
-							"content": "수정 댓글"
-						}
-						""")
 					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsString(request))
 					.with(user(otherMemberDetails))
 			)
 			.andDo(print());
@@ -360,7 +333,7 @@ public class CommentControllerTest {
 	@DisplayName("댓글 페이징 조회")
 	@CustomWithMockUser(role="USER")
 	void getCommentsWithPaging() throws Exception {
-		// 테스트 데이터 15개 한 번만 생성
+
 		for (int i = 1; i <= 15; i++) {
 			Comment comment = Comment.builder()
 				.content("test comment " + i)
@@ -370,15 +343,13 @@ public class CommentControllerTest {
 			commentRepository.save(comment);
 		}
 
-
-	mvc.perform(
+		mvc.perform(
 				get("/api/v1/comment/" + testPostId)
 					.param("page", "0")
 					.param("size", "10")
 					.param("sort", "createdAt,desc")
 			)
 			.andDo(print())
-
 
 			.andExpect(jsonPath("$.isSuccess").value(true))
 			.andExpect(jsonPath("$.code").value("200"))
@@ -388,8 +359,7 @@ public class CommentControllerTest {
 			.andExpect(jsonPath("$.data.first").value(true))
 			.andExpect(jsonPath("$.data.last").value(false));
 
-
-	mvc.perform(
+		mvc.perform(
 				get("/api/v1/comment/" + testPostId)
 					.param("page", "1")
 					.param("size", "10")
@@ -405,7 +375,6 @@ public class CommentControllerTest {
 			.andExpect(jsonPath("$.data.first").value(false))
 			.andExpect(jsonPath("$.data.last").value(true));
 	}
-
 
 	@Test
 	@DisplayName("댓글 페이징 조회 (게시물 없음)")
