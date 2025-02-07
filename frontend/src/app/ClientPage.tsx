@@ -18,7 +18,7 @@ export default function ClientPage() {
         if (accessToken) {
             try {
                 const payload = JSON.parse(atob(accessToken.split('.')[1]));
-                console.log('사용자 정보:', payload);
+                // console.log('사용자 정보:', payload);
                 setUserNickname(loginMember.nickname);
             } catch (error) {
                 console.error('토큰 디코드 실패:', error);

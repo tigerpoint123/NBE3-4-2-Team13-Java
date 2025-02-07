@@ -86,7 +86,6 @@ export function ClientLayout({children,}: React.ComponentProps<typeof NextThemes
         if (response.ok) {
           const responseData = await response.json();
           
-          console.log("레이아웃 : "+responseData.data.nickname);
           if (responseData.isSuccess) {
             const memberData = responseData.data;
             setLoginMember({
