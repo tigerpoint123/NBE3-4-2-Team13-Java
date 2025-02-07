@@ -37,7 +37,6 @@ export default function KakaoCallback() {
                 }
 
                 const data = await response.json();
-                console.log(data);
 
                 if (data.accessToken) {  // accessToken이 있는 경우에만 저장
                     // 응답 데이터를 localStorage에 저장
