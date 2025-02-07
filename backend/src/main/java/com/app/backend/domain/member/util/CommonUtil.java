@@ -14,7 +14,12 @@ public class CommonUtil {
 		refreshTokenCookie.setPath("/");
 		refreshTokenCookie.setMaxAge(1800); // 30분
 
-		String cookieHeader = String.format("%s; SameSite=Strict", refreshTokenCookie.toString());
+		String cookieHeader = String.format("%s=%s; Path=%s; Max-Age=%d; HttpOnly; Secure; SameSite=Strict",
+				refreshTokenCookie.getName(),
+				refreshTokenCookie.getValue() != null ? refreshTokenCookie.getValue() : "",
+				refreshTokenCookie.getPath(),
+				refreshTokenCookie.getMaxAge());
+
 		response.setHeader("Set-Cookie", cookieHeader);
 		response.addCookie(refreshTokenCookie);
 	}
@@ -27,10 +32,16 @@ public class CommonUtil {
 		refreshTokenCookie.setHttpOnly(true);
 		refreshTokenCookie.setSecure(true);
 		refreshTokenCookie.setPath("/");
-		refreshTokenCookie.setMaxAge(0);  // 즉시 만료
+		refreshTokenCookie.setMaxAge(0); // 즉시 만료
 
-		// SameSite 설정
-		String refreshTokenCookieHeader = String.format("%s; SameSite=Lax", refreshTokenCookie.toString());
-		response.addHeader("Set-Cookie", refreshTokenCookieHeader);
+		// 올바른 쿠키 형식으로 헤더 설정
+		String cookieHeader = String.format("%s=%s; Path=%s; Max-Age=%d; HttpOnly; Secure; SameSite=Strict",
+				refreshTokenCookie.getName(),
+				refreshTokenCookie.getValue() != null ? refreshTokenCookie.getValue() : "",
+				refreshTokenCookie.getPath(),
+				refreshTokenCookie.getMaxAge());
+
+		response.addHeader("Set-Cookie", cookieHeader);
+		response.addCookie(refreshTokenCookie);
 	}
 }

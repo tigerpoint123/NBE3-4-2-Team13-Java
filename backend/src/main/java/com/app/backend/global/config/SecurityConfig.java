@@ -1,7 +1,6 @@
 package com.app.backend.global.config;
 
 import java.util.Arrays;
-import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,8 +15,6 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
-import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -43,12 +40,12 @@ public class SecurityConfig {
 	private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
 	private final String[] allowedOrigins = {
-		"http://localhost:3000",  // React
-		"http://localhost:5173",  // Vite
-		"http://localhost:8080"   // Spring Boot
+		"http://localhost:3000", // React
+		"http://localhost:5173", // Vite
+		"http://localhost:8080" // Spring Boot
 	};
 
-	@Bean       // 비밀번호 암호화
+	@Bean // 비밀번호 암호화
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
@@ -73,10 +70,9 @@ public class SecurityConfig {
 					"/api/v1/members/**",
 					"/oauth2/**",
 					"/login/oauth2/**",
-					"/ws/**"
-				).permitAll()
-				.anyRequest().authenticated()
-			)
+					"/ws/**")
+				.permitAll()
+				.anyRequest().authenticated())
 			.headers(headers -> headers
 				.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
 				.contentSecurityPolicy(csp -> csp
@@ -84,16 +80,16 @@ public class SecurityConfig {
 						"default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; object-src 'none'; base-uri 'self'; connect-src 'self' https://kauth.kakao.com https://kapi.kakao.com; frame-ancestors 'self'; form-action 'self'; block-all-mixed-content")))
 			.oauth2Login(oauth2 -> oauth2
 				.authorizationEndpoint(authorizationEndpointConfig -> authorizationEndpointConfig
-					.baseUri("/oauth2/authorization/kakao"))  // 카카오 로그인 시작점
+					.baseUri("/oauth2/authorization/kakao")) // 카카오 로그인 시작점
 				.redirectionEndpoint(redirectionEndpointConfig -> redirectionEndpointConfig
-					.baseUri("/login/oauth2/code/*"))  // 카카오 인증 후 백엔드 콜백
+					.baseUri("/login/oauth2/code/*")) // 카카오 인증 후 백엔드 콜백
 				.userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig
 					.userService(customOAuth2UserService))
 				.successHandler(oAuth2SuccessHandler)
 				.failureHandler((request, response, exception) -> {
 					String errorMessage = "";
 					if (exception instanceof OAuth2AuthenticationException) {
-						OAuth2Error error = ((OAuth2AuthenticationException) exception).getError();
+						OAuth2Error error = ((OAuth2AuthenticationException)exception).getError();
 						errorMessage = switch (error.getErrorCode()) {
 							case "invalid_token" -> "유효하지 않은 토큰입니다.";
 							case "invalid_request" -> "잘못된 요청입니다.";
@@ -116,8 +112,7 @@ public class SecurityConfig {
 				}))
 			.sessionManagement(session -> session
 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-			.addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
-		;
+			.addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
 	}
@@ -133,8 +128,7 @@ public class SecurityConfig {
 			"Authorization",
 			"Content-Type",
 			"Accept",
-			"X-Requested-With"
-		));
+			"X-Requested-With"));
 		configuration.setAllowCredentials(true);
 		configuration.setMaxAge(3600L);
 

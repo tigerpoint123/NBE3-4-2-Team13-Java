@@ -42,16 +42,19 @@ export default function ClientPage() {
             
             // LoginMemberContext에 사용자 정보 저장
             setLoginMember({
-            id: data.id,
-            nickname: data.nickname,
-            createdAt: new Date().toISOString(), // 응답에 없는 필드는 현재 시간으로 설정
-            modifiedAt: new Date().toISOString(),
-            authorities: [data.role] // role을 authorities 배열로 변환
+                id: data.id,
+                username: data.username,
+                password: data.password || '',
+                nickname: data.nickname,
+                provider: 'LOCAL',
+                createdAt: new Date().toISOString(),
+                modifiedAt: new Date().toISOString(),
+                authorities: [data.role]
             });
     
             // 토큰을 로컬 스토리지에 저장
             localStorage.setItem('accessToken', data.accessToken);
-            localStorage.setItem('refreshToken', data.refreshToken);
+            // localStorage.setItem('refreshToken', data.refreshToken);
             
             // axios 기본 헤더에 토큰 설정
             axios.defaults.headers.common['Authorization'] = `Bearer ${data.accessToken}`;

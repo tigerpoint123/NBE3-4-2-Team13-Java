@@ -95,8 +95,9 @@ export function ClientLayout({children,}: React.ComponentProps<typeof NextThemes
               password: memberData.password,
               nickname: memberData.nickname,
               createdAt: memberData.createdAt,
+              modifiedAt: memberData.modifiedAt,
               provider: memberData.provider,
-              role: memberData.authorities.map((auth: any) => auth.authority), // authorities 배열에서 authority 값만 추출
+              authorities: memberData.authorities.map((auth: any) => auth.authority), // authorities 배열에서 authority 값만 추출
             });
           } else {
             setNoLoginMember();
@@ -136,7 +137,6 @@ export function ClientLayout({children,}: React.ComponentProps<typeof NextThemes
         },
         credentials: 'include'  // refreshToken이 쿠키에 있으므로 필요
       });
-
       if (!response.ok) {
         throw new Error('로그아웃 실패');
       }
