@@ -57,7 +57,7 @@ public class CommentService {
 
 	// 댓글 작성
 	@Transactional
-	public CommentResponse createComment(Long postId, Long memberId, CommentCreateRequest req) {
+	public CommentResponse.CommentDto createComment(Long postId, Long memberId, CommentCreateRequest req) {
 
 		validateCommentContent(req.getContent());
 
@@ -76,7 +76,7 @@ public class CommentService {
 
 		commentRepository.save(comment);
 
-		return CommentResponse.from(comment);
+		return CommentResponse.CommentDto.from(comment);
 
 	}
 
@@ -93,7 +93,7 @@ public class CommentService {
 
 	// 댓글 수정
 	@Transactional
-	public CommentResponse updateComment(Long commentId, Long memberId, CommentCreateRequest req) {
+	public CommentResponse.CommentDto updateComment(Long commentId, Long memberId, CommentCreateRequest req) {
 
 		Comment comment = getCommentValidate(commentId);
 
@@ -103,25 +103,25 @@ public class CommentService {
 
 		comment.update(req.getContent());
 
-		return CommentResponse.from(comment);
+		return CommentResponse.CommentDto.from(comment);
 
 
 	}
 
 	// 댓글 조회
-	public Page<CommentResponse> getComments(Long postId, Pageable pageable) {
+	public Page<CommentResponse.CommentList> getComments(Long postId, Pageable pageable) {
 
 		Post post = getPostValidate(postId);
 
 		Page<Comment> comments = commentRepository.findByPostAndDisabled(post, false, pageable);
 
-		return comments.map(CommentResponse::from);
+		return comments.map(CommentResponse.CommentList::from);
 	}
 
 
 	// 대댓글 작성
 	@Transactional
-	public CommentResponse createReply(Long commentId, Long memberId, CommentCreateRequest req) {
+	public CommentResponse.ReplyDto createReply(Long commentId, Long memberId, CommentCreateRequest req) {
 
 		Comment parentComment = getCommentValidate(commentId);
 
@@ -143,7 +143,7 @@ public class CommentService {
 
 		parentComment.addReply(saveReply);
 
-		return CommentResponse.from(saveReply);
+		return CommentResponse.ReplyDto.from(saveReply);
 	}
 
 	//대댓글 수정
