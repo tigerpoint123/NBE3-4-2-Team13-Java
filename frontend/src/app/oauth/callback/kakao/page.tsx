@@ -69,6 +69,7 @@ export default function KakaoCallback() {
                 } else {
                     throw new Error('액세스 토큰이 없습니다.');
                 }
+
                 
             } catch (error) {
                 console.error('카카오 로그인 처리 중 오류:', error);
