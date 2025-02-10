@@ -52,6 +52,7 @@ public class PostService {
     private final PostAttachmentRepository postAttachmentRepository;
     private final GroupMembershipRepository groupMembershipRepository;
 
+    private final int MAX_FILE_SIZE = 10 * 1024 * 1024;
 
     public PostRespDto.GetPostDto getPost(final Long postId, final Long memberId) {
         String redisKey = "post:" + postId;
@@ -88,9 +89,9 @@ public class PostService {
     }
 
 
-    public Page<PostRespDto.GetPostListDto> getPostsBySearch(final PostReqDto.SearchPostDto searchPost, final Pageable pageable) {
+    public Page<PostRespDto.GetPostListDto> getPostsBySearch(final Long groupId, final String search, final PostStatus postStatus, final Pageable pageable) {
         return postRepository
-                .findAllBySearchStatus(searchPost.getGroupId(), searchPost.getSearch(), searchPost.getPostStatus(), false, pageable)
+                .findAllBySearchStatus(groupId, search, postStatus, false, pageable)
                 .map(PostRespDto::toGetPostList);
     }
 
@@ -112,8 +113,8 @@ public class PostService {
         if (savePost.getPostStatus().equals(PostStatus.NOTICE) && !membership.getGroupRole().equals(GroupRole.LEADER)) {
             throw new PostException(PostErrorCode.POST_UNAUTHORIZATION);
         }
-
-        Post post = postRepository.save(savePost.toEntity(memberId));
+        Member member = getMemberEntity(memberId);
+        Post post = postRepository.save(savePost.toEntity(memberId,member.getNickname()));
 
         saveFiles(files, post);
 
@@ -135,7 +136,7 @@ public class PostService {
             throw new PostException(PostErrorCode.POST_UNAUTHORIZATION);
         }
 
-        checkFileSize(files, modifyPost.getOldFileSize(), (long) (10 * 1024 * 1024));
+        checkFileSize(files, modifyPost.getOldFileSize(), (long) MAX_FILE_SIZE);
 
         post.setTitle(modifyPost.getTitle());
         post.setContent(modifyPost.getContent());

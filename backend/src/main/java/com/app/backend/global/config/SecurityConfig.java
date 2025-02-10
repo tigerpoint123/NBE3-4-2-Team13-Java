@@ -41,20 +41,20 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class SecurityConfig {
-	private final JwtProvider jwtProvider;
-	private final CustomOAuth2UserService customOAuth2UserService;
-	private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final JwtProvider jwtProvider;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
-	private final String[] allowedOrigins = {
-		"http://localhost:3000", // React
-		"http://localhost:5173", // Vite
-		"http://localhost:8080" // Spring Boot
-	};
+    private final String[] allowedOrigins = {
+            "http://localhost:3000", // React
+            "http://localhost:5173", // Vite
+            "http://localhost:8080" // Spring Boot
+    };
 
-	@Bean // 비밀번호 암호화
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
+    @Bean // 비밀번호 암호화
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -81,6 +81,7 @@ public class SecurityConfig {
 				// API 엔드포인트
 				.requestMatchers(
 					"/api/v1/members/**",
+                    "/images/**",
 					"/ws/**"
 				).permitAll()
 				.anyRequest().authenticated())
@@ -100,13 +101,12 @@ public class SecurityConfig {
 				.failureHandler(new OAuth2AuthenticationFailureHandler()))
 			.addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
 
-		return http.build();
-	}
+        return http.build();
+    }
 
-	@Bean
-	public CorsConfigurationSource corsConfigurationSource() {
-		CorsConfiguration configuration = new CorsConfiguration();
-
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
 		configuration.setAllowedOrigins(Arrays.asList(allowedOrigins));
 		// 허용할 HTTP 메서드
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
@@ -119,13 +119,12 @@ public class SecurityConfig {
 		// 인증 정보 허용
 		configuration.setAllowCredentials(true);
 		// pre-flight 요청 캐시 시간
-		configuration.setMaxAge(3600L);
+		    configuration.setMaxAge(3600L);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
 
-		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-		source.registerCorsConfiguration("/**", configuration);
-
-		return source;
-	}
+        return source;
+    }
 }
 // OAuth2 실패 핸들러를 별도 클래스로 분리
 @Component
