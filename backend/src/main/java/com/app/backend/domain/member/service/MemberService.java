@@ -140,6 +140,8 @@ public class MemberService {
 			.username(member.getUsername())
 			.password(member.getPassword())
 			.nickname(member.getNickname())
+			.provider(member.getProvider())
+			.oauthProviderId(member.getOauthProviderId())
 			.role(member.getRole())
 			.disabled(true)
 			.build();

@@ -35,6 +35,40 @@ export default function ClientPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
 
+    // 회원 탈퇴 처리 함수 추가
+    const handleWithdrawal = async () => {
+        if (!window.confirm('정말로 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('accessToken');
+            const response = await fetch('http://localhost:8080/api/v1/members', {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('회원 탈퇴 처리 중 오류가 발생했습니다.');
+            }
+
+            const data = await response.json();
+            if (data.isSuccess) {
+                // refreshToken 쿠키 삭제
+                document.cookie = 'refreshToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                localStorage.removeItem('accessToken');
+                alert('회원 탈퇴가 완료되었습니다.');
+                window.location.href = '/';
+            } else {
+                alert(data.message || '회원 탈퇴 처리 중 오류가 발생했습니다.');
+            }
+        } catch (err) {
+            alert('회원 탈퇴 처리 중 오류가 발생했습니다.');
+        }
+    };
+
     useEffect(() => {
         const fetchMyGroups = async () => {
             try {
@@ -90,6 +124,19 @@ export default function ClientPage() {
                         <div className="font-semibold">가입 방식</div>
                         <div className="col-span-2">{loginMember.provider}</div>
                     </div>
+                </div>
+                
+                {/* 회원 탈퇴 버튼 추가 */}
+                <div className="mt-8 pt-6 border-t">
+                    <button
+                        onClick={handleWithdrawal}
+                        className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
+                    >
+                        회원 탈퇴
+                    </button>
+                    <p className="mt-2 text-sm text-gray-500">
+                        회원 탈퇴 시 모든 데이터가 삭제되며 복구할 수 없습니다.
+                    </p>
                 </div>
             </div>
 
