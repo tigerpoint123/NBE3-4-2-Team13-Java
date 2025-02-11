@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Pagination from '@/components/common/Pagination';
 import AddressSearchModal from '@/components/groups/AddressSearchModal';
 import CategorySelectModal from '@/components/groups/CategorySelectModal';
+import KakaoMapMultiMarker from '@/components/groups/KakaoMapMultiMarker';
 
 interface GroupListInfo {
   id: number;
@@ -17,6 +18,7 @@ interface GroupListInfo {
   maxRecruitCount: number;
   currentMemberCount: number;
   createdAt: string;
+  groupLeaders: string[];
 }
 
 interface SearchParams {
@@ -68,6 +70,15 @@ export default function ClientPage() {
   const [hasNext, setHasNext] = useState(false);
   const [hasPrevious, setHasPrevious] = useState(false);
   const [totalElements, setTotalElements] = useState(0);
+  const [groupLocations, setGroupLocations] = useState<
+    Array<{
+      id: number;
+      name: string;
+      latitude: string;
+      longitude: string;
+      address: string;
+    }>
+  >([]);
 
   useEffect(() => {
     fetchGroups();
@@ -177,6 +188,65 @@ export default function ClientPage() {
     setCurrentPage(0);
   };
 
+  // 좌표 가져오기
+  const fetchGroupLocations = async (groups: GroupListInfo[]) => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      console.log('Fetching coordinates for groups:', groups.length); // 디버깅용
+
+      const locations = await Promise.all(
+        groups.map(async (group) => {
+          try {
+            const response = await fetch(
+              `http://localhost:8080/api/v1/proxy/kakao/address?province=${group.province}&city=${group.city}&town=${group.town}`,
+              {
+                headers: {
+                  Accept: 'application/json',
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+
+            const data = await response.json();
+            console.log(`Coordinates for group ${group.id}:`, data); // 디버깅용
+
+            if (data.isSuccess && data.data.documents.length > 0) {
+              const firstResult = data.data.documents[0];
+              return {
+                id: group.id,
+                name: group.name,
+                latitude: firstResult.y,
+                longitude: firstResult.x,
+                address: `${group.province} ${group.city} ${group.town}`,
+              };
+            } else {
+              console.warn(`No coordinates found for group ${group.id}:`, group); // 디버깅용
+              return null;
+            }
+          } catch (error) {
+            console.error(`Error fetching coordinates for group ${group.id}:`, error);
+            return null;
+          }
+        })
+      );
+
+      const validLocations = locations.filter((loc): loc is NonNullable<typeof loc> => loc !== null);
+      console.log('Valid locations found:', validLocations.length); // 디버깅용
+      setGroupLocations(validLocations);
+    } catch (error) {
+      console.error('Failed to fetch coordinates:', error);
+    }
+  };
+
+  // useEffect에서 groups 변경 시 호출
+  useEffect(() => {
+    if (groups.length > 0) {
+      console.log('Groups updated, fetching coordinates...'); // 디버깅용
+      fetchGroupLocations(groups);
+    }
+  }, [groups]);
+
   return (
     <div className='container mx-auto px-4 py-8'>
       <div className='flex justify-between items-center mb-6'>
@@ -278,6 +348,13 @@ export default function ClientPage() {
         </div>
       </div>
 
+      {/* 카카오맵 */}
+      {groupLocations.length > 0 && (
+        <div className='mb-6'>
+          <KakaoMapMultiMarker locations={groupLocations} />
+        </div>
+      )}
+
       {/* 그룹 목록 */}
       <div className='space-y-4'>
         {groups.map((group) => (
@@ -295,7 +372,8 @@ export default function ClientPage() {
               </span>
             </div>
 
-            <h3 className='text-xl font-bold text-gray-900 dark:text-white mb-4'>{group.name}</h3>
+            <h3 className='text-xl font-bold text-gray-900 dark:text-white mb-2'>{group.name}</h3>
+            <div className='text-sm text-gray-500 dark:text-gray-400 mb-4'>관리자: {group.groupLeaders.join(', ')}</div>
 
             <div className='flex justify-between items-center'>
               <div className='text-gray-600 dark:text-gray-400'>
