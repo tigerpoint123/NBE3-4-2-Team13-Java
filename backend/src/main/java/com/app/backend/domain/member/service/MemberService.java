@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -129,7 +130,7 @@ public class MemberService {
 					throw new MemberException(MemberErrorCode.MEMBER_NO_ADMIN_PERMISSION);
 				return true;
 			})
-			.map(validateToken -> memberRepository.findAll());
+			.map(validateToken -> memberRepository.findAllByOrderByIdDesc());
 	}
 
 	@Transactional
@@ -140,6 +141,8 @@ public class MemberService {
 			.username(member.getUsername())
 			.password(member.getPassword())
 			.nickname(member.getNickname())
+			.provider(member.getProvider())
+			.oauthProviderId(member.getOauthProviderId())
 			.role(member.getRole())
 			.disabled(true)
 			.build();
@@ -148,7 +151,7 @@ public class MemberService {
 	}
 
 	@Transactional
-	// @Scheduled(fixedRate = 10000) // 10초마다 실행
+	@Scheduled(fixedRate = 60000) // 1분마다 실행
 	public void cleanupDisabledMembers() {
 		log.info("비활성화된 회원 정보 삭제 작업 시작");
 		LocalDateTime cutoffDate = LocalDateTime.now().minusSeconds(30);

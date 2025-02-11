@@ -57,7 +57,8 @@ export function ClientLayout({
   const router = useRouter();
   const INITIAL_SESSION_TIME = 30 * 60; // 30분
   const [sessionTime, setSessionTime] = React.useState<number>(0);
-  const [tokenExpirationTime, setTokenExpirationTime] = React.useState<number>(0); // 토큰 만료 시간을 저장할 state
+  const [tokenExpirationTime, setTokenExpirationTime] =
+    React.useState<number>(0); // 토큰 만료 시간을 저장할 state
 
   // formatTime 함수를 컴포넌트 내부로 이동
   const formatTime = (seconds: number) => {
@@ -155,26 +156,38 @@ export function ClientLayout({
   };
 
   useEffect(() => {
-    // 로그인 상태일 때만 타이머 실행
-    let timer: NodeJS.Timeout;
-    if (isLogin && sessionTime > 0) {
-      timer = setInterval(() => {
-        setSessionTime((prev) => {
-          if (prev <= 1) {
-            clearInterval(timer);
-            logout(); // 시간 종료시 자동 로그아웃
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
+    // 초기 로딩 시 토큰 존재 여부에 따라 로그인 상태 설정
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      setNoLoginMember();
+      return;
     }
 
-    // 컴포넌트가 언마운트되거나 의존성이 변경될 때 타이머 정리
-    return () => {
-      if (timer) clearInterval(timer);
-    };
-  }, [isLogin, sessionTime, logout]); // logout 함수도 의존성에 추가
+    try {
+      // JWT 토큰에서 페이로드 추출
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      
+      // 토큰이 만료되었는지 확인
+      const currentTime = Math.floor(Date.now() / 1000);
+      if (payload.exp && payload.exp < currentTime) {
+        // 토큰이 만료된 경우
+        localStorage.removeItem("accessToken");
+        setNoLoginMember();
+        return;
+      }
+
+      // 이미 저장된 로그인 정보가 있다면 그대로 사용
+      if (loginMember.id !== 0) {
+        setLoginMember(loginMember);
+      } else {
+        // 토큰은 있지만 로그인 정보가 없는 경우
+        setNoLoginMember();
+      }
+    } catch (error) {
+      console.error("토큰 처리 중 에러:", error);
+      setNoLoginMember();
+    }
+  }, []); // 컴포넌트 마운트 시 한 번만 실행
 
   useEffect(() => {
     if (isLogin) {
@@ -183,10 +196,6 @@ export function ClientLayout({
   }, [isLogin]); // 로그인 상태가 변경될 때만 실행
 
   useEffect(() => {
-    // 추후 이 부분은 fetch(GET http://localhost:8080/api/v1/members/me) 로 대체될 예정이다.
-    // 현재는 일단은 임시로 관리자 회원으로 로그인 했다고 가정하기 위해서 아래와 같이 선언
-    // 실제로 나중에 fetch로 변경될 때도 fetch가 완료되는데 걸리는 시간이 걸린다.
-    // 그 상황을 실감나게 흉내내기 위해서 setTimeout을 사용하였다.
     // 로그인 상태일 때만 타이머 실행
     let timer: NodeJS.Timeout;
     if (isLogin && sessionTime > 0) {
@@ -202,58 +211,12 @@ export function ClientLayout({
       }, 1000);
     }
 
-    const fetchLoginMember = async () => {
-      try {
-        const token = localStorage.getItem("accessToken");
-
-        const response = await fetch(
-          "http://localhost:8080/api/v1/members/info",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-            credentials: "include",
-          }
-        );
-        if (response.ok) {
-          const responseData = await response.json();
-
-          if (responseData.isSuccess) {
-            const memberData = responseData.data;
-            setLoginMember({
-              id: memberData.id,
-              username: memberData.username,
-              password: memberData.password,
-              nickname: memberData.nickname,
-              createdAt: memberData.createdAt,
-              modifiedAt: memberData.modifiedAt,
-              provider: memberData.provider,
-              authorities: memberData.authorities.map(
-                (auth: any) => auth.authority
-              ), // authorities 배열에서 authority 값만 추출
-            });
-          } else {
-            setNoLoginMember();
-          }
-        } else {
-          setNoLoginMember();
-        }
-      } catch (error) {
-        console.error("로그인 정보 조회 실패:", error);
-        setNoLoginMember();
-      }
-    };
-    fetchLoginMember();
     // 컴포넌트가 언마운트되거나 의존성이 변경될 때 타이머 정리
     return () => {
       if (timer) clearInterval(timer);
     };
-  }, [isLogin]);
+  }, [isLogin, sessionTime]); // sessionTime 의존성 추가
 
-  // isLoginMemberPending 의 시작상태는 true 이다.
-  // 해당값이 true 라는 것은 아직 로그인 상태인지 아닌지 판별되기 전이라는 의미이다.
-  // setLoginMember, setNoLoginMember, removeLoginMember 함수가 호출되면 해당값이 false 로 변경된다.
   if (isLoginMemberPending) {
     return (
       <div className="flex-1 flex justify-center items-center text-muted-foreground">

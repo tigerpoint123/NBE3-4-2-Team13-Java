@@ -17,6 +17,9 @@ interface Member {
 
 export default function ClientPage() {
     const [members, setMembers] = useState<Member[]>([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(0);
+    const [pageSize] = useState(10);
     const router = useRouter();
 
     useEffect(() => {
@@ -28,6 +31,11 @@ export default function ClientPage() {
                 }
 
                 const response = await axios.get('http://localhost:8080/api/v1/members/findAll', {
+                    params: {
+                        page: currentPage - 1,
+                        size: pageSize,
+                        sort: 'id,desc'  
+                    },
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -36,7 +44,13 @@ export default function ClientPage() {
                 });
                 
                 if (response.data.isSuccess) {
-                    setMembers(response.data.data);
+                    // 페이지 크기만큼 데이터 자르기
+                    const startIndex = (currentPage - 1) * pageSize;
+                    const endIndex = startIndex + pageSize;
+                    const paginatedData = response.data.data.slice(startIndex, endIndex);
+                    
+                    setMembers(paginatedData);
+                    setTotalPages(Math.ceil(response.data.data.length / pageSize));
                 }
             } catch (error) {
                 console.error('멤버 정보를 가져오는데 실패했습니다:', error);
@@ -44,7 +58,11 @@ export default function ClientPage() {
         };
 
         fetchMembers();
-    }, []);
+    }, [currentPage, pageSize]);
+
+    const handlePageChange = (pageNumber: number) => {
+        setCurrentPage(pageNumber);
+    };
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -110,6 +128,29 @@ export default function ClientPage() {
                                 ))}
                             </tbody>
                         </table>
+                    </div>
+                    
+                    {/* 페이지네이션 UI */}
+                    <div className="px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+                        <div className="flex-1 flex justify-between sm:justify-end">
+                            <button
+                                onClick={() => handlePageChange(currentPage - 1)}
+                                disabled={currentPage === 1}
+                                className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed mr-2"
+                            >
+                                이전
+                            </button>
+                            <span className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700">
+                                {currentPage} / {totalPages} 페이지
+                            </span>
+                            <button
+                                onClick={() => handlePageChange(currentPage + 1)}
+                                disabled={currentPage === totalPages}
+                                className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed ml-2"
+                            >
+                                다음
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
