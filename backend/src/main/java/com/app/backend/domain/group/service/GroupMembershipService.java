@@ -85,6 +85,14 @@ public class GroupMembershipService {
         //모임의 관리자 권한을 갖는 회원이 가입을 승인한 경우(isAccept = true)
         if (isAccept) {
             groupMembership.modifyStatus(MembershipStatus.APPROVED);
+            if (group.getMaxRecruitCount() <= groupMembershipRepository.countByGroupIdAndStatusAndDisabled(groupId,
+                                                                                                           MembershipStatus.APPROVED,
+                                                                                                           false)) {
+                RecruitStatus closed = RecruitStatus.CLOSED;
+                closed.modifyForceStatus(false);
+                group.modifyRecruitStatus(closed);
+            }
+
             return true;
         }
 
@@ -171,6 +179,13 @@ public class GroupMembershipService {
             throw new GroupMembershipException(GroupMembershipErrorCode.GROUP_MEMBERSHIP_UNABLE_TO_LEAVE);
 
         groupMembership.modifyStatus(MembershipStatus.LEAVE);
+
+        Group group = groupMembership.getGroup();
+        if (group.getMaxRecruitCount() > groupMembershipRepository.countByGroupIdAndStatusAndDisabled(groupId,
+                                                                                                      MembershipStatus.APPROVED,
+                                                                                                      false)
+            && !group.getRecruitStatus().isForceStatus())
+            group.modifyRecruitStatus(RecruitStatus.RECRUITING);
 
         return true;
     }

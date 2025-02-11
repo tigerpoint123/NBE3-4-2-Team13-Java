@@ -77,6 +77,7 @@ public class GroupController {
                               empty = false)
     public ApiResponse<Page<GroupResponse.ListInfo>> getGroups(
             @RequestParam(required = false) final String categoryName,
+            @RequestParam(required = false) final String recruitStatus,
             @RequestParam(required = false) final String province,
             @RequestParam(required = false) final String city,
             @RequestParam(required = false) final String town,
@@ -88,6 +89,7 @@ public class GroupController {
     ) {
         GroupRequest.Search requestDto = GroupRequest.Search.builder()
                                                             .categoryName(categoryName)
+                                                            .recruitStatus(recruitStatus)
                                                             .name(keyword)
                                                             .province(province)
                                                             .city(city)

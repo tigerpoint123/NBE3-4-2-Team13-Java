@@ -96,6 +96,12 @@ public class GroupService {
                                                          .build();
         groupMembershipRepository.save(groupMembership);
 
+        int count = groupMembershipRepository.countByGroupIdAndStatusAndDisabled(group.getId(),
+                                                                                 MembershipStatus.APPROVED,
+                                                                                 false);
+        if (group.getMaxRecruitCount() <= count)
+            group.modifyRecruitStatus(RecruitStatus.CLOSED);
+
         return group.getId();
     }
 
@@ -264,12 +270,13 @@ public class GroupService {
      * @return 모임 응답 DTO 목록(List)
      */
     public List<GroupResponse.ListInfo> getGroupsBySearch(@NotNull final GroupRequest.Search dto) {
-        return groupRepository.findAllByCategoryAndNameContainingAndRegion(dto.getCategoryName(),
-                                                                           dto.getName(),
-                                                                           dto.getProvince(),
-                                                                           dto.getCity(),
-                                                                           dto.getTown(),
-                                                                           false)
+        return groupRepository.findAllByCategoryAndRecruitStatusAndNameContainingAndRegion(dto.getCategoryName(),
+                                                                                           dto.getRecruitStatus(),
+                                                                                           dto.getName(),
+                                                                                           dto.getProvince(),
+                                                                                           dto.getCity(),
+                                                                                           dto.getTown(),
+                                                                                           false)
                               .stream()
                               .map(GroupResponse::toListInfo)
                               .toList();
@@ -284,13 +291,14 @@ public class GroupService {
      */
     public Page<GroupResponse.ListInfo> getGroupsBySearch(@NotNull final GroupRequest.Search dto,
                                                           @NotNull final Pageable pageable) {
-        return groupRepository.findAllByCategoryAndNameContainingAndRegion(dto.getCategoryName(),
-                                                                           dto.getName(),
-                                                                           dto.getProvince(),
-                                                                           dto.getCity(),
-                                                                           dto.getTown(),
-                                                                           false,
-                                                                           pageable)
+        return groupRepository.findAllByCategoryAndRecruitStatusAndNameContainingAndRegion(dto.getCategoryName(),
+                                                                                           dto.getRecruitStatus(),
+                                                                                           dto.getName(),
+                                                                                           dto.getProvince(),
+                                                                                           dto.getCity(),
+                                                                                           dto.getTown(),
+                                                                                           false,
+                                                                                           pageable)
                               .map(GroupResponse::toListInfo);
     }
 
@@ -329,10 +337,18 @@ public class GroupService {
                                                          CategoryErrorCode.CATEGORY_NOT_FOUND
                                                  ));
 
+        if (dto.getMaxRecruitCount() < groupMembershipRepository.countByGroupIdAndStatusAndDisabled(groupId,
+                                                                                                    MembershipStatus.APPROVED,
+                                                                                                    false))
+            throw new GroupException(GroupErrorCode.GROUP_MAXIMUM_NUMBER_OF_MEMBERS);
+
+        RecruitStatus newRecruitStatus = RecruitStatus.valueOf(dto.getRecruitStatus());
+        if (newRecruitStatus == RecruitStatus.CLOSED)
+            newRecruitStatus.modifyForceStatus(true);
         group.modifyName(dto.getName())
              .modifyRegion(dto.getProvince(), dto.getCity(), dto.getTown())
              .modifyDescription(dto.getDescription())
-             .modifyRecruitStatus(RecruitStatus.valueOf(dto.getRecruitStatus()))
+             .modifyRecruitStatus(newRecruitStatus)
              .modifyMaxRecruitCount(dto.getMaxRecruitCount())
              .modifyCategory(newCategory);
 
