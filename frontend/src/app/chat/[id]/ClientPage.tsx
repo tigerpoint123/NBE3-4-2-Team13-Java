@@ -265,7 +265,7 @@ export default function ChatRoom() {
                                     className={`flex flex-col mb-2 ${isMyMessage ? 'items-end' : 'items-start'}`}>
                                     <span className="font-bold dark:text-white mb-1">{!isMyMessage && message.senderNickname}</span>
                                     <div className={`flex items-end gap-2 ${isMyMessage ? 'flex-row-reverse' : ''}`}>
-                                        <p className={`rounded-lg p-2 max-w-[95%] whitespace-pre-wrap
+                                        <p className={`rounded-lg p-2 max-w-[100%] whitespace-pre-wrap
                                             ${isMyMessage 
                                                 ? 'bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100' 
                                                 : 'bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-gray-100'}`}>
