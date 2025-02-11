@@ -2,6 +2,7 @@ package com.app.backend.domain.comment.entity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.app.backend.domain.member.entity.Member;
 import com.app.backend.domain.post.entity.Post;
@@ -68,5 +69,16 @@ public class Comment extends BaseEntity {
 	public void addReply(Comment reply) {
 		this.children.add(reply);
 		reply.parent = this;
+	}
+
+	public void removeReply(Comment reply) {
+		this.children.remove(reply);
+		reply.parent = null;
+	}
+
+	public List<Comment> getChildren() {
+		return this.children.stream()
+			.filter(child -> !child.getDisabled())
+			.collect(Collectors.toList());
 	}
 }
