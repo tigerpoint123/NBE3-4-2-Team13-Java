@@ -8,10 +8,13 @@ export const getComments = async (
   try {
     const response = await api.get(`/comment/${postId}`, {
       headers: { Authorization: `Bearer ${token}` },
-      params: { page },
+      params: { page, sort: "createdAt,asc" },
     });
     return response.data.data;
   } catch (error: any) {
+    if (error.response.data.code) {
+      throw error.response.data.code;
+    }
     throw new Error("댓글 목록을 불러오는데 실패했습니다");
   }
 };
@@ -28,6 +31,9 @@ export const createComment = async (
     });
     return response.data;
   } catch (error: any) {
+    if (error.response.data.code) {
+      throw error.response.data.code;
+    }
     throw new Error("댓글 작성에 실패했습니다.");
   }
 };
@@ -44,6 +50,9 @@ export const updateComment = async (
     });
     return response.data.data;
   } catch (error: any) {
+    if (error.response.data.code) {
+      throw error.response.data.code;
+    }
     throw new Error("댓글 수정에 실패했습니다.");
   }
 };
@@ -58,6 +67,9 @@ export const deleteComment = async (
     });
     return response.data.data;
   } catch (error: any) {
+    if (error.response.data.code) {
+      throw error.response.data.code;
+    }
     throw new Error("댓글 삭제에 실패했습니다.");
   }
 };
@@ -69,9 +81,13 @@ export const getReplies = async (
   try {
     const response = await api.get(`/comment/${commentId}/reply`, {
       headers: { Authorization: `Bearer ${token}` },
+      params: { sort: "createdAt,asc" },
     });
     return response.data.data;
   } catch (error: any) {
+    if (error.response.data.code) {
+      throw error.response.data.code;
+    }
     throw new Error("답글을 불러오는데 실패했습니다.");
   }
 };
@@ -88,6 +104,9 @@ export const createReply = async (
     });
     return response.data.data;
   } catch (error: any) {
+    if (error.response.data.code) {
+      throw error.response.data.code;
+    }
     throw new Error("답글 등록에 실패했습니다.");
   }
 };
@@ -104,6 +123,9 @@ export const updateReply = async (
     });
     return response.data.data;
   } catch (error: any) {
+    if (error.response.data.code) {
+      throw error.response.data.code;
+    }
     throw new Error("답글 수정에 실패했습니다.");
   }
 };
@@ -118,6 +140,9 @@ export const deleteReply = async (
     });
     return response.data;
   } catch (error: any) {
+    if (error.response.data.code) {
+      throw error.response.data.code;
+    }
     throw new Error("답글 삭제에 실패했습니다.");
   }
 };

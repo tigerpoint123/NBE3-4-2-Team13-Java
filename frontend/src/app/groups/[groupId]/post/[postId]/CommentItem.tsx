@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useState, useRef, useEffect } from "react";
 import { Comment } from "@/types/Comment";
 import {
   getReplies,
@@ -11,12 +11,12 @@ import {
   deleteComment,
 } from "@/api/comment/commentApi";
 import { LoginMemberContext } from "@/stores/auth/LoginMember";
+import { useParams, useRouter } from "next/navigation";
 
-// 날짜 포맷
+// 날짜 포맷 (배열형태 데이터 사용)
 function formatDateFromArray(dateData: any): string {
   if (dateData.length < 6) return "";
   const [year, month, day, hour, minute, second] = dateData;
-  // month, day, hour, minute, second를 두 자리 문자열로 변환
   const mm = String(month).padStart(2, "0");
   const dd = String(day).padStart(2, "0");
   const hh = String(hour).padStart(2, "0");
@@ -40,7 +40,8 @@ export default function CommentItem({
 }: CommentItemProps) {
   const token = localStorage.getItem("accessToken") || "";
   const { loginMember } = use(LoginMemberContext);
-
+  const router = useRouter();
+  const params = useParams();
   const [editMode, setEditMode] = useState(false);
   const [editedContent, setEditedContent] = useState(comment.content);
   const [showReplyForm, setShowReplyForm] = useState(false);
@@ -54,6 +55,45 @@ export default function CommentItem({
   const [replyEditedContent, setReplyEditedContent] = useState<{
     [key: number]: string;
   }>({});
+  const [replyCount, setReplyCount] = useState(comment.replyCount);
+
+  // 댓글 드롭다운 관련 ref 및 상태
+  const commentDropdownRef = useRef<HTMLDivElement>(null);
+  const [commentDropdownOpen, setCommentDropdownOpen] = useState(false);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        commentDropdownRef.current &&
+        !commentDropdownRef.current.contains(event.target as Node)
+      ) {
+        setCommentDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // 답글 드롭다운 관련 ref 및 상태 (각 답글 개별 관리)
+  const replyDropdownRefs = useRef<{ [key: number]: HTMLDivElement | null }>(
+    {}
+  );
+  const [replyDropdownOpen, setReplyDropdownOpen] = useState<{
+    [key: number]: boolean;
+  }>({});
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      Object.keys(replyDropdownRefs.current).forEach((key) => {
+        const ref = replyDropdownRefs.current[Number(key)];
+        if (ref && !ref.contains(event.target as Node)) {
+          setReplyDropdownOpen((prev) => ({ ...prev, [Number(key)]: false }));
+        }
+      });
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // 댓글 수정 (일반 댓글)
   const handleEditSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -63,8 +103,13 @@ export default function CommentItem({
       const updated = await updateComment(comment.id, editedContent, token);
       setEditMode(false);
       if (onCommentUpdated) onCommentUpdated(updated.data || updated);
-    } catch (error) {
-      console.error("댓글 수정 오류:", error);
+    } catch (error: any) {
+      if (error == "CM001") {
+        console.log(error);
+        window.location.reload();
+      } else {
+        console.error("답글 불러오기 오류:", error);
+      }
     }
   };
 
@@ -74,8 +119,13 @@ export default function CommentItem({
       try {
         await deleteComment(comment.id, token);
         if (onCommentDeleted) onCommentDeleted(comment.id);
-      } catch (error) {
-        console.error("댓글 삭제 오류:", error);
+      } catch (error: any) {
+        if (error == "CM001") {
+          console.log(error);
+          window.location.reload();
+        } else {
+          console.error("답글 불러오기 오류:", error);
+        }
       }
     }
   };
@@ -86,9 +136,16 @@ export default function CommentItem({
       setLoadingReplies(true);
       try {
         const data = await getReplies(comment.id, token);
-        setReplies(data.content || data || []);
-      } catch (error) {
-        console.error("답글 불러오기 오류:", error);
+        const loadedReplies = data.content || data || [];
+        setReplies(loadedReplies);
+        setReplyCount(loadedReplies.length);
+      } catch (error: any) {
+        if (error == "CM001") {
+          console.log(error);
+          window.location.reload();
+        } else {
+          console.error("답글 불러오기 오류:", error);
+        }
       } finally {
         setLoadingReplies(false);
       }
@@ -104,12 +161,19 @@ export default function CommentItem({
       await createReply(comment.id, replyContent, token);
       setReplyContent("");
       const data = await getReplies(comment.id, token);
-      setReplies(data.content || data || []);
+      const updatedReplies = data.content || data || [];
+      setReplies(updatedReplies);
+      setReplyCount(updatedReplies.length);
       setShowReplies(true);
       setShowReplyForm(false);
       onReplySubmit(comment.id, replyContent);
-    } catch (error) {
-      console.error("답글 작성 오류:", error);
+    } catch (error: any) {
+      if (error == "CM001") {
+        console.log(error);
+        window.location.reload();
+      } else {
+        console.error("답글 불러오기 오류:", error);
+      }
     }
   };
 
@@ -125,8 +189,13 @@ export default function CommentItem({
         )
       );
       setReplyEditMode((prev) => ({ ...prev, [replyId]: false }));
-    } catch (error) {
-      console.error("답글 수정 오류:", error);
+    } catch (error: any) {
+      if (error == "CM001") {
+        console.log(error);
+        window.location.reload();
+      } else {
+        console.error("답글 불러오기 오류:", error);
+      }
     }
   };
 
@@ -135,11 +204,18 @@ export default function CommentItem({
     if (confirm("정말 답글을 삭제하시겠습니까?")) {
       try {
         await deleteReply(replyId, token);
-        setReplies((prevReplies) =>
-          prevReplies.filter((r) => r.id !== replyId)
-        );
-      } catch (error) {
-        console.error("답글 삭제 오류:", error);
+        setReplies((prevReplies) => {
+          const newReplies = prevReplies.filter((r) => r.id !== replyId);
+          setReplyCount(newReplies.length);
+          return newReplies;
+        });
+      } catch (error: any) {
+        if (error == "CM001") {
+          console.log(error);
+          window.location.reload();
+        } else {
+          console.error("답글 불러오기 오류:", error);
+        }
       }
     }
   };
@@ -182,37 +258,52 @@ export default function CommentItem({
           </div>
         </div>
 
-        {/* 댓글 버튼 */}
+        {/* 댓글 드롭다운 및 버튼 */}
         <div className="flex flex-col items-end space-y-2">
           {loginMember.id === comment.memberId && !editMode && (
-            <div className="space-x-2">
+            <div ref={commentDropdownRef} className="relative">
               <button
-                onClick={() => setEditMode(true)}
+                onClick={() => setCommentDropdownOpen((prev) => !prev)}
                 className="text-xs border px-2 py-1 rounded hover:bg-gray-100"
               >
-                수정
+                ...
               </button>
-              <button
-                onClick={handleDelete}
-                className="text-xs border px-2 py-1 rounded hover:bg-gray-100"
-              >
-                삭제
-              </button>
+              {commentDropdownOpen && (
+                <div className="absolute right-0 mt-1 bg-white border rounded shadow-lg z-10 px-1 py-1">
+                  <button
+                    onClick={() => {
+                      setCommentDropdownOpen(false);
+                      setEditMode(true);
+                    }}
+                    className="w-full text-left px-2 py-1 text-xs whitespace-nowrap hover:bg-gray-100"
+                  >
+                    수정
+                  </button>
+                  <button
+                    onClick={() => {
+                      setCommentDropdownOpen(false);
+                      handleDelete();
+                    }}
+                    className="w-full text-left px-2 py-1 text-xs whitespace-nowrap hover:bg-gray-100"
+                  >
+                    삭제
+                  </button>
+                </div>
+              )}
             </div>
           )}
           <button
             onClick={handleToggleReplies}
             className="text-xs border px-2 py-1 rounded hover:bg-gray-100"
           >
-            {showReplies ? "답글 닫기" : `답글 보기 (${comment.replyCount})`}
+            {showReplies ? "답글 닫기" : `답글 보기 (${replyCount})`}
           </button>
         </div>
       </div>
 
-      {/* 답글 작성 폼 (답글 보기 토글 시 함께 표시) */}
+      {/* 답글 작성 폼 및 목록 */}
       {showReplies && (
         <div className="mt-2 ml-4 space-y-2">
-          {/* 답글 목록 */}
           {loadingReplies ? (
             <p className="text-gray-500 text-xs">로딩 중...</p>
           ) : replies.length > 0 ? (
@@ -233,11 +324,11 @@ export default function CommentItem({
                             [reply.id]: e.target.value,
                           }))
                         }
-                        className="flex-1 px-2 py-1 border rounded text-xs" // w-full 대신 flex-1 사용
+                        className="flex-1 px-2 py-1 border rounded text-xs"
                       />
                       <button
                         onClick={() => handleReplyEditSubmit(reply.id)}
-                        className="text-xs border px-2 py-1 rounded hover:bg-gray-100"
+                        className="text-xs border px-2 py-1 rounded hover:bg-gray-100 whitespace-nowrap"
                       >
                         저장
                       </button>
@@ -248,7 +339,7 @@ export default function CommentItem({
                             [reply.id]: false,
                           }))
                         }
-                        className="text-xs border px-2 py-1 rounded hover:bg-gray-100"
+                        className="text-xs border px-2 py-1 rounded hover:bg-gray-100 whitespace-nowrap"
                       >
                         취소
                       </button>
@@ -265,28 +356,58 @@ export default function CommentItem({
                 </div>
                 {loginMember.id === reply.memberId &&
                   !replyEditMode[reply.id] && (
-                    <div className="space-x-1">
+                    <div
+                      className="relative"
+                      ref={(el) => {
+                        replyDropdownRefs.current[reply.id] = el;
+                      }}
+                    >
                       <button
-                        onClick={() => {
-                          setReplyEditMode((prev) => ({
+                        onClick={() =>
+                          setReplyDropdownOpen((prev) => ({
                             ...prev,
-                            [reply.id]: true,
-                          }));
-                          setReplyEditedContent((prev) => ({
-                            ...prev,
-                            [reply.id]: reply.content,
-                          }));
-                        }}
+                            [reply.id]: !prev[reply.id],
+                          }))
+                        }
                         className="text-xs border px-2 py-1 rounded hover:bg-gray-100"
                       >
-                        수정
+                        ...
                       </button>
-                      <button
-                        onClick={() => handleReplyDelete(reply.id)}
-                        className="text-xs border px-2 py-1 rounded hover:bg-gray-100"
-                      >
-                        삭제
-                      </button>
+                      {replyDropdownOpen[reply.id] && (
+                        <div className="absolute right-0 mt-1 bg-white border rounded shadow-lg z-10 px-1 py-1">
+                          <button
+                            onClick={() => {
+                              setReplyDropdownOpen((prev) => ({
+                                ...prev,
+                                [reply.id]: false,
+                              }));
+                              setReplyEditMode((prev) => ({
+                                ...prev,
+                                [reply.id]: true,
+                              }));
+                              setReplyEditedContent((prev) => ({
+                                ...prev,
+                                [reply.id]: reply.content,
+                              }));
+                            }}
+                            className="px-2 py-1 text-xs whitespace-nowrap hover:bg-gray-100"
+                          >
+                            수정
+                          </button>
+                          <button
+                            onClick={() => {
+                              setReplyDropdownOpen((prev) => ({
+                                ...prev,
+                                [reply.id]: false,
+                              }));
+                              handleReplyDelete(reply.id);
+                            }}
+                            className="px-2 py-1 text-xs whitespace-nowrap hover:bg-gray-100"
+                          >
+                            삭제
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
               </div>
@@ -303,7 +424,7 @@ export default function CommentItem({
               value={replyContent}
               onChange={(e) => setReplyContent(e.target.value)}
               placeholder="답글 입력..."
-              className="flex-1 px-2 py-1 border rounded text-xs" // w-full 대신 flex-1 사용
+              className="flex-1 px-2 py-1 border rounded text-xs"
             />
             <button
               type="submit"
