@@ -176,13 +176,34 @@ export function ClientLayout({
         return;
       }
 
-      // 이미 저장된 로그인 정보가 있다면 그대로 사용
-      if (loginMember.id !== 0) {
-        setLoginMember(loginMember);
-      } else {
-        // 토큰은 있지만 로그인 정보가 없는 경우
+      // 토큰이 유효하면 사용자 정보를 가져옴
+      fetch("http://localhost:8080/api/v1/members/info", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.isSuccess) {
+          setLoginMember({
+            id: data.data.id,
+            username: data.data.username,
+            password: data.data.password || "-",
+            nickname: data.data.nickname,
+            createdAt: data.data.createdAt,
+            provider: data.data.provider,
+            authorities: data.data.authorities || [],
+            modifiedAt: data.data.modifiedAt
+          });
+        } else {
+          setNoLoginMember();
+        }
+      })
+      .catch(error => {
+        console.error("사용자 정보 조회 중 에러:", error);
         setNoLoginMember();
-      }
+      });
+
     } catch (error) {
       console.error("토큰 처리 중 에러:", error);
       setNoLoginMember();
