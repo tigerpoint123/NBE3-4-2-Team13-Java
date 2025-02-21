@@ -1,5 +1,6 @@
 package com.app.backend.domain.notification;
 
+import com.app.backend.domain.notification.dto.NotificationEvent;
 import com.app.backend.domain.notification.dto.NotificationMessage;
 import com.app.backend.domain.notification.service.NotificationProducer;
 import lombok.RequiredArgsConstructor;

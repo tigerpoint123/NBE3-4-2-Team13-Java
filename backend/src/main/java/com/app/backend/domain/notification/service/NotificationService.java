@@ -1,6 +1,6 @@
 package com.app.backend.domain.notification.service;
 
-import com.app.backend.domain.notification.NotificationEvent;
+import com.app.backend.domain.notification.dto.NotificationEvent;
 import com.app.backend.domain.notification.dto.NotificationMessage;
 import com.app.backend.domain.notification.entity.Notification;
 import com.app.backend.domain.notification.repository.NotificationRepository;
