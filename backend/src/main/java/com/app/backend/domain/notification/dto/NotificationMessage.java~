@@ -1,0 +1,11 @@
+package com.app.backend.domain.notification;
+
+import java.time.LocalDateTime;
+
+public record NotificationMessage(
+        String userId,
+        String title,
+        String content,
+        LocalDateTime timestamp
+) {
+}
