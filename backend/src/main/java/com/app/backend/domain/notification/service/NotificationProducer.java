@@ -12,6 +12,6 @@ public class NotificationProducer {
     private static final String TOPIC = "notification-topic";
 
     public void sendNotification(NotificationMessage message) {
-        kafkaTemplate.send(TOPIC, message.userId(), message);
+        kafkaTemplate.send(TOPIC, message.getUserId(), message);
     }
 }

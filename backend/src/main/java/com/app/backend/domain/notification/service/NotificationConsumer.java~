@@ -15,7 +15,7 @@ public class NotificationConsumer {
     public void consume(NotificationMessage message) {
         // WebSocket을 통해 클라이언트에게 알림 전송
         messagingTemplate.convertAndSendToUser(
-                message.getUserId(),
+                message.userId(),
                 "/queue/notifications",
                 message
         );

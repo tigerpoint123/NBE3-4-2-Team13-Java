@@ -22,4 +22,8 @@ public class Notification extends BaseEntity {
     private String content;
     private boolean isRead;
     private LocalDateTime createdAt;
+
+    public void markAsRead() {
+        this.isRead = true;
+    }
 }
