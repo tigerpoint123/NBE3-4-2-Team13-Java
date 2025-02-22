@@ -24,6 +24,8 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { notificationService } from "../services/notificationService";
+import { NotificationBell } from "@/components/notification/NotificationBell";
 
 function ModeToggle() {
   const { setTheme } = useTheme();
@@ -238,6 +240,24 @@ export function ClientLayout({
     };
   }, [isLogin, sessionTime]); // sessionTime 의존성 추가
 
+  useEffect(() => {
+    // 로그인된 상태일 때만 SSE 연결
+    if (isLogin) {
+      // 브라우저 알림 권한 요청
+      if (Notification.permission === 'default') {
+        Notification.requestPermission();
+      }
+
+      // SSE 연결
+      notificationService.connect();
+
+      // 컴포넌트 언마운트나 로그아웃 시 연결 해제
+      return () => {
+        notificationService.disconnect();
+      };
+    }
+  }, [isLogin]); // isLogin이 변경될 때마다 실행
+
   if (isLoginMemberPending) {
     return (
       <div className="flex-1 flex justify-center items-center text-muted-foreground">
@@ -256,58 +276,61 @@ export function ClientLayout({
       <LoginMemberContext value={loginMemberContextValue}>
         {/* 이 안의 모든 곳에서 `loginMemberContextValue` 변수를 `use` 함수를 통해서 접근할 수 있다. */}
         {/* 하지만 여기서는 어짜피 useLoginMember 함수의 실행결과가 바로 있기 때문에 딱히 `use` 를 사용할 필요가 없다. */}
-        <header className="flex p-2 items-center">
-          <div className="flex">
-            <Button variant="link" asChild>
-              <Link href="/">
-                <Home /> LinkUs
-              </Link>
-            </Button>
-            {isLogin && (
-              <>
-                <Button variant="link" asChild>
-                  <Link href="/groups">
-                    <Users /> 모임
-                  </Link>
-                </Button>
-                <Button variant="link" asChild>
-                  <Link href="/chat">
-                    <MessageSquare /> 채팅
-                  </Link>
-                </Button>
-              </>
-            )}
-          </div>
-          <div className="flex-grow"></div>
-          <div className="flex items-center gap-2">
-            {isLogin && (
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">
-                  세션 만료까지: {formatTime(sessionTime)}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={extendTime}
-                  className="text-xs"
-                >
-                  시간연장
-                </Button>
-              </div>
-            )}
-            {isLogin && (
+        <header className="border-b">
+          <div className="container flex items-center justify-between h-14">
+            <div className="flex">
               <Button variant="link" asChild>
-                <Link href="/member/info">
-                  <User /> 내 정보
+                <Link href="/">
+                  <Home /> LinkUs
                 </Link>
               </Button>
-            )}
-            {isLogin && (
-              <Button variant="link" onClick={logout}>
-                <LogOut /> 로그아웃
-              </Button>
-            )}
-            <ModeToggle />
+              {isLogin && (
+                <>
+                  <Button variant="link" asChild>
+                    <Link href="/groups">
+                      <Users /> 모임
+                    </Link>
+                  </Button>
+                  <Button variant="link" asChild>
+                    <Link href="/chat">
+                      <MessageSquare /> 채팅
+                    </Link>
+                  </Button>
+                </>
+              )}
+            </div>
+            <div className="flex-grow"></div>
+            <div className="flex items-center gap-4">
+              {isLogin && <NotificationBell />}
+              {isLogin && (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    세션 만료까지: {formatTime(sessionTime)}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={extendTime}
+                    className="text-xs"
+                  >
+                    시간연장
+                  </Button>
+                </div>
+              )}
+              {isLogin && (
+                <Button variant="link" asChild>
+                  <Link href="/member/info">
+                    <User /> 내 정보
+                  </Link>
+                </Button>
+              )}
+              {isLogin && (
+                <Button variant="link" onClick={logout}>
+                  <LogOut /> 로그아웃
+                </Button>
+              )}
+              <ModeToggle />
+            </div>
           </div>
         </header>
         <main className="flex-1 flex flex-col">{children}</main>
