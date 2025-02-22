@@ -22,8 +22,7 @@ public class NotificationEventListener {
                 event.getUserId(),
                 event.getTitle(),
                 event.getContent(),
-                LocalDateTime.now(),
-                false
+                LocalDateTime.now()
         );
         notificationProducer.sendNotification(message);
     }

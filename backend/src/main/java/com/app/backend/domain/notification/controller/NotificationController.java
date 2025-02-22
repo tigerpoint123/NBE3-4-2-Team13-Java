@@ -1,7 +1,7 @@
 package com.app.backend.domain.notification.controller;
 
-import com.app.backend.domain.notification.SseEmitters;
-import com.app.backend.domain.notification.entity.Notification;
+import com.app.backend.domain.notification.dto.SseEmitters;
+import com.app.backend.domain.notification.dto.NotificationMessage;
 import com.app.backend.domain.notification.service.NotificationService;
 import com.app.backend.global.dto.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -23,8 +23,8 @@ public class NotificationController {
     private final SseEmitters sseEmitters;
 
     @GetMapping
-    public ApiResponse<List<Notification>> getNotifications(@RequestParam String userId) {
-        List<Notification> notifications = notificationService.getNotifications(userId);
+    public ApiResponse<List<NotificationMessage>> getNotifications(@RequestParam String userId) {
+        List<NotificationMessage> notifications = notificationService.getNotifications(userId);
         return ApiResponse.of(
                 true,
                 HttpStatus.OK,

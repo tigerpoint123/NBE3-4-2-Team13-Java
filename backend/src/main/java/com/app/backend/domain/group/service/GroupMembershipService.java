@@ -87,12 +87,12 @@ public class GroupMembershipService {
         //모임의 관리자 권한을 갖는 회원이 가입을 승인한 경우(isAccept = true)
         if (isAccept) {
             groupMembership.modifyStatus(MembershipStatus.APPROVED);
-            // Kafka 알림
             notificationService.sendNotification(
                     memberId.toString(),
                     "그룹 가입 승인",
-                    group.getName() + "그룹 가입이 승인되었습니다",
-                    NotificationEvent.NotificationType.GROUP_INVITE
+                    group.getName() + " 그룹 가입이 승인되었습니다",
+                    NotificationEvent.NotificationType.GROUP_INVITE,
+                    group.getId()
             );
 
             if (group.getMaxRecruitCount() <= groupMembershipRepository.countByGroupIdAndStatusAndDisabled(groupId,

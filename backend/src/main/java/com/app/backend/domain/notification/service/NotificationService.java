@@ -1,46 +1,67 @@
 package com.app.backend.domain.notification.service;
 
-import com.app.backend.domain.notification.SseEmitters;
+import com.app.backend.domain.notification.dto.SseEmitters;
 import com.app.backend.domain.notification.dto.NotificationEvent;
 import com.app.backend.domain.notification.dto.NotificationMessage;
 import com.app.backend.domain.notification.entity.Notification;
 import com.app.backend.domain.notification.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class NotificationService {
     private final NotificationRepository notificationRepository;
+    private final NotificationProducer notificationProducer;
     private final SseEmitters sseEmitters;
 
-    public void sendNotification(String userId, String title, String content, NotificationEvent.NotificationType type) {
+    public void sendNotification(String userId, String title, String content, 
+                               NotificationEvent.NotificationType type, Long targetId) {
         // 알림 저장
         Notification notification = Notification.builder()
                 .userId(userId)
                 .title(title)
                 .content(content)
                 .isRead(false)
+                .type(type)
+                .targetId(targetId)
                 .createdAt(LocalDateTime.now())
                 .build();
-        notificationRepository.save(notification);
+        notification = notificationRepository.save(notification);
 
-        // SSE를 통해 실시간 알림 전송
+        // Kafka로 메시지 전송
         NotificationMessage message = new NotificationMessage(
-                userId, title, content, LocalDateTime.now()
+                notification.getUserId(),
+                notification.getTitle(),
+                notification.getContent(),
+                notification.getCreatedAt(),
+                notification.isRead()
         );
-        sseEmitters.sendToUser(userId, message);
+        notificationProducer.sendNotification(message);
     }
 
     public void save(Notification notification) {
         notificationRepository.save(notification);
     }
 
-    public List<Notification> getNotifications(String userId) {
-        return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
+    @Transactional(readOnly = true)
+    public List<NotificationMessage> getNotifications(String userId) {
+        return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId)
+                .stream()
+                .map(notification -> new NotificationMessage(
+                        notification.getUserId(),
+                        notification.getTitle(),
+                        notification.getContent(),
+                        notification.getCreatedAt(),
+                        notification.isRead()
+                ))
+                .collect(Collectors.toList());
     }
 
     public void markAsRead(Long notificationId) {
