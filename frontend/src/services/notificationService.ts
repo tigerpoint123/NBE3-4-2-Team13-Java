@@ -31,14 +31,13 @@ class NotificationService {
         },
         onmessage: (event: EventSourceMessage) => {
           try {
-            // 이벤트 타입에 따른 처리
             if (event.event === 'connect') {
               console.log('연결 메시지:', event.data);
               return;
             }
 
-            // 일반 알림 메시지 처리
             const notification = JSON.parse(event.data);
+            this.listeners.forEach(listener => listener(notification));
             this.showNotification(notification);
           } catch (error) {
             console.error('알림 처리 중 오류:', error);
@@ -112,9 +111,6 @@ class NotificationService {
     } else if (Notification.permission === 'default') {
       Notification.requestPermission();
     }
-
-    // 리스너들에게 알림
-    this.listeners.forEach(listener => listener(notification));
   }
 
   disconnect() {

@@ -14,7 +14,6 @@ import com.app.backend.domain.member.jwt.JwtProvider;
 import com.app.backend.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -149,7 +148,7 @@ public class MemberService {
     }
 
     @Transactional
-    @Scheduled(fixedRate = 60000) // 1분마다 실행
+//    @Scheduled(fixedRate = 60000) // 1분마다 실행
     public void cleanupDisabledMembers() {
         log.info("비활성화된 회원 정보 삭제 작업 시작");
         LocalDateTime cutoffDate   = LocalDateTime.now().minusSeconds(30);
