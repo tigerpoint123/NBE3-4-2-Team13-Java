@@ -69,27 +69,6 @@ export function ClientLayout({
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
-  // JWT 토큰에서 만료시간을 계산하는 함수
-  // const calculateRemainingTime = () => {
-  //   const token = localStorage.getItem("accessToken");
-  //   if (!token) return 0;
-
-  //   try {
-  //     // JWT의 payload 부분을 디코딩
-  //     const payload = JSON.parse(atob(token.split(".")[1]));
-  //     // exp는 초 단위의 유닉스 타임스탬프
-  //     const expirationTime = payload.exp; // 초 단위의 만료 시간
-  //     setTokenExpirationTime(expirationTime);  // 토큰의 만료 시간 저장
-  //     const currentTime = Math.floor(Date.now() / 1000);  // 현재 시간을 초 단위로 변환
-  //     const remainingTime = expirationTime - currentTime;
-
-  //     return remainingTime > 0 ? remainingTime : 0;
-  //   } catch (error) {
-  //     console.error("토큰 파싱 에러:", error);
-  //     return 0;
-  //   }
-  // };
-
   // 시간 연장 함수 수정
   const extendTime = () => {
     setSessionTime(INITIAL_SESSION_TIME);
@@ -215,6 +194,12 @@ export function ClientLayout({
   useEffect(() => {
     if (isLogin) {
       setSessionTime(INITIAL_SESSION_TIME);
+      notificationService.connect();
+
+      // 컴포넌트 언마운트나 로그아웃 시 연결 해제
+      return () => {
+        notificationService.disconnect();
+      };
     }
   }, [isLogin]); // 로그인 상태가 변경될 때만 실행
 

@@ -1,6 +1,5 @@
-package com.app.backend.domain.notification.service;
+package com.app.backend.domain.notification.dto;
 
-import com.app.backend.domain.notification.dto.NotificationMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -12,6 +11,7 @@ public class NotificationProducer {
     private static final String TOPIC = "notification-topic";
 
     public void sendNotification(NotificationMessage message) {
-        kafkaTemplate.send(TOPIC, message.getUserId(), message);
+//        kafkaTemplate.send(TOPIC, message.getUserId(), message);
+        kafkaTemplate.send("comment-notifications", message);
     }
 }

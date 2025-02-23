@@ -8,7 +8,6 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "notifications")
 @Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -26,7 +25,7 @@ public class Notification extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private NotificationEvent.NotificationType type;
 
-    private Long targetId;  // 관련 엔티티 ID (그룹 ID 등)
+    private Long targetId;
     private LocalDateTime createdAt;
 
     public void markAsRead() {

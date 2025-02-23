@@ -2,7 +2,7 @@ package com.app.backend.domain.notification;
 
 import com.app.backend.domain.notification.dto.NotificationEvent;
 import com.app.backend.domain.notification.dto.NotificationMessage;
-import com.app.backend.domain.notification.service.NotificationProducer;
+import com.app.backend.domain.notification.dto.NotificationProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;

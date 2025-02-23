@@ -1,7 +1,6 @@
-package com.app.backend.domain.notification.service;
+package com.app.backend.domain.notification.dto;
 
-import com.app.backend.domain.notification.dto.NotificationMessage;
-import com.app.backend.domain.notification.dto.SseEmitters;
+import com.app.backend.domain.notification.SseEmitters;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;

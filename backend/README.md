@@ -43,3 +43,7 @@ docker-compose up
 ```bash
 docker-compose up -d
 ```
+
+## 주의사항 
+- Kafka 에서 9092 포트를 사용하는데, 간혹 사용중인 포트라고 뜨는 경우가 있습니다.
+- 고로 되도록이면 Kafka 컨테이너 먼저 실행하는 것을 추천드립니다...

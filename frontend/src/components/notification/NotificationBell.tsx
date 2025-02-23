@@ -10,7 +10,7 @@ import { useState, useEffect } from "react";
 import { notificationService } from "@/services/notificationService";
 
 interface Notification {
-  id: number;
+  userId: number;
   title: string;
   content: string;
   createdAt: string;
@@ -51,7 +51,7 @@ export function NotificationBell() {
   const handleMarkAsRead = async (notificationId: number) => {
     await notificationService.markAsRead(notificationId);
     setNotifications(notifications.map(n => 
-      n.id === notificationId ? { ...n, read: true } : n
+      n.userId === notificationId ? { ...n, read: true } : n
     ));
     setUnreadCount(prev => Math.max(0, prev - 1));
   };
@@ -76,9 +76,9 @@ export function NotificationBell() {
         ) : (
           notifications.map((notification) => (
             <DropdownMenuItem
-              key={notification.id}
+              key={notification.userId}
               className={`p-4 cursor-pointer ${!notification.read ? 'bg-muted/50' : ''}`}
-              onClick={() => handleMarkAsRead(notification.id)}
+              onClick={() => handleMarkAsRead(notification.userId)}
             >
               <div>
                 <div className="font-semibold">{notification.title}</div>

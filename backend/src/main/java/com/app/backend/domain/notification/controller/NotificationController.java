@@ -1,10 +1,11 @@
 package com.app.backend.domain.notification.controller;
 
-import com.app.backend.domain.notification.dto.SseEmitters;
+import com.app.backend.domain.notification.SseEmitters;
 import com.app.backend.domain.notification.dto.NotificationMessage;
 import com.app.backend.domain.notification.service.NotificationService;
 import com.app.backend.global.dto.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,13 +19,42 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/notifications")
 @RequiredArgsConstructor
+@Slf4j
 public class NotificationController {
     private final NotificationService notificationService;
     private final SseEmitters sseEmitters;
 
+    @GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter subscribe(@AuthenticationPrincipal UserDetails userDetails) {
+        String userId = userDetails.getUsername();
+        SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+        
+        try {
+            // 연결 직후 더미 이벤트 전송 (연결 확인용)
+            emitter.send(SseEmitter.event()
+                    .name("connect")
+                    .data("Connected!"));
+            
+            sseEmitters.add(userId, emitter);
+            
+            // 연결 종료 시 처리
+            emitter.onCompletion(() -> sseEmitters.remove(userId));
+            emitter.onTimeout(() -> sseEmitters.remove(userId));
+            emitter.onError((e) -> sseEmitters.remove(userId));
+            
+            log.info("SSE 연결 성공: userId = {}", userId);
+        } catch (IOException e) {
+            log.error("SSE 연결 실패: {}", e.getMessage());
+            emitter.complete();
+        }
+        return emitter;
+    }
+
     @GetMapping
-    public ApiResponse<List<NotificationMessage>> getNotifications(@RequestParam String userId) {
-        List<NotificationMessage> notifications = notificationService.getNotifications(userId);
+    public ApiResponse<List<NotificationMessage>> getNotifications(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        List<NotificationMessage> notifications = 
+            notificationService.getNotifications(userDetails.getUsername());
         return ApiResponse.of(
                 true,
                 HttpStatus.OK,
@@ -34,34 +64,16 @@ public class NotificationController {
     }
 
     @PatchMapping("/{notificationId}/read")
-    public ApiResponse<Void> markAsRead(@PathVariable Long notificationId) {
+    public ApiResponse<Void> markAsRead(
+            @PathVariable Long notificationId,
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody NotificationMessage notification
+    ) {
         notificationService.markAsRead(notificationId);
         return ApiResponse.of(
                 true,
                 HttpStatus.OK,
                 "알림 읽음 처리 성공"
         );
-    }
-
-    @GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter subscribe(@AuthenticationPrincipal UserDetails userDetails) {
-        String userId = userDetails.getUsername();
-        SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
-        sseEmitters.add(userId, emitter);
-        
-        // 연결 종료 시 처리
-        emitter.onCompletion(() -> sseEmitters.remove(userId));
-        emitter.onTimeout(() -> sseEmitters.remove(userId));
-        
-        // 연결 즉시 테스트 이벤트 전송
-        try {
-            emitter.send(SseEmitter.event()
-                    .name("connect")
-                    .data("Connected!"));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        
-        return emitter;
     }
 }

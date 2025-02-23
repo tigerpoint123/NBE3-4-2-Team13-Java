@@ -18,7 +18,7 @@ import java.util.Map;
 @EnableKafka
 @Slf4j
 public class KafkaConfig {
-    // 어드민 - Producer
+    // 어드민
     @Bean
     public ProducerFactory<String, NotificationMessage> producerFactory() {
         JsonDeserializer<NotificationMessage> jsonDeserializer = new JsonDeserializer<>(NotificationMessage.class, false);
@@ -29,10 +29,12 @@ public class KafkaConfig {
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "notification-group");
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
-        return new DefaultKafkaProducerFactory<>(props);
+        return new DefaultKafkaProducerFactory<>(
+                props
+        );
     }
 
-    // 회원 - Consumer
+    // 회원
     @Bean
     public KafkaTemplate<String, NotificationMessage> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());

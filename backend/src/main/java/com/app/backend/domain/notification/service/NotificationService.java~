@@ -49,7 +49,7 @@ public class NotificationService {
                 notification.isRead()
         );
         log.info("Service 2) 리뷰 답글 알림 전송. userId : {}, message : {}",userId, content);
-        kafkaTemplate.send(NotificationEvent.NotificationType.GROUP_INVITE.toString(), userId, message);
+        kafkaTemplate.send("comment-notifications", userId, message);
         notificationProducer.sendNotification(message);
     }
 
