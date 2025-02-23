@@ -50,35 +50,29 @@ export function NotificationBell() {
 
   // 초기 알림 목록 로드
   useEffect(() => {
-    fetchNotifications();
+    const loadNotifications = async () => {
+      try {
+        setIsLoading(true);
+        const notifs = await notificationService.getNotifications();
+        setNotifications(notifs);
+        setUnreadCount(notifs.filter((n: Notification) => !n.read).length);
+      } catch (error) {
+        console.error('알림 로드 중 오류:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadNotifications();
   }, []);
 
   // 알림 목록 조회 함수
   const fetchNotifications = async () => {
     try {
       setIsLoading(true);
-      const token = localStorage.getItem('accessToken');
-      
-      if (!token) return;
-
-      // userId 파라미터 제거 - 서버에서 토큰으로 사용자 식별
-      const response = await fetch(`http://localhost:8080/api/v1/notifications`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('알림 목록 조회 실패');
-      }
-
-      const data = await response.json();
-      console.log('받아온 알림 데이터:', data); // 디버깅용 로그
-
-      if (data.isSuccess) {
-        setNotifications(data.data);
-        setUnreadCount(data.data.filter((n: Notification) => !n.read).length);
-      }
+      const notifs = await notificationService.getNotifications();
+      setNotifications(notifs);
+      setUnreadCount(notifs.filter((n: Notification) => !n.read).length);
     } catch (error) {
       console.error('알림 목록 조회 중 오류:', error);
     } finally {

@@ -1,5 +1,7 @@
 package com.app.backend.domain.notification.controller;
 
+import com.app.backend.domain.member.entity.Member;
+import com.app.backend.domain.member.service.MemberService;
 import com.app.backend.domain.notification.SseEmitters;
 import com.app.backend.domain.notification.dto.NotificationMessage;
 import com.app.backend.domain.notification.service.NotificationService;
@@ -23,6 +25,7 @@ import java.util.List;
 public class NotificationController {
     private final NotificationService notificationService;
     private final SseEmitters sseEmitters;
+    private final MemberService memberService;
 
     @GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter subscribe(@AuthenticationPrincipal UserDetails userDetails) {
@@ -52,9 +55,11 @@ public class NotificationController {
 
     @GetMapping
     public ApiResponse<List<NotificationMessage>> getNotifications(
-            @AuthenticationPrincipal UserDetails userDetails) {
-        List<NotificationMessage> notifications = 
-            notificationService.getNotifications(userDetails.getUsername());
+            @RequestHeader(value = "Authorization") String token
+    ) {
+        Member member = memberService.getCurrentMember(token); // 현재 사용자 조회
+        List<NotificationMessage> notifications =
+            notificationService.getNotifications(String.valueOf(member.getId()));
         return ApiResponse.of(
                 true,
                 HttpStatus.OK,

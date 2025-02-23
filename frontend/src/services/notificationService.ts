@@ -57,19 +57,29 @@ class NotificationService {
     }
   }
 
-  // 알림 목록 조회 메서드 추가
-  async getNotifications(userId: string) {
+  // 알림 목록 조회 메서드 수정
+  async getNotifications() {
     const token = localStorage.getItem('accessToken');
     if (!token) return [];
 
     try {
-      const response = await fetch(`http://localhost:8080/api/v1/notifications?userId=${userId}`, {
+      const response = await fetch(`http://localhost:8080/api/v1/notifications`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
+      
+      if (!response.ok) {
+        throw new Error('알림 목록 조회 실패');
+      }
+
       const data = await response.json();
-      return data.data;
+      console.log('서버에서 받은 알림 데이터:', data); // 디버깅용 로그
+      
+      if (data.isSuccess) {
+        return data.data;
+      }
+      return [];
     } catch (error) {
       console.error('알림 목록 조회 중 오류:', error);
       return [];
