@@ -28,11 +28,8 @@ public class NotificationController {
     private final MemberService memberService;
 
     @GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter subscribe(
-            @RequestHeader(value = "Authorization") String token
-    ) {
-        Member member = memberService.getCurrentMember(token); // 현재 사용자 조회
-        String userId = String.valueOf(member.getId());
+    public SseEmitter subscribe(@AuthenticationPrincipal UserDetails userDetails) {
+        String userId = userDetails.getUsername();
         log.info("SSE subscription request received for user: {}", userId);
         SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
         

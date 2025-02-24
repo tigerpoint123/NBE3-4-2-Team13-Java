@@ -14,7 +14,9 @@ public class SseEmitters {
     private final Map<String, SseEmitter> emitters = new ConcurrentHashMap<>();
 
     public void add(String userId, SseEmitter emitter) {
+        log.info("Adding new SSE emitter for user: {}", userId);
         emitters.put(userId, emitter);
+        log.info("Current active emitters count: {}", emitters.size());
     }
 
     public void remove(String userId) {
@@ -22,16 +24,21 @@ public class SseEmitters {
     }
 
     public void sendToUser(String userId, Object data) {
+        log.info("Attempting to send SSE to user: {}", userId);
         SseEmitter emitter = emitters.get(userId);
         if (emitter != null) {
             try {
+                log.info("Found emitter for user: {}, sending data: {}", userId, data);
                 emitter.send(SseEmitter.event()
                         .name("notification")
                         .data(data));
+                log.info("Successfully sent SSE to user: {}", userId);
             } catch (IOException e) {
-                log.error("SSE 전송 실패: {}", e.getMessage());
+                log.error("SSE 전송 실패 for user {}: {}", userId, e.getMessage(), e);
                 emitters.remove(userId);
             }
+        } else {
+            log.warn("No SSE emitter found for user: {}", userId);
         }
     }
 }

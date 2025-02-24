@@ -15,11 +15,12 @@ public class NotificationConsumer {
     @KafkaListener(topics = "notification-topic", groupId = "notification-group")
     public void consume(NotificationMessage message) {
         try {
+            log.info("Kafka message received: {}", message);
             // SSE를 통해 클라이언트에게 알림 전송
             sseEmitters.sendToUser(message.getUserId(), message);
             log.info("Notification sent via SSE: {}", message);
         } catch (Exception e) {
-            log.error("Failed to send notification: {}", e.getMessage());
+            log.error("Failed to send notification: {}", e.getMessage(), e);
         }
     }
 }

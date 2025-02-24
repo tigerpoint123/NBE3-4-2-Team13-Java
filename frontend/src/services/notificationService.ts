@@ -31,13 +31,20 @@ class NotificationService {
         },
         onmessage: (event: EventSourceMessage) => {
           try {
+            console.log('SSE 이벤트 수신:', event);
+            
             if (event.event === 'connect') {
               console.log('연결 메시지:', event.data);
               return;
             }
 
             const notification = JSON.parse(event.data);
-            this.listeners.forEach(listener => listener(notification));
+            console.log('파싱된 알림 데이터:', notification);
+            
+            this.listeners.forEach(listener => {
+              console.log('리스너 호출:', listener);
+              listener(notification);
+            });
             this.showNotification(notification);
           } catch (error) {
             console.error('알림 처리 중 오류:', error);
@@ -46,14 +53,23 @@ class NotificationService {
         onerror: (error) => {
           console.error('SSE 연결 오류:', error);
           this.isConnecting = false;
-          throw error; // 재연결을 위해 에러를 던집니다
-        }
+          
+          // 의도적인 중단이 아닌 경우에만 재연결 시도
+          if (!(error instanceof Error) || error.name !== 'AbortError') {
+            setTimeout(() => this.connect(), 5000);
+          }
+        },
+        // 페이지 가시성 변경 시에도 연결 유지
+        openWhenHidden: true
       });
     } catch (error) {
       console.error('SSE 연결 시도 중 오류:', error);
       this.isConnecting = false;
-      // 재연결 시도
-      setTimeout(() => this.connect(), 5000);
+      
+      // 의도적인 중단이 아닌 경우에만 재연결 시도
+      if (!(error instanceof Error) || error.name !== 'AbortError') {
+        setTimeout(() => this.connect(), 5000);
+      }
     }
   }
 

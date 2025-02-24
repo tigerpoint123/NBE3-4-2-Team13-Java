@@ -28,13 +28,16 @@ export function NotificationBell() {
 
   // SSE 리스너 추가
   useEffect(() => {
-    // 알림 수신 시 처리할 함수
     const handleNewNotification = (notification: Notification) => {
-      setNotifications(prev => [notification, ...prev]);
+      console.log('NotificationBell: 새 알림 수신:', notification);
+      setNotifications(prev => {
+        console.log('이전 알림 목록:', prev);
+        return [notification, ...prev];
+      });
       setUnreadCount(prev => prev + 1);
     };
 
-    // NotificationService에 리스너 등록
+    console.log('NotificationBell: 리스너 등록');
     notificationService.addNotificationListener(handleNewNotification);
     
     // SSE 연결 시작
@@ -42,11 +45,11 @@ export function NotificationBell() {
 
     // 컴포넌트 언마운트 시 정리
     return () => {
+      console.log('NotificationBell: 리스너 제거');
       notificationService.removeNotificationListener(handleNewNotification);
       notificationService.disconnect();
     };
   }, []);
-
 
   // 초기 알림 목록 로드
   useEffect(() => {
