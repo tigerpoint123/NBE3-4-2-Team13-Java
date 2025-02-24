@@ -116,32 +116,32 @@ export function NotificationBell() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80">
-      {isLoading ? (
-        <div className="p-4 text-center text-muted-foreground">
-          알림 로딩중...
-        </div>
-      ) : notifications.length === 0 ? (
-        <div className="p-4 text-center text-muted-foreground">
-          새로운 알림이 없습니다
-        </div>
-      ) : (
-        notifications.map((notification) => (
-          <DropdownMenuItem
-            key={notification.id}  // userId -> id로 변경
-            className={`p-4 cursor-pointer ${!notification.read ? 'bg-muted/50' : ''}`}
-            onClick={() => handleMarkAsRead(notification.id)}  // userId -> id로 변경
-          >
-            <div>
-              <div className="font-semibold">{notification.title}</div>
-              <div className="text-sm text-muted-foreground">{notification.content}</div>
-              <div className="text-xs text-muted-foreground mt-1">
-                {new Date(notification.createdAt).toLocaleString()}
+        {isLoading ? (
+          <div className="p-4 text-center text-muted-foreground">
+            알림 로딩중...
+          </div>
+        ) : notifications.length === 0 ? (
+          <div className="p-4 text-center text-muted-foreground">
+            새로운 알림이 없습니다
+          </div>
+        ) : (
+          notifications.map((notification) => (
+            <DropdownMenuItem
+              key={`${notification.id}-${notification.createdAt}`}  // 고유한 key 값 설정
+              className={`p-4 cursor-pointer ${!notification.read ? 'bg-muted/50' : ''}`}
+              onClick={() => handleMarkAsRead(notification.id)}
+            >
+              <div>
+                <div className="font-semibold">{notification.title}</div>
+                <div className="text-sm text-muted-foreground">{notification.content}</div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  {new Date(notification.createdAt).toLocaleString()}
+                </div>
               </div>
-            </div>
-          </DropdownMenuItem>
-        ))
-      )}
-    </DropdownMenuContent>
+            </DropdownMenuItem>
+          ))
+        )}
+      </DropdownMenuContent>
     </DropdownMenu>
   );
 } 
