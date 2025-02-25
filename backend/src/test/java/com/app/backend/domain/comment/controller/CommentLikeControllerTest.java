@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.app.backend.domain.comment.dto.response.CommentResponse;
 import com.app.backend.domain.comment.entity.Comment;
-import com.app.backend.domain.comment.repository.CommentLikeRepository;
 import com.app.backend.domain.comment.repository.CommentRepository;
 import com.app.backend.domain.comment.service.CommentService;
 import com.app.backend.domain.member.entity.Member;
@@ -30,9 +29,6 @@ import com.app.backend.domain.post.entity.PostStatus;
 import com.app.backend.domain.post.repository.post.PostRepository;
 import com.app.backend.global.annotation.CustomWithMockUser;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
@@ -41,14 +37,8 @@ class CommentLikeControllerTest {
 	@Autowired
 	private MockMvc mockMvc;
 
-	@PersistenceContext
-	private EntityManager entityManager;
-
 	@Autowired
 	private CommentRepository commentRepository;
-
-	@Autowired
-	private CommentLikeRepository commentLikeRepository;
 
 	@Autowired
 	private MemberRepository memberRepository;
