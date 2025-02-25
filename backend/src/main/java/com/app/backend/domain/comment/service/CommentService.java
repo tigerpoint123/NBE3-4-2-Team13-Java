@@ -114,14 +114,10 @@ public class CommentService {
 
 	}
 
-	// 댓글 조회
+	// 댓글 조회 (좋아요 수 포함)
 	public Page<CommentResponse.CommentList> getComments(Long postId, Pageable pageable) {
-
 		Post post = getPostValidate(postId);
-
-		Page<Comment> comments = commentRepository.findByPostAndDisabledAndParentIsNull(post, false, pageable);
-
-		return comments.map(CommentResponse.CommentList::from);
+		return commentRepository.findCommentsWithLikeCount(post, pageable);
 	}
 
 
@@ -197,17 +193,18 @@ public class CommentService {
 	//댓글 좋아요
 	@Transactional
 	public void CommentLike(Long commentId, Long memberId) {
+
 		Comment comment = getCommentValidate(commentId);
 
 		Member member = memberRepository.findByIdAndDisabled(memberId, false)
 			.orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
+
 		//좋아요 확인
 		Optional<CommentLike> isLike = commentLikeRepository.findByCommentIdAndMemberIdAndDisabled(commentId, memberId, false);
 
 		if (isLike.isPresent()) {
-
-			isLike.get().delete(); //좋아요가 이미 있으면 삭제
+			isLike.get().delete(); //좋아요가 있으면 삭제
 		} else {
 			CommentLike commentLike = CommentLike.builder()
 				.comment(comment)
