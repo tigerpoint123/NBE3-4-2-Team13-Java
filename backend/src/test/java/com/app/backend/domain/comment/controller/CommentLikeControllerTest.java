@@ -26,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.app.backend.domain.comment.dto.response.CommentResponse;
 import com.app.backend.domain.comment.entity.Comment;
-import com.app.backend.domain.comment.repository.CommentLikeRepository;
 import com.app.backend.domain.comment.repository.CommentRepository;
 import com.app.backend.domain.comment.service.CommentService;
 import com.app.backend.domain.member.entity.Member;
@@ -56,9 +55,6 @@ class CommentLikeControllerTest {
 
 	@Autowired
 	private CommentService commentService;
-
-	@Autowired
-	private CommentLikeRepository commentLikeRepository;
 
 	private Member testMember;
 	private Post testPost;
@@ -221,7 +217,7 @@ class CommentLikeControllerTest {
 							.with(user(new MemberDetails(user))))
 						.andExpect(status().isOk());
 				} catch (Exception e) {
-					e.printStackTrace();
+					System.out.println("에러: " + e.getMessage());
 				} finally {
 					endSignal.countDown();
 				}
