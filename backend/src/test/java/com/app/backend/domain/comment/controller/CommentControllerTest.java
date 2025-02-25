@@ -449,7 +449,7 @@ public class CommentControllerTest {
 			commentLikeRepository.save(like);
 		}
 
-		// when & then
+
 		mvc.perform(get("/api/v1/comment/" + testPostId)
 				.param("page", "0")
 				.param("size", "10")

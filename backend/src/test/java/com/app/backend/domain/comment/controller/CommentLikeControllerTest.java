@@ -56,7 +56,7 @@ class CommentLikeControllerTest {
 
 	@BeforeEach
 	void setUp() {
-		// 테스트 멤버 생성
+
 		testMember = Member.builder()
 			.username("testUser")
 			.password("password")
@@ -66,7 +66,7 @@ class CommentLikeControllerTest {
 			.build();
 		testMember = memberRepository.save(testMember);
 
-		// 테스트 게시글 생성
+
 		testPost = Post.builder()
 			.title("테스트 게시글")
 			.content("테스트 내용")
@@ -77,7 +77,7 @@ class CommentLikeControllerTest {
 			.build();
 		testPost = postRepository.save(testPost);
 
-		// 테스트 댓글 생성
+
 		testComment = Comment.builder()
 			.content("테스트 댓글")
 			.member(testMember)
@@ -86,14 +86,14 @@ class CommentLikeControllerTest {
 		testComment = commentRepository.save(testComment);
 
 
-		// MemberDetails 생성
+
 		memberDetails = new MemberDetails(testMember);
 	}
 
 	@Test
 	@DisplayName("댓글 좋아요 추가 성공")
 	void createCommentLike() throws Exception {
-		// when
+
 		mockMvc.perform(post("/api/v1/comment/{id}/like", testComment.getId())
 				.with(user(memberDetails)))
 			.andDo(print())
@@ -101,7 +101,7 @@ class CommentLikeControllerTest {
 			.andExpect(jsonPath("$.isSuccess").value(true))
 			.andExpect(jsonPath("$.message").value("댓글 좋아요가 추가되었습니다."));
 
-		// then
+
 		Page<CommentResponse.CommentList> comments = commentService.getComments(testPost.getId(),
 			PageRequest.of(0, 10));
 		assertThat(comments.getContent().get(0).getLikeCount()).isEqualTo(1);
@@ -110,11 +110,11 @@ class CommentLikeControllerTest {
 	@Test
 	@DisplayName("삭제된 댓글에 좋아요 시도 시 실패")
 	void createCommentLike2() throws Exception {
-		// given
+
 		testComment.delete();
 		commentRepository.save(testComment);
 
-		// when & then
+
 		mockMvc.perform(post("/api/v1/comment/{id}/like", testComment.getId())
 				.with(user(memberDetails)))
 			.andDo(print())
@@ -128,7 +128,7 @@ class CommentLikeControllerTest {
 	@DisplayName("여러 사용자의 좋아요 정합성 테스트")
 	@CustomWithMockUser(role="USER")
 	void testMultipleUserLikes() throws Exception {
-		// given
+
 		Comment testComment = Comment.builder()
 			.content("테스트 댓글")
 			.post(testPost)
@@ -136,7 +136,7 @@ class CommentLikeControllerTest {
 			.build();
 		commentRepository.save(testComment);
 
-		// when
+
 		int numberOfUsers = 10;
 		for (int i = 0; i < numberOfUsers; i++) {
 			Member user = Member.builder()
@@ -151,8 +151,7 @@ class CommentLikeControllerTest {
 				.andExpect(status().isOk());
 		}
 
-		// then
-		// API 응답의 좋아요 수 확인
+
 		mockMvc.perform(get("/api/v1/comment/" + testPost.getId())
 				.with(user(memberDetails)))
 			.andExpect(status().isOk())
@@ -173,7 +172,7 @@ class CommentLikeControllerTest {
 				.andExpect(jsonPath("$.isSuccess").value(true));
 		}
 
-		// then
+
 		Page<CommentResponse.CommentList> comments = commentService.getComments(testPost.getId(),
 			PageRequest.of(0, 10));
 		assertThat(comments.getContent().get(0).getLikeCount()).isEqualTo(0);
