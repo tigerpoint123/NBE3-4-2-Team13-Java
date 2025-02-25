@@ -11,14 +11,14 @@ import { notificationService } from "@/services/notificationService";
 
 // 1. 인터페이스 수정
 interface Notification {
-  id: number;           // userId -> id로 변경
-  userId: string;       // number -> string으로 변경
+  id: number;           
+  userId: string;       
   title: string;
   content: string;
   createdAt: string;
   read: boolean;
-  type?: string;        // 선택적 필드로 추가
-  targetId?: number;    // 선택적 필드로 추가
+  type?: string;        
+  targetId?: number;    
 }
 
 export function NotificationBell() {
@@ -86,16 +86,20 @@ export function NotificationBell() {
   // 3. 읽음 처리 함수 수정 - notificationId 사용
   const handleMarkAsRead = async (notificationId: number) => {
     try {
+      console.log('읽음 처리할 알림 ID:', notificationId);
       const token = localStorage.getItem('accessToken');
-      await fetch(`http://localhost:8080/api/v1/notifications/${notificationId}/read`, {
+      const response = await fetch(`http://localhost:8080/api/v1/notifications/${notificationId}/read`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       });
+      
+      console.log('서버 응답:', response);
 
       setNotifications(notifications.map(n =>
-        n.id === notificationId ? { ...n, read: true } : n  // userId -> id로 변경
+        n.id === notificationId ? { ...n, read: true } : n
       ));
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (error) {

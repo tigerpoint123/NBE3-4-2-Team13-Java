@@ -13,6 +13,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class NotificationMessage implements Serializable {
+    @JsonProperty("id")
+    private Long id;
     @JsonProperty("userId")
     private String userId;
     @JsonProperty("title")

@@ -1,6 +1,5 @@
 package com.app.backend.domain.notification.service;
 
-import com.app.backend.domain.notification.SseEmitters;
 import com.app.backend.domain.notification.dto.NotificationEvent;
 import com.app.backend.domain.notification.dto.NotificationMessage;
 import com.app.backend.domain.notification.dto.NotificationProducer;
@@ -23,7 +22,6 @@ import java.util.stream.Collectors;
 public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final NotificationProducer notificationProducer;
-    private final SseEmitters sseEmitters;
     private final KafkaTemplate<String, NotificationMessage> kafkaTemplate;
 
     public void sendNotification(String userId, String title, String content,
@@ -42,6 +40,7 @@ public class NotificationService {
         log.info("Service 1) 리뷰 답글 알림 전송. userId : {}, message : {}",userId, content);
         // Kafka로 메시지 전송
         NotificationMessage message = new NotificationMessage(
+                notification.getId(),
                 notification.getUserId(),
                 notification.getTitle(),
                 notification.getContent(),
@@ -62,6 +61,7 @@ public class NotificationService {
         return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId)
                 .stream()
                 .map(notification -> new NotificationMessage(
+                        notification.getId(),
                         notification.getUserId(),
                         notification.getTitle(),
                         notification.getContent(),

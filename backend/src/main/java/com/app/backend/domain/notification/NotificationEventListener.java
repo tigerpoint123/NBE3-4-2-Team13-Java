@@ -19,6 +19,7 @@ public class NotificationEventListener {
     @EventListener
     public void handleNotificationEvent(NotificationEvent event) {
         NotificationMessage message = new NotificationMessage(
+                event.getId(),
                 event.getUserId(),
                 event.getTitle(),
                 event.getContent(),

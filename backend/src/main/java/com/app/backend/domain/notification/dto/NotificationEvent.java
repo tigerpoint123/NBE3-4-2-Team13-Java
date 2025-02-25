@@ -6,6 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class NotificationEvent {
+    private Long id;
     private String userId;
     private String title;
     private String content;

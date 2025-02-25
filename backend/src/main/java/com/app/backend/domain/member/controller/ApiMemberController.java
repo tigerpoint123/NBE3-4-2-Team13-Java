@@ -94,16 +94,6 @@ public class ApiMemberController {
         );
     }
 
-    // 소속된 그룹 조회
-/*
-	@GetMapping("/mygroups")
-	public List<Group> getMyGroup(
-		@RequestHeader(value = "Authorization") String token
-		) {
-		List<Group> list = memberService.getMyGroup(token);
-		return list;
-	}
-*/
     @GetMapping("/mygroups")
     public ApiResponse<List<GroupMembershipResponse.Detail>> getMyGroup(
             @RequestHeader(value = "Authorization") String token
