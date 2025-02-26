@@ -8,6 +8,8 @@ import com.app.backend.domain.group.repository.GroupLikeRepository;
 import com.app.backend.domain.group.repository.GroupRepository;
 import com.app.backend.domain.member.entity.Member;
 import com.app.backend.domain.member.repository.MemberRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,6 +42,9 @@ public class GroupLikeServiceTest {
     @Autowired
     private CategoryRepository categoryRepository;
 
+    @Autowired
+    private EntityManager entityManager;
+
     private Group testGroup;
     private List<Member> testMembers;
     private Category category;
@@ -54,6 +59,7 @@ public class GroupLikeServiceTest {
         category = categoryRepository.save(Category.builder()
                 .name("category")
                 .build());
+        groupRepository.flush();
 
         testGroup = groupRepository.save(
                 Group.builder()
@@ -66,6 +72,7 @@ public class GroupLikeServiceTest {
                         .maxRecruitCount(300)
                         .category(category)
                         .build());
+        groupRepository.flush();
 
         testMembers = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
@@ -75,11 +82,12 @@ public class GroupLikeServiceTest {
                             .build()
             );
             testMembers.add(member);
-
         }
+        memberRepository.flush();
     }
 
     @Test
+    @Transactional
     @DisplayName("그룹 좋아요")
     void t1() throws Exception {
         Long memberId = testMembers.get(0).getId();
@@ -92,6 +100,7 @@ public class GroupLikeServiceTest {
     }
 
     @Test
+    @Transactional
     @DisplayName("동일 유저가 같은 그룹에 대해 좋아요를 눌렀다가 취소했을 때, likeCount ＝ ０")
     void t2() throws Exception {
         Long memberId = testMembers.get(0).getId();
@@ -105,6 +114,7 @@ public class GroupLikeServiceTest {
     }
 
     @Test
+    @Transactional
     @DisplayName("동일 유저가 같은 그룹에 대해 동시에 좋아요를 눌렀을 때, likeCount ＝ ０")
     void t3() throws Exception {
         int threadCount = 2;
@@ -134,6 +144,8 @@ public class GroupLikeServiceTest {
     @Test
     @DisplayName("한 그룹에 100명의 유저가 동시에 좋아요를 눌렀을 때, 100개 저장")
     void t4() throws InterruptedException {
+        Long groupId = groupRepository.findById(testGroup.getId()).orElseThrow().getId();
+
         int threadCount = 100;
         ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
         CountDownLatch latch = new CountDownLatch(threadCount);
@@ -141,7 +153,7 @@ public class GroupLikeServiceTest {
         for (Member member : testMembers) {
             executorService.execute(() -> {
                 try {
-                    groupLikeService.toggleLikeGroup(testGroup.getId(), member.getId());
+                    groupLikeService.toggleLikeGroup(groupId, member.getId());
                 } finally {
                     latch.countDown();
                 }

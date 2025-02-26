@@ -41,5 +41,4 @@ public interface GroupRepository extends JpaRepository<Group, Long>, GroupReposi
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT g FROM Group g WHERE g.id = :groupId")
     Optional<Group> findByIdWithLock(Long groupId);
-
 }
