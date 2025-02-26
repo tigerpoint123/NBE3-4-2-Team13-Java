@@ -3,30 +3,14 @@ package com.app.backend.domain.group.entity;
 import com.app.backend.domain.category.entity.Category;
 import com.app.backend.domain.chat.room.entity.ChatRoom;
 import com.app.backend.global.entity.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.*;
+
 import java.util.ArrayList;
 import java.util.List;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Table(name = "tbl_groups")
@@ -74,6 +58,12 @@ public class Group extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;  //카테고리
+
+    @OneToMany(mappedBy = "group")
+    private List<GroupLike> likes = new ArrayList<>(); // 좋아요
+
+    @Column(nullable = false)
+    private int likeCount = 0; // 좋아요 수
 
     @Builder
     private Group(@NotNull final Long id,
@@ -194,6 +184,22 @@ public class Group extends BaseEntity {
     public void delete() {
         if (!this.getDisabled())
             deactivate();
+    }
+
+    /**
+     * 좋아요 수 증가
+     */
+    public void increaseLikeCount() {
+        this.likeCount++;
+    }
+
+    /**
+     * 좋아요 수 감소
+     */
+    public void decreaseLikeCount() {
+        if (this.likeCount > 0) {
+            this.likeCount--;
+        }
     }
 
 }
