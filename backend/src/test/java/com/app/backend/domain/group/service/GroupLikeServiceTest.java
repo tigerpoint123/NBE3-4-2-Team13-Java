@@ -92,6 +92,19 @@ public class GroupLikeServiceTest {
     }
 
     @Test
+    @DisplayName("동일 유저가 같은 그룹에 대해 좋아요를 눌렀다가 취소했을 때, likeCount ＝ ０")
+    void t2() throws Exception {
+        Long memberId = testMembers.get(0).getId();
+        Long groupId = testGroup.getId();
+
+        groupLikeService.toggleLikeGroup(groupId, memberId);
+        groupLikeService.toggleLikeGroup(groupId, memberId);
+
+        long likeCount = groupLikeRepository.countByGroupIdAndMemberId(groupId, memberId);
+        assertThat(likeCount).isEqualTo(0);
+    }
+
+    @Test
     @DisplayName("동일 유저가 같은 그룹에 대해 동시에 좋아요를 눌렀을 때, likeCount ＝ ０")
     void t3() throws Exception {
         int threadCount = 2;

@@ -60,7 +60,7 @@ public class Group extends BaseEntity {
     private Category category;  //카테고리
 
     @OneToMany(mappedBy = "group")
-    private List<GroupLike> likes = new ArrayList<>(); // 좋아요
+    private List<GroupLike> likes = new ArrayList<>(); // 좋아요 리스트
 
     @Column(nullable = false)
     private int likeCount = 0; // 좋아요 수
