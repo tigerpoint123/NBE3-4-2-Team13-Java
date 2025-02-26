@@ -26,4 +26,12 @@ public class TestKafkaConfig {
                        .build()
         );
     }
+
+    @Bean
+    public NewTopic notificationTopic() {
+        return TopicBuilder.name("notification-topic")
+                .partitions(1)
+                .replicas(1)
+                .build();
+    }
 } 
