@@ -80,8 +80,20 @@ public class GroupLikeServiceTest {
     }
 
     @Test
-    @DisplayName("동일 유저가 같은 그룹에 대해 동시에 좋아요를 눌렀을 때, likeCount ＝ ０")
+    @DisplayName("그룹 좋아요")
     void t1() throws Exception {
+        Long memberId = testMembers.get(0).getId();
+        Long groupId = testGroup.getId();
+
+        groupLikeService.toggleLikeGroup(groupId, memberId);
+
+        long likeCount = groupLikeRepository.countByGroupIdAndMemberId(groupId, memberId);
+        assertThat(likeCount).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("동일 유저가 같은 그룹에 대해 동시에 좋아요를 눌렀을 때, likeCount ＝ ０")
+    void t3() throws Exception {
         int threadCount = 2;
         ExecutorService executorService = Executors.newFixedThreadPool(32);
         CountDownLatch latch = new CountDownLatch(threadCount);
@@ -108,7 +120,7 @@ public class GroupLikeServiceTest {
 
     @Test
     @DisplayName("한 그룹에 100명의 유저가 동시에 좋아요를 눌렀을 때, 100개 저장")
-    void t2() throws InterruptedException {
+    void t4() throws InterruptedException {
         int threadCount = 100;
         ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
         CountDownLatch latch = new CountDownLatch(threadCount);

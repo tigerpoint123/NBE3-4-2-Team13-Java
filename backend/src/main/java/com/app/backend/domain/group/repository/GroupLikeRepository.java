@@ -17,4 +17,6 @@ public interface GroupLikeRepository extends JpaRepository<GroupLike, Long> {
     Optional<GroupLike> findByGroupAndMemberWithLock(Group group, Member member);
 
     long countByGroupIdAndMemberId(Long groupId, Long memberId);
+
+    boolean existsByGroupAndMember(Group group, Member member);
 }

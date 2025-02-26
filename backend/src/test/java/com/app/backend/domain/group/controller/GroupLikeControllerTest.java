@@ -4,6 +4,7 @@ import com.app.backend.domain.category.entity.Category;
 import com.app.backend.domain.category.repository.CategoryRepository;
 import com.app.backend.domain.group.entity.Group;
 import com.app.backend.domain.group.entity.RecruitStatus;
+import com.app.backend.domain.group.repository.GroupLikeRepository;
 import com.app.backend.domain.group.repository.GroupRepository;
 import com.app.backend.domain.group.service.GroupLikeService;
 import com.app.backend.domain.member.entity.Member;
@@ -20,9 +21,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -39,6 +40,9 @@ public class GroupLikeControllerTest {
 
     @Autowired
     private MemberRepository memberRepository;
+
+    @Autowired
+    private GroupLikeRepository groupLikeRepository;
 
     @Autowired
     MockMvc mvc;
@@ -82,14 +86,12 @@ public class GroupLikeControllerTest {
         // given
         when(groupLikeService.toggleLikeGroup(group.getId(), member.getId())).thenReturn(true);
 
-        // When & Then
+        // when
         mvc.perform(post("/api/v1/groups/" + group.getId() + "/like")
                         .contentType(MediaType.APPLICATION_JSON))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$.isSuccess").value(true))
                         .andExpect(jsonPath("$.message").value("좋아요 성공"));
-
-
     }
 
     @Test
@@ -99,11 +101,11 @@ public class GroupLikeControllerTest {
         // given
         when(groupLikeService.toggleLikeGroup(group.getId(), member.getId())).thenReturn(false);
 
-        // When & Then
+        // when
         mvc.perform(post("/api/v1/groups/{groupId}/like", group.getId())
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.isSuccess").value(true))
-                .andExpect(jsonPath("$.message").value("좋아요 취소 성공"));
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.isSuccess").value(true))
+                        .andExpect(jsonPath("$.message").value("좋아요 취소 성공"));
     }
 }
