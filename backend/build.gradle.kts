@@ -66,6 +66,10 @@ dependencies {
     //Querydsl
     annotationProcessor("com.querydsl:querydsl-apt:5.0.0:jakarta")
 
+    // monitoring
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("io.micrometer:micrometer-registry-prometheus")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.mockito:mockito-inline:5.2.0")
