@@ -29,26 +29,21 @@ public class NotificationController {
     public SseEmitter subscribe(
             @RequestHeader(value = "Authorization") String token
     ) {
-        Member member = memberService.getCurrentMember(token); // 현재 사용자 조회
+        Member member = memberService.getCurrentMember(token);
         String userId = String.valueOf(member.getId());
-        log.info("SSE subscription request received for user: {}", userId);
         SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
         
         try {
-            // 연결 직후 더미 이벤트 전송 (연결 확인용)
             emitter.send(SseEmitter.event()
                     .name("connect")
                     .data("Connected!"));
             
             sseEmitters.add(userId, emitter);
             
-            // 연결 종료 시 처리
             emitter.onCompletion(() -> {
-                log.info("SSE connection completed for user: {}", userId);
                 sseEmitters.remove(userId);
             });
             emitter.onTimeout(() -> {
-                log.info("SSE connection timed out for user: {}", userId);
                 sseEmitters.remove(userId);
             });
             emitter.onError((e) -> {
@@ -56,7 +51,6 @@ public class NotificationController {
                 sseEmitters.remove(userId);
             });
             
-            log.info("SSE 연결 성공: userId = {}", userId);
         } catch (IOException e) {
             log.error("SSE 연결 실패: {}", e.getMessage(), e);
             emitter.complete();
@@ -68,7 +62,7 @@ public class NotificationController {
     public ApiResponse<List<NotificationMessage>> getNotifications(
             @RequestHeader(value = "Authorization") String token
     ) {
-        Member member = memberService.getCurrentMember(token); // 현재 사용자 조회
+        Member member = memberService.getCurrentMember(token);
         List<NotificationMessage> notifications =
             notificationService.getNotifications(String.valueOf(member.getId()));
         return ApiResponse.of(
@@ -83,7 +77,6 @@ public class NotificationController {
     public ApiResponse<Void> markAsRead(
             @PathVariable Long notificationId
     ) {
-        log.info("notificationId : {}", notificationId);
         notificationService.markAsRead(notificationId);
         return ApiResponse.of(
                 true,
