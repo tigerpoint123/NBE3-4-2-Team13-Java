@@ -1,7 +1,5 @@
 package com.app.backend.domain.group.service;
 
-import java.util.Optional;
-
 import com.app.backend.domain.group.entity.Group;
 import com.app.backend.domain.group.entity.GroupLike;
 import com.app.backend.domain.group.exception.GroupLikeErrorCode;
@@ -11,9 +9,10 @@ import com.app.backend.domain.group.repository.GroupRepository;
 import com.app.backend.domain.member.entity.Member;
 import com.app.backend.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +31,8 @@ public class GroupLikeService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new GroupLikeException(GroupLikeErrorCode.MEMBER_NOT_FOUND));
 
-        Optional<GroupLike> existingLike = groupLikeRepository.findByGroupAndMemberWithLock(group, member);
+        // 🔹 여기서 중복 체크 (비관적 락 X)
+        Optional<GroupLike> existingLike = groupLikeRepository.findByGroupAndMember(group, member);
 
         if (existingLike.isPresent()) {
             groupLikeRepository.delete(existingLike.get());
@@ -49,4 +49,5 @@ public class GroupLikeService {
             return true; // 좋아요 성공
         }
     }
+
 }
