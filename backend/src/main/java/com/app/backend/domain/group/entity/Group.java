@@ -79,7 +79,7 @@ public class Group extends BaseEntity {
     @OneToMany(mappedBy = "group")
     private List<GroupLike> likes = new ArrayList<>(); // 좋아요 리스트
 
-    @Column(nullable = false)
+    @Column
     private int likeCount = 0; // 좋아요 수
 
     @Builder

@@ -57,7 +57,7 @@ public class GroupLikeServiceTest {
         categoryRepository.deleteAll();
 
         category = categoryRepository.save(Category.builder()
-                .name("category")
+                .name("카테고리")
                 .build());
         groupRepository.flush();
 
