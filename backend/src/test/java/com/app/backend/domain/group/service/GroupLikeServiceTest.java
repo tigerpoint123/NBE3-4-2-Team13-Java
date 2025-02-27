@@ -8,7 +8,6 @@ import com.app.backend.domain.group.repository.GroupLikeRepository;
 import com.app.backend.domain.group.repository.GroupRepository;
 import com.app.backend.domain.member.entity.Member;
 import com.app.backend.domain.member.repository.MemberRepository;
-import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,41 +39,10 @@ public class GroupLikeServiceTest {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    @Autowired
-    private EntityManager entityManager;
-
     @Test
-    @DisplayName("그룹 좋아요")
-    void t1() throws Exception {
-        // 그룹, 멤버 개별 생성
-        Category category = categoryRepository.save(Category.builder().name("카테고리").build());
-        Group group = groupRepository.save(
-                Group.builder()
-                        .name("test group")
-                        .province("test province")
-                        .city("test city")
-                        .town("test town")
-                        .description("test description")
-                        .recruitStatus(RecruitStatus.RECRUITING)
-                        .maxRecruitCount(300)
-                        .category(category)
-                        .build());
-        Member member = memberRepository.save(Member.builder().username("user0").build());
-
-        Long memberId = member.getId();
-        Long groupId = group.getId();
-
-        groupLikeService.toggleLikeGroup(groupId, memberId);
-
-        long likeCount = groupLikeRepository.countByGroupIdAndMemberId(groupId, memberId);
-        assertThat(likeCount).isEqualTo(1);
-    }
-
-
-    @Test
-    @DisplayName("동일 유저가 같은 그룹에 대해 좋아요를 눌렀다가 취소했을 때, likeCount ＝ ０")
-    void t2() throws Exception {
-        // 그룹, 멤버 개별 생성
+    @DisplayName("그룹 좋아요 추가")
+    void likeGroupTest() {
+        // given
         Category category = categoryRepository.save(Category.builder().name("카테고리").build());
         Group group = groupRepository.save(Group.builder()
                 .name("test group")
@@ -91,21 +59,52 @@ public class GroupLikeServiceTest {
         Long memberId = member.getId();
         Long groupId = group.getId();
 
-        groupLikeService.toggleLikeGroup(groupId, memberId);
-        groupLikeService.toggleLikeGroup(groupId, memberId);
+        // when
+        groupLikeService.likeGroup(groupId, memberId);
 
+        // then
+        long likeCount = groupLikeRepository.countByGroupIdAndMemberId(groupId, memberId);
+        assertThat(likeCount).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("그룹 좋아요 취소")
+    void unlikeGroupTest() {
+        // given
+        Category category = categoryRepository.save(Category.builder().name("카테고리").build());
+        Group group = groupRepository.save(Group.builder()
+                .name("test group")
+                .province("test province")
+                .city("test city")
+                .town("test town")
+                .description("test description")
+                .recruitStatus(RecruitStatus.RECRUITING)
+                .maxRecruitCount(300)
+                .category(category)
+                .build());
+        Member member = memberRepository.save(Member.builder().username("user0").build());
+
+        Long memberId = member.getId();
+        Long groupId = group.getId();
+
+        groupLikeService.likeGroup(groupId, memberId);
+
+        // when
+        groupLikeService.unlikeGroup(groupId, memberId);
+
+        // then
         long likeCount = groupLikeRepository.countByGroupIdAndMemberId(groupId, memberId);
         assertThat(likeCount).isEqualTo(0);
     }
 
     @Test
-    @DisplayName("동일 유저가 같은 그룹에 대해 동시에 좋아요를 눌렀을 때, likeCount ＝ ０")
-    void t3() throws Exception {
+    @DisplayName("동일 유저가 같은 그룹에 대해 동시에 좋아요 요청을 보냈을 때, likeCount = 0")
+    void concurrentLikeTest() throws Exception {
         int threadCount = 2;
         ExecutorService executorService = Executors.newFixedThreadPool(32);
         CountDownLatch latch = new CountDownLatch(threadCount);
 
-        // 그룹, 멤버 개별 생성
+        // given
         Category category = categoryRepository.save(Category.builder().name("카테고리").build());
         Group group = groupRepository.save(Group.builder()
                 .name("test group")
@@ -125,7 +124,7 @@ public class GroupLikeServiceTest {
         for (int i = 0; i < threadCount; i++) {
             executorService.submit(() -> {
                 try {
-                    groupLikeService.toggleLikeGroup(groupId, memberId);
+                    groupLikeService.likeGroup(groupId, memberId);
                 } finally {
                     latch.countDown();
                 }
@@ -134,10 +133,8 @@ public class GroupLikeServiceTest {
 
         latch.await();
 
+        // then
         long likeCount = groupLikeRepository.countByGroupIdAndMemberId(groupId, memberId);
         assertThat(likeCount).isEqualTo(0L);
     }
-
 }
-
-

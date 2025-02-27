@@ -21,7 +21,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doNothing;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -86,7 +87,7 @@ public class GroupLikeControllerTest {
     @CustomWithMockUser
     void toggleLikeGroup_Success() throws Exception {
         // given
-        when(groupLikeService.toggleLikeGroup(group.getId(), member.getId())).thenReturn(true);
+        doNothing().when(groupLikeService).likeGroup(group.getId(), member.getId());
 
         // when
         mvc.perform(post("/api/v1/groups/" + group.getId() + "/like")
@@ -101,13 +102,13 @@ public class GroupLikeControllerTest {
     @CustomWithMockUser
     void toggleLikeGroup_Cancel() throws Exception {
         // given
-        when(groupLikeService.toggleLikeGroup(group.getId(), member.getId())).thenReturn(false);
+        doNothing().when(groupLikeService).likeGroup(group.getId(), member.getId());
+        doNothing().when(groupLikeService).unlikeGroup(group.getId(), member.getId());
 
         // when
-        mvc.perform(post("/api/v1/groups/{groupId}/like", group.getId())
-                        .contentType(MediaType.APPLICATION_JSON))
-                        .andExpect(status().isOk())
-                        .andExpect(jsonPath("$.isSuccess").value(true))
-                        .andExpect(jsonPath("$.message").value("좋아요 취소 성공"));
+        mvc.perform(delete("/api/v1/groups/{groupId}/like", group.getId()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.isSuccess").value(true))
+                    .andExpect(jsonPath("$.message").value("좋아요 취소 성공"));
     }
 }
