@@ -1,12 +1,10 @@
 package com.app.backend.domain.post.entity;
 
-import com.app.backend.domain.comment.entity.Comment;
-import com.app.backend.domain.group.entity.Group;
-import com.app.backend.domain.member.entity.Member;
 import com.app.backend.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -19,8 +17,8 @@ import java.util.List;
 public class Post extends BaseEntity {
 
     @Id
-    @Column(name = "post_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "post_id")
     private Long id;
 
     @Setter
@@ -58,9 +56,26 @@ public class Post extends BaseEntity {
 //    @ManyToOne(fetch = FetchType.LAZY)
 //    private Group group;
 
+
+    @OneToMany(mappedBy = "post")
+    private List<PostLike> likes = new ArrayList<>();
+
+    @Column
+    private int likeCount = 0;
+
     public void delete(){
         if(!this.getDisabled()){
             deactivate();
+        }
+    }
+
+    public void addLikeCount() {
+        this.likeCount++;
+    }
+
+    public void removeLikeCount() {
+        if (this.likeCount > 0) {
+            this.likeCount--;
         }
     }
 
