@@ -12,8 +12,12 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
 	@Override
 	public void configureMessageBroker(MessageBrokerRegistry registry) {
-		// 클라이언트가 메세지를 받을 경로
-		registry.enableSimpleBroker("/topic", "/queue");
+		// 외부 브로커(RabbitMQ) 적용
+		registry.enableStompBrokerRelay("/topic", "/queue")
+			.setRelayHost("localhost")
+			.setRelayPort(5672)
+			.setClientLogin("guest")
+			.setClientPasscode("guest");
 
 		// 클라이언트가 서버로 메세지를 보낼 경로
 		registry.setApplicationDestinationPrefixes("/app");
