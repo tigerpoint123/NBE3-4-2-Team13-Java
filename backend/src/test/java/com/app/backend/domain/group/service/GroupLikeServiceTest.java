@@ -136,4 +136,5 @@ public class GroupLikeServiceTest {
         // then
         long likeCount = groupLikeRepository.countByGroupIdAndMemberId(groupId, memberId);
         assertThat(likeCount).isEqualTo(0L);
-    }}
+    }
+}
