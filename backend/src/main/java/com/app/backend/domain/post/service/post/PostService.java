@@ -82,7 +82,7 @@ public class PostService {
                 .map(file -> PostAttachmentRespDto.GetPostImage(file, fileConfig.getIMAGE_DIR()))
                 .toList();
 
-        return PostRespDto.toGetPost(post, member, images, documents);
+        return PostRespDto.toGetPost(post, member, images, documents, true);
     }
 
     @CustomCache(prefix = "post", key = "groupid", id = "groupId", ttl = 2)

@@ -58,7 +58,8 @@ public class Post extends BaseEntity {
     @OneToMany(mappedBy = "post")
     private List<PostLike> likes = new ArrayList<>();
 
-    @Column
+    @Builder.Default
+    @Column(nullable = false)
     private int likeCount = 0;
 
     @Builder.Default
