@@ -7,7 +7,6 @@ import lombok.*;
 import java.util.ArrayList;
 import java.util.List;
 
-
 @Entity
 @Getter
 @Builder
@@ -56,12 +55,28 @@ public class Post extends BaseEntity {
 //    @ManyToOne(fetch = FetchType.LAZY)
 //    private Group group;
 
-
     @OneToMany(mappedBy = "post")
     private List<PostLike> likes = new ArrayList<>();
 
     @Column
     private int likeCount = 0;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Long todayViewCount = 0L;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Long totalViewCount = 0L;
+
+    public void addTodayViewCount(Long viewCount) {
+        this.todayViewCount += viewCount;
+    }
+
+    public void refreshViewCount() {
+        totalViewCount += todayViewCount;
+        todayViewCount = 0L;
+    }
 
     public void delete(){
         if(!this.getDisabled()){
