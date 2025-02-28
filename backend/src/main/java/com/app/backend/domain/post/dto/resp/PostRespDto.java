@@ -33,6 +33,8 @@ public class PostRespDto {
         private final Long groupId;
         private final String createdAt;
         private final String modifiedAt;
+        private final int likeCount;
+        private Boolean liked;
         private final List<PostAttachmentRespDto.GetPostImageDto> images;
         private final List<PostAttachmentRespDto.GetPostDocumentDto> documents;
     }
@@ -40,7 +42,8 @@ public class PostRespDto {
     public static GetPostDto toGetPost(final Post post,
                                        final Member member,
                                        final List<PostAttachmentRespDto.GetPostImageDto> images,
-                                       final List<PostAttachmentRespDto.GetPostDocumentDto> documents)
+                                       final List<PostAttachmentRespDto.GetPostDocumentDto> documents,
+                                       final boolean isLiked)
     {
         return GetPostDto.builder()
                 .postId(post.getId())
@@ -52,6 +55,8 @@ public class PostRespDto {
                 .groupId(post.getGroupId())
                 .createdAt(AppUtil.localDateTimeToString(post.getCreatedAt()))
                 .modifiedAt(AppUtil.localDateTimeToString(post.getModifiedAt()))
+                .likeCount(post.getLikeCount())
+                .liked(isLiked)
                 .images(images)
                 .documents(documents)
                 .build();
