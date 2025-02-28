@@ -19,12 +19,15 @@ import com.app.backend.domain.post.dto.resp.PostAttachmentRespDto;
 import com.app.backend.domain.post.dto.resp.PostRespDto;
 import com.app.backend.domain.post.entity.Post;
 import com.app.backend.domain.post.entity.PostAttachment;
+import com.app.backend.domain.post.entity.PostLike;
 import com.app.backend.domain.post.entity.PostStatus;
 import com.app.backend.domain.post.exception.PostErrorCode;
 import com.app.backend.domain.post.exception.PostException;
+import com.app.backend.domain.post.repository.post.PostLikeRepository;
 import com.app.backend.domain.post.repository.post.PostRepository;
 import com.app.backend.domain.post.repository.postAttachment.PostAttachmentRepository;
 import com.app.backend.global.config.FileConfig;
+import com.app.backend.global.entity.BaseEntity;
 import com.app.backend.global.error.exception.GlobalErrorCode;
 import com.app.backend.global.redis.repository.RedisRepository;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +40,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -49,6 +53,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final RedisRepository redisRepository;
     private final MemberRepository memberRepository;
+    private final PostLikeRepository postLikeRepository;
     private final PostAttachmentRepository postAttachmentRepository;
     private final GroupMembershipRepository groupMembershipRepository;
 
@@ -80,7 +85,7 @@ public class PostService {
                 .map(file -> PostAttachmentRespDto.GetPostImage(file, fileConfig.getIMAGE_DIR()))
                 .toList();
 
-        PostRespDto.GetPostDto getPostDto = PostRespDto.toGetPost(post, member, images, documents);
+        PostRespDto.GetPostDto getPostDto = PostRespDto.toGetPost(post, member, images, documents, isLiked(postId, memberId));
 
         redisRepository.save(redisKey, getPostDto, 5, TimeUnit.MINUTES);
 
@@ -234,5 +239,40 @@ public class PostService {
             }
             throw e;
         }
+    }
+
+    @Transactional
+    public void PostLike(Long postId, Long memberId) {
+        Post post = postRepository.findByIdWithLock(postId)
+            .orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
+
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new PostException(GlobalErrorCode.ENTITY_NOT_FOUND));
+
+        Optional<PostLike> postLike = postLikeRepository.findByPostAndMember(post, member);
+
+        if (postLike.isPresent()) {
+            postLike.get().delete();
+            post.removeLikeCount();
+
+        } else {
+            postLikeRepository.save(PostLike.builder()
+                .post(post)
+                .member(member)
+                .build());
+            post.addLikeCount();
+        }
+    }
+
+    public boolean isLiked(Long postId, Long memberId) {
+        Post post = postRepository.findById(postId)
+            .orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
+
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new PostException(GlobalErrorCode.ENTITY_NOT_FOUND));
+
+        return postLikeRepository.findByPostAndMember(post, member)
+            .map(postLike -> !postLike.getDisabled())
+            .orElse(false);
     }
 }

@@ -17,7 +17,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -116,4 +118,23 @@ public class PostController {
 
         return ApiResponse.of(true, HttpStatus.OK, "게시물 목록을 성공적으로 불러왔습니다", posts);
     }
+
+    @PostMapping("/{postId}/like")
+    public ApiResponse<Void> createPostLike(
+        @PathVariable Long postId,
+        @AuthenticationPrincipal MemberDetails memberDetails
+    ) {
+        postService.PostLike(postId, memberDetails.getId());
+        return ApiResponse.of(true, HttpStatus.OK, "게시글 좋아요 토글 성공");
+    }
+
+    @GetMapping("/{postId}/like")
+    public ApiResponse<Boolean> isLiked(
+        @PathVariable Long postId,
+        @AuthenticationPrincipal MemberDetails memberDetails
+    ) {
+        boolean liked = postService.isLiked(postId, memberDetails.getId());
+        return ApiResponse.of(true, HttpStatus.OK, "좋아요 여부 확인 성공", liked);
+    }
+
 }
