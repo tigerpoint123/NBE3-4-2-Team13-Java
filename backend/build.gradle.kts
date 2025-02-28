@@ -43,6 +43,10 @@ dependencies {
     implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")
     //JJWT :: API
     implementation("io.jsonwebtoken:jjwt-api:0.12.6")
+    //Redisson/Spring Boot Starter
+    implementation("org.redisson:redisson-spring-boot-starter:3.45.0")
+    //Jedis
+    implementation("redis.clients:jedis")
 
     compileOnly("org.projectlombok:lombok")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
@@ -64,6 +68,7 @@ dependencies {
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
+    testImplementation("org.mockito:mockito-inline:5.2.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     //test lombok
@@ -74,11 +79,17 @@ dependencies {
     implementation("me.paulschwarz:spring-dotenv:4.0.0")
 
     // kafka 의존성
-    implementation ("org.springframework.kafka:spring-kafka")
+    implementation("org.springframework.kafka:spring-kafka")
 }
 
 tasks.withType<Test> {
-    useJUnitPlatform()
+    useJUnitPlatform {
+        val includeTags = project.findProperty("includeTags") as String?
+        val excludeTags = project.findProperty("excludeTags") as String?
+
+        includeTags?.split(",")?.forEach { tag -> includeTags(tag.trim()) }
+        excludeTags?.split(",")?.forEach { tag -> excludeTags(tag.trim()) }
+    }
 }
 
 //Querydsl - Start
@@ -92,11 +103,11 @@ sourceSets {
     }
 }
 
-tasks {
-    compileJava {
-        options.annotationProcessorGeneratedSourcesDirectory = generatedDir
-    }
+tasks.withType<JavaCompile>().configureEach {
+    options.generatedSourceOutputDirectory.set(generatedDir)
+}
 
+tasks {
     clean {
         doFirst {
             delete(generatedDir)

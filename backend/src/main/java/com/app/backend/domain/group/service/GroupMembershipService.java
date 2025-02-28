@@ -13,6 +13,7 @@ import com.app.backend.domain.group.repository.GroupMembershipRepository;
 import com.app.backend.domain.group.repository.GroupRepository;
 import com.app.backend.domain.notification.dto.NotificationEvent;
 import com.app.backend.domain.notification.service.NotificationService;
+import com.app.backend.global.annotation.CustomLock;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,7 @@ public class GroupMembershipService {
      * @param isAccept      - 가입 승인 여부
      * @return 모임 가입 승인 여부
      */
+    @CustomLock(key = "'group:' + #groupId + '-member:' + #memberId")
     @Transactional
     public boolean approveJoining(@NotNull @Min(1) final Long groupLeaderId,
                                   @NotNull @Min(1) final Long groupId,
@@ -119,6 +121,7 @@ public class GroupMembershipService {
      * @param memberId      - 모임 내 권한 변경 대상 회원 ID
      * @return 권한 변경 성공 여부
      */
+    @CustomLock(key = "'group:' + #groupId + '-member:' + #memberId")
     @Transactional
     public boolean modifyGroupRole(@NotNull @Min(1) final Long groupLeaderId,
                                    @NotNull @Min(1) final Long groupId,
@@ -168,6 +171,7 @@ public class GroupMembershipService {
      * @param memberId - 회원 ID
      * @return 탈퇴 성공 여부
      */
+    @CustomLock(key = "'group:' + #groupId + '-member:' + #memberId")
     @Transactional
     public boolean leaveGroup(@NotNull @Min(1) final Long groupId, @NotNull @Min(1) final Long memberId) {
         GroupMembership groupMembership = groupMembershipRepository.findByGroupIdAndMemberIdAndDisabled(groupId,
