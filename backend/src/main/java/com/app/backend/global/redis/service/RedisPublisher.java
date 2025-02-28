@@ -18,7 +18,7 @@ public class RedisPublisher {
 	// 채널에 메세지 발행
 	public void publish(String chatRoomId, MessageResponse messageResponse) {
 		// Redis 에 메세지 발행
-		log.info("publishing message to topic: chatroom:{}", chatRoomId);
+		// log.info("publishing message to topic: chatroom:{}", chatRoomId);
 		redisTemplate.convertAndSend("chatroom:" + chatRoomId, messageResponse);
 	}
 }

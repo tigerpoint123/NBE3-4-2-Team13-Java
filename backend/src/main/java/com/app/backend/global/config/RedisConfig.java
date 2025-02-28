@@ -69,7 +69,7 @@ public class RedisConfig {
 
         // chatroom:* 패턴에 대한 메시지 리스너 추가 -> 모든 채팅방 메세지를 수신 할 수 있음.
         container.addMessageListener(messageListenerAdapter, new PatternTopic("chatroom:*"));
-        log.info("RedisMessageListenerContainer initialized with pattern: chatroom:*");
+        // log.info("RedisMessageListenerContainer initialized with pattern: chatroom:*");
         return container;
     }
 

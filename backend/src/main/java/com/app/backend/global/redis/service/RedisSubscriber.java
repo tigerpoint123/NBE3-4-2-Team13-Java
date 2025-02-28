@@ -25,7 +25,7 @@ public class RedisSubscriber implements MessageListener {
 		// 채널에서 chatRoomId 추출
 		String channel = new String(message.getChannel());
 		String chatRoomId = channel.split(":")[1];
-		log.info("Message received from Redis: {}", new String(message.getBody()));
+		// log.info("Message received from Redis: {}", new String(message.getBody()));
 
 		// byte[] 메시지를 MessageResponse 객체로 변환
 		MessageResponse messageResponse = null;

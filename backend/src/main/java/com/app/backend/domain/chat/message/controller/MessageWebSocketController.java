@@ -27,7 +27,7 @@ public class MessageWebSocketController {
 		MessageResponse messageResponse = messageService.saveMessage(messageRequest);
 
 		// Redis 채널로 발행
-		log.info("message publish");
+		// log.info("message publish");
 		redisPublisher.publish(chatRoomId, messageResponse);
 
 	}
