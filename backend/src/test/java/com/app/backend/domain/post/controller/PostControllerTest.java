@@ -79,7 +79,7 @@ public class PostControllerTest {
 
         MemberDetails mockUser = new MemberDetails(member);
 
-        PostRespDto.GetPostDto responseDto = PostRespDto.toGetPost(post, member, null, null);
+        PostRespDto.GetPostDto responseDto = PostRespDto.toGetPost(post, member, null, null, true);
 
         given(postService.getPost(eq(post.getId()), eq(mockUser.getId()))).willReturn(responseDto);
 

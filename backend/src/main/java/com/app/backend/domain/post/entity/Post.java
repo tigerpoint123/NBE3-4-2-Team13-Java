@@ -4,6 +4,9 @@ import com.app.backend.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @Builder
@@ -13,8 +16,8 @@ import lombok.*;
 public class Post extends BaseEntity {
 
     @Id
-    @Column(name = "post_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "post_id")
     private Long id;
 
     @Setter
@@ -52,6 +55,13 @@ public class Post extends BaseEntity {
 //    @ManyToOne(fetch = FetchType.LAZY)
 //    private Group group;
 
+    @OneToMany(mappedBy = "post")
+    private List<PostLike> likes = new ArrayList<>();
+
+    @Builder.Default
+    @Column(nullable = false)
+    private int likeCount = 0;
+
     @Builder.Default
     @Column(nullable = false)
     private Long todayViewCount = 0L;
@@ -72,6 +82,16 @@ public class Post extends BaseEntity {
     public void delete(){
         if(!this.getDisabled()){
             deactivate();
+        }
+    }
+
+    public void addLikeCount() {
+        this.likeCount++;
+    }
+
+    public void removeLikeCount() {
+        if (this.likeCount > 0) {
+            this.likeCount--;
         }
     }
 
