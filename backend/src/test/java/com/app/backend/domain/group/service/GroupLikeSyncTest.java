@@ -49,6 +49,47 @@ public class GroupLikeSyncTest {
     }
 
     @Test
+    @DisplayName("동일 유저가 같은 그룹에 대해 동시에 좋아요 요청을 보냈을 때, likeCount = 1")
+    void concurrentLikeTest() throws Exception {
+        int threadCount = 2;
+        ExecutorService executorService = Executors.newFixedThreadPool(32);
+        CountDownLatch latch = new CountDownLatch(threadCount);
+
+        // given
+        Category category = categoryRepository.save(Category.builder().name("카테고리").build());
+        Group group = groupRepository.save(Group.builder()
+                .name("test group")
+                .province("test province")
+                .city("test city")
+                .town("test town")
+                .description("test description")
+                .recruitStatus(RecruitStatus.RECRUITING)
+                .maxRecruitCount(300)
+                .category(category)
+                .build());
+        Member member = memberRepository.save(Member.builder().username("user0").build());
+
+        Long memberId = member.getId();
+        Long groupId = group.getId();
+
+        for (int i = 0; i < threadCount; i++) {
+            executorService.submit(() -> {
+                try {
+                    groupLikeService.likeGroup(groupId, memberId);
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        latch.await();
+
+        // then
+        long likeCount = groupLikeRepository.countByGroupIdAndMemberId(groupId, memberId);
+        assertThat(likeCount).isEqualTo(1L);
+    }
+
+    @Test
     @DisplayName("여러 유저가 동시에 같은 그룹에 대해 좋아요를 눌렀을 때, likeCount = 100")
     void multipleUsersLikeTest() throws Exception {
         int threadCount = 100;

@@ -44,7 +44,7 @@ public class GroupLikeService {
                 .orElseThrow(() -> new GroupLikeException(GroupLikeErrorCode.MEMBER_NOT_FOUND));
 
         if (groupLikeRepository.findByGroupAndMember(group, member).isPresent()) {
-            throw new GroupLikeException(GroupLikeErrorCode.ALREADY_LIKED);
+            return;
         }
 
         GroupLike newLike = GroupLike.builder()
