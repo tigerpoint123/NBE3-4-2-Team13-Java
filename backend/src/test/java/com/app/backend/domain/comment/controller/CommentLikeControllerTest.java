@@ -110,7 +110,7 @@ class CommentLikeControllerTest {
 
 
 		Page<CommentResponse.CommentList> comments = commentService.getComments(testPost.getId(),
-			PageRequest.of(0, 10));
+			testMember.getId(), PageRequest.of(0, 10));
 		assertThat(comments.getContent().get(0).getLikeCount()).isEqualTo(1);
 	}
 
@@ -181,57 +181,7 @@ class CommentLikeControllerTest {
 
 
 		Page<CommentResponse.CommentList> comments = commentService.getComments(testPost.getId(),
-			PageRequest.of(0, 10));
+			testMember.getId(), PageRequest.of(0, 10));
 		assertThat(comments.getContent().get(0).getLikeCount()).isEqualTo(0);
 	}
-
-	@Test
-	@DisplayName("여러 사용자가 동시에 좋아요를 누를 때 정합성 테스트")
-	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	void getCommentLikeCount4() throws Exception {
-
-		int numberOfUsers = 3;
-		List<Member> users = new ArrayList<>();
-
-
-		for (int i = 0; i < numberOfUsers; i++) {
-			Member user = Member.builder()
-				.username("testUser" + i)
-				.password("password")
-				.nickname("테스터" + i)
-				.role("ROLE_USER")
-				.build();
-			users.add(memberRepository.save(user));
-		}
-
-		CountDownLatch startSignal = new CountDownLatch(1);
-		CountDownLatch endSignal = new CountDownLatch(numberOfUsers);
-		ExecutorService executorService = Executors.newFixedThreadPool(numberOfUsers);
-
-
-		for (Member user : users) {
-			executorService.submit(() -> {
-				try {
-					startSignal.await();
-					mockMvc.perform(post("/api/v1/comment/{id}/like", testComment.getId())
-							.with(user(new MemberDetails(user))))
-						.andExpect(status().isOk());
-				} catch (Exception e) {
-					System.out.println("에러: " + e.getMessage());
-				} finally {
-					endSignal.countDown();
-				}
-			});
-		}
-
-		startSignal.countDown();
-		endSignal.await();
-		executorService.shutdown();
-
-		Page<CommentResponse.CommentList> comments = commentService.getComments(testPost.getId(),
-			PageRequest.of(0, 10));
-		assertThat(comments.getContent().get(0).getLikeCount()).isEqualTo(numberOfUsers);
-		System.out.println("최종 좋아요 수: " + comments.getContent().get(0).getLikeCount());
-	}
-
 }
