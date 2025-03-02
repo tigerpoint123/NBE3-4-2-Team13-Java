@@ -92,9 +92,10 @@ public class CommentController {
 	)
 	public ApiResponse<Page<CommentResponse.CommentList>> getComments(
 		@PathVariable(name = "id") Long postId,
-		@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+		@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+		@AuthenticationPrincipal MemberDetails memberDetails
 	) {
-		Page<CommentResponse.CommentList> response = commentService.getComments(postId, pageable);
+		Page<CommentResponse.CommentList> response = commentService.getComments(postId, memberDetails.getId(), pageable);
 
 		return ApiResponse.of(
 			true,

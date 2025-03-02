@@ -19,8 +19,9 @@ public class CommentResponse {
 		private LocalDateTime createdAt;
 		private int replyCount;
 		private long likeCount;
+		private boolean liked;
 
-		public static CommentList from(Comment comment, Long likeCount) {
+		public static CommentList from(Comment comment, Long likeCount, boolean liked) {
 			return CommentList.builder()
 				.id(comment.getId())
 				.content(comment.getContent())
@@ -29,6 +30,7 @@ public class CommentResponse {
 				.createdAt(comment.getCreatedAt())
 				.replyCount(comment.getChildren().size())
 				.likeCount(likeCount)
+				.liked(liked)
 				.build();
 		}
 	}
