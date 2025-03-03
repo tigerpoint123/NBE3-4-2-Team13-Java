@@ -16,11 +16,19 @@ server:
 
 spring:
   rabbitmq:
+#    host: linkus-rabbitmq
     host: localhost
-    port: 5672
     username: guest
     password: guest
     virtual-host: /
+
+rabbitmq:
+  queue:
+    name: chat.queue
+  exchange:
+    name: chat.exchange
+  routing:
+    key: chatroom.*
 
 management:
   endpoints:

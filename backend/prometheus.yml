@@ -6,3 +6,4 @@ scrape_configs:
     metrics_path: '/actuator/prometheus'  # Spring Boot의 Prometheus 엔드포인트
     static_configs:
       - targets: [ 'backend:8080' ]  # Spring Boot 애플리케이션의 주소
+#      - targets: [ 'host.docker.internal:8080' ]  # Spring Boot 애플리케이션의 주소

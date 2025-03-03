@@ -105,7 +105,7 @@ export default function ChatRoom() {
             webSocketFactory: () => socket,
             onConnect: () => {
                 // 새 메시지는 배열 앞에 추가
-                client.subscribe(`/topic/chatroom/${chatRoomId}`, (message) => {
+                client.subscribe(`/exchange/chat.exchange/chat.${chatRoomId}`, (message) => {
                     const receivedMessage: Message = JSON.parse(message.body);
                     setMessages((prevMessages) => [receivedMessage, ...prevMessages]);
                     setShouldScrollToBottom(true);
@@ -184,7 +184,7 @@ export default function ChatRoom() {
         };
 
         clientRef.current.publish({
-            destination: `/app/chat/${chatRoomId}`,
+            destination: `/pub/chat.${chatRoomId}`,
             body: JSON.stringify(messageToSend)
         });
 
