@@ -70,7 +70,7 @@ class PostLikeConcurrencyTest {
 	@Test
 	@DisplayName("여러 사용자가 동시에 게시글 좋아요를 누를 때 정합성 테스트")
 	void createMultiPostLike() throws InterruptedException {
-		// 기존 테스트 코드 유지
+
 		int numberOfUsers = 10;
 		List<Member> users = new ArrayList<>();
 

@@ -110,7 +110,7 @@ class CommentLikeControllerTest {
 
 
 		Page<CommentResponse.CommentList> comments = commentService.getComments(testPost.getId(),
-			PageRequest.of(0, 10));
+			testMember.getId(), PageRequest.of(0, 10));
 		assertThat(comments.getContent().get(0).getLikeCount()).isEqualTo(1);
 	}
 
@@ -181,7 +181,7 @@ class CommentLikeControllerTest {
 
 
 		Page<CommentResponse.CommentList> comments = commentService.getComments(testPost.getId(),
-			PageRequest.of(0, 10));
+			testMember.getId(), PageRequest.of(0, 10));
 		assertThat(comments.getContent().get(0).getLikeCount()).isEqualTo(0);
 	}
 
@@ -229,7 +229,7 @@ class CommentLikeControllerTest {
 		executorService.shutdown();
 
 		Page<CommentResponse.CommentList> comments = commentService.getComments(testPost.getId(),
-			PageRequest.of(0, 10));
+			testMember.getId(), PageRequest.of(0, 10));
 		assertThat(comments.getContent().get(0).getLikeCount()).isEqualTo(numberOfUsers);
 		System.out.println("최종 좋아요 수: " + comments.getContent().get(0).getLikeCount());
 	}

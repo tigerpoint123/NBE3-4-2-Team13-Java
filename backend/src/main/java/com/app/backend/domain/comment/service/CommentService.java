@@ -114,10 +114,10 @@ public class CommentService {
 
 	}
 
-	// 댓글 조회 (좋아요 수 포함)
-	public Page<CommentResponse.CommentList> getComments(Long postId, Pageable pageable) {
+	// 댓글 조회 (좋아요 포함)
+	public Page<CommentResponse.CommentList> getComments(Long postId, Long memberId, Pageable pageable) {
 		Post post = getPostValidate(postId);
-		return commentRepository.findCommentsWithLikeCount(post, pageable);
+		return commentRepository.findCommentsWithLikeCount(post, memberId, pageable);
 	}
 
 

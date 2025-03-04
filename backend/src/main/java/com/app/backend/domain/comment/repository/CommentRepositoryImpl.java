@@ -14,6 +14,7 @@ import com.app.backend.domain.comment.dto.response.CommentResponse;
 import com.app.backend.domain.comment.entity.QComment;
 import com.app.backend.domain.comment.entity.QCommentLike;
 import com.app.backend.domain.post.entity.Post;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -25,12 +26,18 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
 	private final JPAQueryFactory queryFactory;
 
 	@Override
-	public Page<CommentResponse.CommentList> findCommentsWithLikeCount(Post post, Pageable pageable) {
+	public Page<CommentResponse.CommentList> findCommentsWithLikeCount(Post post, Long memberId, Pageable pageable) {
 		QComment comment = QComment.comment;
 		QCommentLike commentLike = QCommentLike.commentLike;
 
 		List<CommentResponse.CommentList> results = queryFactory
-			.select(comment, commentLike.count())
+			.select(comment, commentLike.count(),
+				JPAExpressions.selectOne()
+					.from(commentLike)
+					.where(commentLike.comment.eq(comment)
+						.and(commentLike.member.id.eq(memberId))
+						.and(commentLike.disabled.eq(false)))
+					.exists())
 			.from(comment)
 			.leftJoin(comment.member).fetchJoin()
 			.leftJoin(commentLike)
@@ -49,7 +56,8 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
 				Objects.requireNonNull(tuple.get(comment)),
 				Optional.ofNullable(tuple.get(1, Number.class))
 					.map(Number::longValue)
-					.orElse(0L)))
+					.orElse(0L),
+				Boolean.TRUE.equals(tuple.get(2, Boolean.class))))
 			.collect(Collectors.toList());
 
 		Long total = Optional.ofNullable(
@@ -65,3 +73,4 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
 		return new PageImpl<>(results, pageable, total);
 	}
 }
+
