@@ -120,6 +120,17 @@ export default function ChatRoom() {
 
         client.activate();
         clientRef.current = client;
+        return socket
+    };
+
+    const websocketRef = useRef<WebSocket>(null)
+
+    const disconnectWebSocket = () => {
+        if (clientRef.current) {
+            console.log(`웹소켓 연결 종료 -> chatRoom: ${chatRoomId}`);
+            clientRef.current.deactivate(); // 웹소켓 연결 종료
+            clientRef.current = null; // 클라이언트 참조 초기화
+        }
     };
 
     useEffect(() => {
@@ -130,6 +141,7 @@ export default function ChatRoom() {
     }, [messages, isLoadingMore, shouldScrollToBottom]);
 
     useEffect(() => {
+        if (websocketRef.current) return;
         const fetchChatRoomData = async () => {
             try {
                 const token = localStorage.getItem('accessToken');
@@ -157,15 +169,17 @@ export default function ChatRoom() {
         };
     
         fetchChatRoomData();
-        connectWebSocket(chatRoomId);
+        // 웹소켓 연결
+        const socket = connectWebSocket(chatRoomId);
+        websocketRef.current = socket;
 
         // cleanup 함수 수정
         return () => {
-            if (clientRef.current) {
-                console.log(`웹소켓 연결 종료 -> chatRoom: ${chatRoomId}`);
-                clientRef.current.deactivate();
-                clientRef.current = null;
-            }
+            // if (clientRef.current) {
+            //     console.log(`웹소켓 연결 종료 -> chatRoom: ${chatRoomId}`);
+            //     clientRef.current.deactivate();
+            //     clientRef.current = null;
+            // }
         };
       }, [chatRoomId]);
     
