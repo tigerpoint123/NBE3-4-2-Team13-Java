@@ -49,11 +49,14 @@ jobs:
           - 61613:61613    # STOMP 포트
         env:
           RABBITMQ_DEFAULT_USER: guest
-          RABBITMQ_DEFAULT_PASS: guest
+          RABBITMQ_DEFAULT_PASS: guestz
 
     steps:
       - name: Enable RabbitMQ STOMP plugin
-        run: docker exec rabbitmq rabbitmq-plugins enable rabbitmq_stomp
+        run: |
+          # rabbitmq 컨테이너 뜰 때 까지 잠시 대기
+          sleep 10
+          docker exec rabbitmq rabbitmq-plugins enable rabbitmq_stomp
 
       - name: Checkout repository
         uses: actions/checkout@v3
