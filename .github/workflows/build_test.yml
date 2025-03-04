@@ -52,9 +52,11 @@ jobs:
           RABBITMQ_DEFAULT_PASS: guest
 
     steps:
-      - name: Enable RabbitMQ STOMP plugin
-        run: rabbitmq-plugins enable rabbitmq_stomp
-        shell: bash
+      # - name: Enable RabbitMQ STOMP plugin
+      #   run: rabbitmq-plugins enable rabbitmq_stomp
+
+      - name: container name confirm
+        run: docker ps
 
       - name: Checkout repository
         uses: actions/checkout@v3
