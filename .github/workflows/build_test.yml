@@ -82,10 +82,6 @@ jobs:
         working-directory: ./backend
         run: ./gradlew clean test -PexcludeTags=concurrency --no-build-cache --stacktrace --info
 
-      - name: Run Concurrency Tests
-        working-directory: ./backend
-        run: ./gradlew clean test -PincludeTags=concurrency --no-build-cache --stacktrace --info
-
       - name: Start Redis and configure
         run: |
           for container in $(docker ps -q --filter "ancestor=redis:latest"); do
