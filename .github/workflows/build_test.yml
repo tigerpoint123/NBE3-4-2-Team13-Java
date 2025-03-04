@@ -40,6 +40,17 @@ jobs:
           KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
           KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
 
+      # RabbitMQ
+      rabbitmq:
+        image: rabbitmq:management
+        ports:
+          - 15672:15672    # RabbitMQ management UI 포트
+          - 5672:5672      # RabbitMQ AMQP 포트
+          - 61613:61613    # STOMP 포트
+        env:
+          RABBITMQ_DEFAULT_USER: guest
+          RABBITMQ_DEFAULT_PASS: guest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
