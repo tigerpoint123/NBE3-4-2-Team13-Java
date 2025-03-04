@@ -43,6 +43,15 @@ services:
     networks:
       - kafka-net
 
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+      - "61613:61613"
+
 networks:
   kafka-net:
     driver: bridge
