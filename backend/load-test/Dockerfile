@@ -5,7 +5,7 @@ FROM openjdk:17-jdk-slim
 WORKDIR /app
 
 # 3. 프로젝트의 소스파일을 컨테이너로 복사
-COPY . /app
+COPY .. /app
 
 # 4. 프로젝트 빌드
 RUN ./gradlew build -x test
