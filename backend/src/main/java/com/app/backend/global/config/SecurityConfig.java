@@ -83,6 +83,10 @@ public class SecurityConfig {
                                 "/ws/**",
                                 "/api/v1/proxy/kakao/**",
                                 "/api/v1/notifications/**"
+                        )
+                        // Prometheus 매트릭 수집 엔드 포인드
+                        .permitAll().requestMatchers(
+                                "/actuator/prometheus"
                         ).permitAll()
                         .anyRequest().authenticated())
                 .headers(headers -> headers
