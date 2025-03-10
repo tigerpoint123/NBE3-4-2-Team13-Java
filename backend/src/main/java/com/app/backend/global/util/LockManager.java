@@ -22,7 +22,7 @@ public class LockManager {
     private final LockUtil       lockUtil;
 
     public LockWrapper acquireLock(final String lockKey, final long maxWaitTime, final long leaseTime) {
-        if (isRedisRunning())
+        if (!isRedisRunning())
             throw new IllegalStateException("Redis server is not available");
         RLock lock = redissonClient.getLock(lockKey);
         return LockWrapper.of(lockKey, lock, lockUtil.lockWithRetry(lock, maxWaitTime, leaseTime));
