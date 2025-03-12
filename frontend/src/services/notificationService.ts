@@ -1,13 +1,26 @@
 import { EventSourceMessage, fetchEventSource } from '@microsoft/fetch-event-source';
 
 class NotificationService {
+  private static instance: NotificationService | null = null;
   private controller: AbortController | null = null;
   private isConnecting: boolean = false;
   private listeners: ((notification: any) => void)[] = [];
+  private isConnected: boolean = false;
+
+  private constructor() {} // private 생성자
+
+  public static getInstance(): NotificationService {
+    if (!NotificationService.instance) {
+      NotificationService.instance = new NotificationService();
+    }
+    return NotificationService.instance;
+  }
 
   async connect() {
-    if (this.isConnecting) return;
-    this.isConnecting = true;
+    if (this.isConnected || this.isConnecting) {
+      console.log('이미 연결됨 또는 연결 시도 중');
+      return;
+    }
 
     const token = localStorage.getItem('accessToken');
     if (!token) {
@@ -28,6 +41,7 @@ class NotificationService {
         onopen: async (response) => {
           console.log('SSE 연결 성공');
           this.isConnecting = false;
+          this.isConnected = true;
         },
         onmessage: (event: EventSourceMessage) => {
           try {
@@ -38,14 +52,16 @@ class NotificationService {
               return;
             }
 
-            const notification = JSON.parse(event.data);
-            console.log('파싱된 알림 데이터:', notification);
-            
-            this.listeners.forEach(listener => {
-              console.log('리스너 호출:', listener);
-              listener(notification);
-            });
-            this.showNotification(notification);
+            if (event.event === 'notification') {
+              const notification = JSON.parse(event.data);
+              console.log('새 알림 데이터:', notification);
+              
+              this.listeners.forEach(listener => {
+                console.log('알림 리스너 호출');
+                listener(notification);
+              });
+              this.showNotification(notification);
+            }
           } catch (error) {
             console.error('알림 처리 중 오류:', error);
           }
@@ -139,13 +155,21 @@ class NotificationService {
     }
   }
 
+  
+
   disconnect() {
     if (this.controller) {
       this.controller.abort();
       this.controller = null;
+      this.isConnected = false;
     }
     this.isConnecting = false;
   }
+
+  isConnectionActive(): boolean {
+    return this.isConnected;
+  }
 }
 
-export const notificationService = new NotificationService(); 
+// 싱글톤 인스턴스 export
+export const notificationService = NotificationService.getInstance(); 

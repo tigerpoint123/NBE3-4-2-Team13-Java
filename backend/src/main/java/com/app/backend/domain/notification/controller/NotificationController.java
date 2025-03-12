@@ -31,9 +31,13 @@ public class NotificationController {
     ) {
         Member member = memberService.getCurrentMember(token);
         String userId = String.valueOf(member.getId());
-        SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+        log.info("SSE subscription request received for user: {}", userId);
+        
+        SseEmitter emitter = new SseEmitter(30000L);
         
         try {
+            sseEmitters.remove(userId);
+            
             emitter.send(SseEmitter.event()
                     .name("connect")
                     .data("Connected!"));
@@ -41,19 +45,29 @@ public class NotificationController {
             sseEmitters.add(userId, emitter);
             
             emitter.onCompletion(() -> {
+                log.info("SSE connection completed for user: {}", userId);
                 sseEmitters.remove(userId);
+                emitter.complete();
             });
+            
             emitter.onTimeout(() -> {
+                log.info("SSE connection timed out for user: {}", userId);
                 sseEmitters.remove(userId);
+                emitter.complete();
             });
+            
             emitter.onError((e) -> {
                 log.error("SSE connection error for user: {}", userId, e);
                 sseEmitters.remove(userId);
+                emitter.complete();
             });
             
+            log.info("SSE 연결 성공: userId = {}", userId);
         } catch (IOException e) {
             log.error("SSE 연결 실패: {}", e.getMessage(), e);
+            sseEmitters.remove(userId);
             emitter.complete();
+            throw new RuntimeException("SSE 연결 실패", e);
         }
         return emitter;
     }

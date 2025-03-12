@@ -31,7 +31,13 @@ export function NotificationBell() {
     const handleNewNotification = (notification: Notification) => {
       console.log('NotificationBell: 새 알림 수신:', notification);
       setNotifications(prev => {
-        console.log('이전 알림 목록:', prev);
+        // 중복 알림 체크
+        const isDuplicate = prev.some(n => n.id === notification.id);
+        if (isDuplicate) {
+          console.log('중복된 알림 무시:', notification.id);
+          return prev;
+        }
+        console.log('새 알림 추가:', notification);
         return [notification, ...prev];
       });
       setUnreadCount(prev => prev + 1);
@@ -40,14 +46,9 @@ export function NotificationBell() {
     console.log('NotificationBell: 리스너 등록');
     notificationService.addNotificationListener(handleNewNotification);
     
-    // SSE 연결 시작
-    notificationService.connect();
-
-    // 컴포넌트 언마운트 시 정리
     return () => {
       console.log('NotificationBell: 리스너 제거');
       notificationService.removeNotificationListener(handleNewNotification);
-      notificationService.disconnect();
     };
   }, []);
 

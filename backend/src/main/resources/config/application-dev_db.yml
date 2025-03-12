@@ -4,6 +4,13 @@ spring:
     url: jdbc:h2:file:./data/testdb;MODE=MySQL
     username: sa
     password:
+    hikari:
+      maximum-pool-size: 30
+      connection-timeout: 5000
+      validation-timeout: 2000
+      minimum-idle: 10
+      idle-timeout: 600000
+      max-lifetime: 1800000
   h2:
     console:
       enabled: true
@@ -44,7 +51,8 @@ logging:
   level:
     org.mongodb.driver.client: warn
     org.mongodb.driver.cluster: warn
-
+    com.zaxxer.hikari.HikariConfig: DEBUG
+    com.zaxxer.hikari: TRACE
 #    org.hibernate.sql: debug
 #    org.hibernate.type: trace
 

@@ -14,29 +14,51 @@ public class SseEmitters {
     private final Map<String, SseEmitter> emitters = new ConcurrentHashMap<>();
 
     public void add(String userId, SseEmitter emitter) {
+        SseEmitter oldEmitter = emitters.get(userId);
+        if (oldEmitter != null) {
+            try {
+                oldEmitter.complete();
+            } catch (Exception e) {
+                log.error("Error completing old emitter for user {}: {}", userId, e.getMessage());
+            } finally {
+                emitters.remove(userId);
+                log.debug("Removed existing SSE emitter for user: {}", userId);
+            }
+        }
+        
         emitters.put(userId, emitter);
         log.debug("New SSE emitter added for user: {}. Total active emitters: {}", 
                   userId, emitters.size());
     }
 
     public void remove(String userId) {
-        emitters.remove(userId);
+        SseEmitter emitter = emitters.remove(userId);
+        if (emitter != null) {
+            try {
+                emitter.complete();
+            } catch (Exception e) {
+                log.error("Error completing emitter for user {}: {}", userId, e.getMessage());
+            }
+        }
+        log.debug("Removed SSE emitter for user: {}. Total active emitters: {}", 
+                  userId, emitters.size());
     }
 
     public void sendToUser(String userId, Object data) {
         SseEmitter emitter = emitters.get(userId);
         if (emitter != null) {
             try {
+                log.info("Sending notification to user {}: {}", userId, data);
                 emitter.send(SseEmitter.event()
                         .name("notification")
                         .data(data));
-                log.debug("SSE sent successfully to user: {}", userId);
+                log.info("Successfully sent notification to user: {}", userId);
             } catch (IOException e) {
                 log.error("SSE 전송 실패 for user {}: {}", userId, e.getMessage());
-                emitters.remove(userId);
+                remove(userId);
             }
         } else {
-            log.debug("No SSE emitter found for user: {}", userId);
+            log.info("No SSE emitter found for user: {}", userId);
         }
     }
 }
