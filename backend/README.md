@@ -2,6 +2,10 @@
 
 ## 서비스 시작하기
 
+## 0. 컨테이너 실행
+- backend (kafka, rabbitMQ, zookeeper)
+- redis (server, lock)
+
 ### 1. Redis 설정
 
 이 프로젝트는 Redis를 사용하고 있습니다. Docker를 통해 Redis를 설치하고 실행해주세요.
