@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -50,7 +51,7 @@ public class ApiMemberController {
     public ApiResponse<MemberLoginResponseDto> login(
             @RequestBody MemberLoginRequestDto request,
             HttpServletResponse response
-    ) {
+    ) throws IOException {
         MemberLoginResponseDto loginResult = memberService.login(request);
         // 쿠키 설정
         Cookie refreshTokenCookie = new Cookie("refreshToken", loginResult.refreshToken());

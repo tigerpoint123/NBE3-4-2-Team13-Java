@@ -56,6 +56,7 @@ public class KakaoAuthService {
 		} catch (Exception e){
 			log.error("카카오 로그인 처리 중 오류: {}", e.getMessage());
 			if (e.getMessage().contains("authorization code not found")) {
+				// 이미 사용된 코드인 경우 특별한 처리
 				log.warn("이미 사용된 인증 코드입니다.");
 			}
 			throw e;
