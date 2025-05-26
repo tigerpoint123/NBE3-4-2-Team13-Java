@@ -112,7 +112,7 @@ export default function ClientPage() {
         </div>
         <div className='space-y-4'>
           <div className='grid grid-cols-3 gap-4'>
-            <div className='font-semibold dark:text-gray-200'>닉네임</div>
+            <div className='font-semibold dark:text-gray-200'>이름</div>
             <div className='col-span-2 dark:text-gray-300'>{loginMember.nickname}</div>
 
             {/* <div className='font-semibold'>회원 ID</div>
