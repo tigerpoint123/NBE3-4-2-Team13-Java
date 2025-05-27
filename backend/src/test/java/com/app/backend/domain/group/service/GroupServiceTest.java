@@ -12,6 +12,7 @@ import com.app.backend.domain.group.exception.GroupMembershipErrorCode;
 import com.app.backend.domain.group.exception.GroupMembershipException;
 import com.app.backend.domain.group.supporter.SpringBootTestSupporter;
 import com.app.backend.domain.member.entity.Member;
+import com.app.backend.domain.member.util.MemberFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
