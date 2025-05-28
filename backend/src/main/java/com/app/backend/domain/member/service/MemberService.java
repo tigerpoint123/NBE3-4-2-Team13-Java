@@ -12,7 +12,6 @@ import com.app.backend.domain.member.exception.MemberErrorCode;
 import com.app.backend.domain.member.exception.MemberException;
 import com.app.backend.domain.member.jwt.JwtProvider;
 import com.app.backend.domain.member.repository.MemberRepository;
-import com.app.backend.domain.member.util.MemberFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -46,11 +45,13 @@ public class MemberService {
                     throw new MemberException(MemberErrorCode.MEMBER_NICKNAME_EXISTS);
                 });
 
-        Member member = MemberFactory.createAdmin(
-                username,
-                passwordEncoder.encode(password),
-                nickname
-        );
+        Member member = Member.builder()
+                .username(username)
+                .password(passwordEncoder.encode(password))
+                .nickname(nickname)
+                .role("ROLE_ADMIN")
+                .disabled(false)
+                .build();
 
         Member savedMember = memberRepository.save(member);
 
@@ -100,10 +101,15 @@ public class MemberService {
 
     @Transactional
     public MemberModifyResponseDto modifyMember(Member member, MemberModifyRequestDto request) {
-        Member modifiedMember = MemberFactory.modifyMember(
-                member,
-                request.password() != null ? passwordEncoder.encode(request.password()) : member.getPassword()
-        );
+        Member modifiedMember = Member.builder()
+                .id(member.getId())
+                .username(member.getUsername())
+                .password(request.password() != null ?
+                        passwordEncoder.encode(request.password()) : member.getPassword())
+                .nickname(member.getNickname())
+                .role(member.getRole())
+                .disabled(member.isDisabled())
+                .build();
 
         Member savedMember = Optional.of(
                 memberRepository.save(modifiedMember)
@@ -128,7 +134,16 @@ public class MemberService {
     @Transactional
     public void deleteMember(String token) {
         Member member = getCurrentMember(token);
-        member = MemberFactory.deleteMember(member);
+        member = Member.builder()
+                .id(member.getId())
+                .username(member.getUsername())
+                .password(member.getPassword())
+                .nickname(member.getNickname())
+                .provider(member.getProvider())
+                .oauthProviderId(member.getOauthProviderId())
+                .role(member.getRole())
+                .disabled(true)
+                .build();
 
         memberRepository.save(member);
     }

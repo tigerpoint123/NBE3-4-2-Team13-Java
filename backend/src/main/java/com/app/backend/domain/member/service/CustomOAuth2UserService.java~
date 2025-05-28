@@ -2,6 +2,7 @@ package com.app.backend.domain.member.service;
 
 import com.app.backend.domain.member.entity.Member;
 import com.app.backend.domain.member.repository.MemberRepository;
+import com.app.backend.domain.member.util.MemberFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -54,14 +55,8 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     }
 
     private Member createMember(String oauthId, String nickname) {
-        Member member = Member.builder()
-                .username(oauthId)
-                .nickname(nickname)
-                .provider(Member.Provider.KAKAO)
-                .oauthProviderId(oauthId)
-                .role("USER")
-                .disabled(false)
-                .build();
+        Member member = MemberFactory.createKakaoUser(oauthId, nickname);
+
         return memberRepository.save(member);
     }
 } 
