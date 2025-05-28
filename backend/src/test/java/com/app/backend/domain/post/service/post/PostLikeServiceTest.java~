@@ -1,22 +1,21 @@
 package com.app.backend.domain.post.service.post;
 
-import com.app.backend.domain.member.entity.Member;
-import com.app.backend.domain.member.repository.MemberRepository;
-import com.app.backend.domain.member.util.MemberFactory;
-import com.app.backend.domain.post.entity.Post;
-import com.app.backend.domain.post.entity.PostStatus;
-import com.app.backend.domain.post.exception.PostErrorCode;
-import com.app.backend.domain.post.exception.PostException;
-import com.app.backend.domain.post.repository.post.PostRepository;
+import static org.assertj.core.api.AssertionsForClassTypes.*;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import com.app.backend.domain.member.entity.Member;
+import com.app.backend.domain.member.repository.MemberRepository;
+import com.app.backend.domain.post.entity.Post;
+import com.app.backend.domain.post.entity.PostStatus;
+import com.app.backend.domain.post.exception.PostErrorCode;
+import com.app.backend.domain.post.exception.PostException;
+import com.app.backend.domain.post.repository.post.PostRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Transactional
@@ -35,11 +34,13 @@ class PostLikeServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		testMember = memberRepository.save(MemberFactory.createUser(
-				"testUser",
-				"password",
-				"테스터"
-		));
+		testMember = memberRepository.save(Member.builder()
+			.username("testUser")
+			.password("password")
+			.nickname("테스터")
+			.role("ROLE_USER")
+			.disabled(false)
+			.build());
 
 		testPost = postRepository.save(Post.builder()
 			.title("테스트 게시글")
@@ -82,11 +83,13 @@ class PostLikeServiceTest {
 		// given
 		int numberOfUsers = 10;
 		for (int i = 0; i < numberOfUsers; i++) {
-			Member user = MemberFactory.createUser(
-					"testUser" + i,
-					"password",
-					"테스터" + i
-			);
+			Member user = Member.builder()
+				.username("testUser" + i)
+				.password("password")
+				.nickname("테스터" + i)
+				.role("ROLE_USER")
+				.disabled(false)
+				.build();
 			Member savedUser = memberRepository.save(user);
 
 			// when

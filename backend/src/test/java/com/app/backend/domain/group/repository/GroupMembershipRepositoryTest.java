@@ -1,25 +1,22 @@
 package com.app.backend.domain.group.repository;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import com.app.backend.domain.category.entity.Category;
-import com.app.backend.domain.group.entity.Group;
-import com.app.backend.domain.group.entity.GroupMembership;
-import com.app.backend.domain.group.entity.GroupMembershipId;
-import com.app.backend.domain.group.entity.GroupRole;
-import com.app.backend.domain.group.entity.MembershipStatus;
-import com.app.backend.domain.group.entity.RecruitStatus;
+import com.app.backend.domain.group.entity.*;
 import com.app.backend.domain.group.supporter.SpringBootTestSupporter;
 import com.app.backend.domain.member.entity.Member;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import com.app.backend.domain.member.util.MemberFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Transactional
 class GroupMembershipRepositoryTest extends SpringBootTestSupporter {
@@ -44,11 +41,11 @@ class GroupMembershipRepositoryTest extends SpringBootTestSupporter {
     @DisplayName("[성공] GroupMembership 엔티티 저장")
     void save() {
         //Given
-        Member member = Member.builder()
-                              .username("testUsername")
-                              .password("testPassword")
-                              .nickname("testNickname")
-                              .build();
+        Member member = MemberFactory.createUser(
+                "testUsername",
+                "testPassword",
+                "testNickname"
+        );
         em.persist(member);
         Long memberId = member.getId();
 
@@ -94,11 +91,11 @@ class GroupMembershipRepositoryTest extends SpringBootTestSupporter {
     @DisplayName("[성공] ID로 GroupMembership 엔티티 조회")
     void findById() {
         //Given
-        Member member = Member.builder()
-                              .username("testUsername")
-                              .password("testPassword")
-                              .nickname("testNickname")
-                              .build();
+        Member member = MemberFactory.createUser(
+                "testUsername",
+                "testPassword",
+                "testNickname"
+        );
         em.persist(member);
         Long memberId = member.getId();
 
@@ -159,11 +156,11 @@ class GroupMembershipRepositoryTest extends SpringBootTestSupporter {
     @DisplayName("[성공] Group ID와 Member ID로 GroupMembership 엔티티 조회")
     void findByGroupIdAndMemberId() {
         //Given
-        Member member = Member.builder()
-                              .username("testUsername")
-                              .password("testPassword")
-                              .nickname("testNickname")
-                              .build();
+        Member member = MemberFactory.createUser(
+                "testUsername",
+                "testPassword",
+                "testNickname"
+        );
         em.persist(member);
         Long memberId = member.getId();
 
@@ -204,11 +201,11 @@ class GroupMembershipRepositoryTest extends SpringBootTestSupporter {
     @DisplayName("[실패] Member ID와 존재하지 않는 Group ID로 GroupMembership 엔티티 조회")
     void findByGroupIdAndMemberId_unknownGroupId() {
         //Given
-        Member member = Member.builder()
-                              .username("testUsername")
-                              .password("testPassword")
-                              .nickname("testNickname")
-                              .build();
+        Member member = MemberFactory.createUser(
+                "testUsername",
+                "testPassword",
+                "testNickname"
+        );
         em.persist(member);
         Long memberId       = member.getId();
         Long unknownGroupId = 1234567890L;
@@ -268,11 +265,11 @@ class GroupMembershipRepositoryTest extends SpringBootTestSupporter {
     @DisplayName("[성공] Group ID와 Member ID, Disabled = false로 GroupMembership 엔티티 조회")
     void findByGroupIdAndMemberIdAndDisabled() {
         //Given
-        Member member = Member.builder()
-                              .username("testUsername")
-                              .password("testPassword")
-                              .nickname("testNickname")
-                              .build();
+        Member member = MemberFactory.createUser(
+                "testUsername",
+                "testPassword",
+                "testNickname"
+        );
         em.persist(member);
         Long memberId = member.getId();
 
@@ -315,11 +312,11 @@ class GroupMembershipRepositoryTest extends SpringBootTestSupporter {
     @DisplayName("[실패] Group ID와 Member ID, Disabled = true로 GroupMembership 엔티티 조회")
     void findByGroupIdAndMemberIdAndDisabled_disabled() {
         //Given
-        Member member = Member.builder()
-                              .username("testUsername")
-                              .password("testPassword")
-                              .nickname("testNickname")
-                              .build();
+        Member member = MemberFactory.createUser(
+                "testUsername",
+                "testPassword",
+                "testNickname"
+        );
         em.persist(member);
         Long memberId = member.getId();
 
@@ -358,11 +355,11 @@ class GroupMembershipRepositoryTest extends SpringBootTestSupporter {
     @DisplayName("[실패] Member ID와 존재하지 않는 Group ID, Disabled = false로 GroupMembership 엔티티 조회")
     void findByGroupIdAndMemberIdAndDisabled_unknownGroupId() {
         //Given
-        Member member = Member.builder()
-                              .username("testUsername")
-                              .password("testPassword")
-                              .nickname("testNickname")
-                              .build();
+        Member member = MemberFactory.createUser(
+                "testUsername",
+                "testPassword",
+                "testNickname"
+        );
         em.persist(member);
         Long memberId       = member.getId();
         Long unknownGroupId = 1234567890L;
@@ -434,11 +431,16 @@ class GroupMembershipRepositoryTest extends SpringBootTestSupporter {
         Group                 group            = null;
 
         for (int i = 0; i < size; i++) {
-            Member member = Member.builder()
-                                  .username("testUsername%d".formatted(i))
-                                  .password("testPassword%d".formatted(i))
-                                  .nickname("testNickname%d".formatted(i))
-                                  .build();
+            Member member = MemberFactory.createUser( 
+                                  "testUsername%d".formatted(i),
+                                  "testPassword%d".formatted(i),
+                                  "testNickname%d".formatted(i)
+            );
+                    MemberFactory.createUser( 
+                                  "testUsername%d".formatted(i),
+                                  "testPassword%d".formatted(i),
+                                  "testNickname%d".formatted(i)
+            );
             em.persist(member);
 
             if (j % 5 == 0) {
@@ -498,11 +500,11 @@ class GroupMembershipRepositoryTest extends SpringBootTestSupporter {
         Group                 group            = null;
 
         for (int i = 0; i < size; i++) {
-            Member member = Member.builder()
-                                  .username("testUsername%d".formatted(i))
-                                  .password("testPassword%d".formatted(i))
-                                  .nickname("testNickname%d".formatted(i))
-                                  .build();
+            Member member = MemberFactory.createUser( 
+                                  "testUsername%d".formatted(i),
+                                  "testPassword%d".formatted(i),
+                                  "testNickname%d".formatted(i)
+            );
             em.persist(member);
 
             if (j % 5 == 0) {
@@ -563,11 +565,11 @@ class GroupMembershipRepositoryTest extends SpringBootTestSupporter {
         Group group = null;
 
         for (int i = 0; i < size; i++) {
-            Member member = Member.builder()
-                                  .username("testUsername%d".formatted(i))
-                                  .password("testPassword%d".formatted(i))
-                                  .nickname("testNickname%d".formatted(i))
-                                  .build();
+            Member member = MemberFactory.createUser( 
+                                  "testUsername%d".formatted(i),
+                                  "testPassword%d".formatted(i),
+                                  "testNickname%d".formatted(i)
+            );
             em.persist(member);
 
             if (j % 5 == 0) {
@@ -614,11 +616,11 @@ class GroupMembershipRepositoryTest extends SpringBootTestSupporter {
         Group                 group            = null;
 
         for (int i = 0; i < size; i++) {
-            Member member = Member.builder()
-                                  .username("testUsername%d".formatted(i))
-                                  .password("testPassword%d".formatted(i))
-                                  .nickname("testNickname%d".formatted(i))
-                                  .build();
+            Member member = MemberFactory.createUser( 
+                                  "testUsername%d".formatted(i),
+                                  "testPassword%d".formatted(i),
+                                  "testNickname%d".formatted(i)
+            );
             em.persist(member);
 
             if (j % 5 == 0) {
@@ -678,11 +680,11 @@ class GroupMembershipRepositoryTest extends SpringBootTestSupporter {
         Group                 group            = null;
 
         for (int i = 0; i < size; i++) {
-            Member member = Member.builder()
-                                  .username("testUsername%d".formatted(i))
-                                  .password("testPassword%d".formatted(i))
-                                  .nickname("testNickname%d".formatted(i))
-                                  .build();
+            Member member = MemberFactory.createUser( 
+                                  "testUsername%d".formatted(i),
+                                  "testPassword%d".formatted(i),
+                                  "testNickname%d".formatted(i)
+            );
             em.persist(member);
 
             if (j % 5 == 0) {
@@ -743,11 +745,11 @@ class GroupMembershipRepositoryTest extends SpringBootTestSupporter {
         Group group = null;
 
         for (int i = 0; i < size; i++) {
-            Member member = Member.builder()
-                                  .username("testUsername%d".formatted(i))
-                                  .password("testPassword%d".formatted(i))
-                                  .nickname("testNickname%d".formatted(i))
-                                  .build();
+            Member member = MemberFactory.createUser( 
+                                  "testUsername%d".formatted(i),
+                                  "testPassword%d".formatted(i),
+                                  "testNickname%d".formatted(i)
+            );
             em.persist(member);
 
             if (j % 5 == 0) {
@@ -794,11 +796,11 @@ class GroupMembershipRepositoryTest extends SpringBootTestSupporter {
         Group                 group            = null;
 
         for (int i = 0; i < size; i++) {
-            Member member = Member.builder()
-                                  .username("testUsername%d".formatted(i))
-                                  .password("testPassword%d".formatted(i))
-                                  .nickname("testNickname%d".formatted(i))
-                                  .build();
+            Member member = MemberFactory.createUser( 
+                                  "testUsername%d".formatted(i),
+                                  "testPassword%d".formatted(i),
+                                  "testNickname%d".formatted(i)
+            );
             em.persist(member);
 
             if (j % 5 == 0) {
@@ -858,11 +860,11 @@ class GroupMembershipRepositoryTest extends SpringBootTestSupporter {
         Group                 group            = null;
 
         for (int i = 0; i < size; i++) {
-            Member member = Member.builder()
-                                  .username("testUsername%d".formatted(i))
-                                  .password("testPassword%d".formatted(i))
-                                  .nickname("testNickname%d".formatted(i))
-                                  .build();
+            Member member = MemberFactory.createUser( 
+                                  "testUsername%d".formatted(i),
+                                  "testPassword%d".formatted(i),
+                                  "testNickname%d".formatted(i)
+            );
             em.persist(member);
 
             if (j % 5 == 0) {
@@ -922,11 +924,11 @@ class GroupMembershipRepositoryTest extends SpringBootTestSupporter {
         Group group = null;
 
         for (int i = 0; i < size; i++) {
-            Member member = Member.builder()
-                                  .username("testUsername%d".formatted(i))
-                                  .password("testPassword%d".formatted(i))
-                                  .nickname("testNickname%d".formatted(i))
-                                  .build();
+            Member member = MemberFactory.createUser( 
+                                  "testUsername%d".formatted(i),
+                                  "testPassword%d".formatted(i),
+                                  "testNickname%d".formatted(i)
+            );
             em.persist(member);
 
             if (j % 5 == 0) {
@@ -971,11 +973,11 @@ class GroupMembershipRepositoryTest extends SpringBootTestSupporter {
         Group                 group            = null;
 
         for (int i = 0; i < size; i++) {
-            Member member = Member.builder()
-                                  .username("testUsername%d".formatted(i))
-                                  .password("testPassword%d".formatted(i))
-                                  .nickname("testNickname%d".formatted(i))
-                                  .build();
+            Member member = MemberFactory.createUser( 
+                                  "testUsername%d".formatted(i),
+                                  "testPassword%d".formatted(i),
+                                  "testNickname%d".formatted(i)
+            );
             em.persist(member);
 
             if (j % 5 == 0) {
@@ -1038,11 +1040,11 @@ class GroupMembershipRepositoryTest extends SpringBootTestSupporter {
         Group                 group            = null;
 
         for (int i = 0; i < size; i++) {
-            Member member = Member.builder()
-                                  .username("testUsername%d".formatted(i))
-                                  .password("testPassword%d".formatted(i))
-                                  .nickname("testNickname%d".formatted(i))
-                                  .build();
+            Member member = MemberFactory.createUser( 
+                                  "testUsername%d".formatted(i),
+                                  "testPassword%d".formatted(i),
+                                  "testNickname%d".formatted(i)
+            );
             em.persist(member);
 
             if (j % 5 == 0) {
@@ -1107,11 +1109,11 @@ class GroupMembershipRepositoryTest extends SpringBootTestSupporter {
         Group group = null;
 
         for (int i = 0; i < size; i++) {
-            Member member = Member.builder()
-                                  .username("testUsername%d".formatted(i))
-                                  .password("testPassword%d".formatted(i))
-                                  .nickname("testNickname%d".formatted(i))
-                                  .build();
+            Member member = MemberFactory.createUser( 
+                                  "testUsername%d".formatted(i),
+                                  "testPassword%d".formatted(i),
+                                  "testNickname%d".formatted(i)
+            );
             em.persist(member);
 
             if (j % 5 == 0) {
@@ -1160,11 +1162,11 @@ class GroupMembershipRepositoryTest extends SpringBootTestSupporter {
         Group                 group            = null;
 
         for (int i = 0; i < size; i++) {
-            Member member = Member.builder()
-                                  .username("testUsername%d".formatted(i))
-                                  .password("testPassword%d".formatted(i))
-                                  .nickname("testNickname%d".formatted(i))
-                                  .build();
+            Member member = MemberFactory.createUser( 
+                                  "testUsername%d".formatted(i),
+                                  "testPassword%d".formatted(i),
+                                  "testNickname%d".formatted(i)
+            );
             em.persist(member);
 
             if (j % 5 == 0) {
@@ -1227,11 +1229,11 @@ class GroupMembershipRepositoryTest extends SpringBootTestSupporter {
         Group                 group            = null;
 
         for (int i = 0; i < size; i++) {
-            Member member = Member.builder()
-                                  .username("testUsername%d".formatted(i))
-                                  .password("testPassword%d".formatted(i))
-                                  .nickname("testNickname%d".formatted(i))
-                                  .build();
+            Member member = MemberFactory.createUser( 
+                                  "testUsername%d".formatted(i),
+                                  "testPassword%d".formatted(i),
+                                  "testNickname%d".formatted(i)
+            );
             em.persist(member);
 
             if (j % 5 == 0) {
@@ -1296,11 +1298,11 @@ class GroupMembershipRepositoryTest extends SpringBootTestSupporter {
         Group group = null;
 
         for (int i = 0; i < size; i++) {
-            Member member = Member.builder()
-                                  .username("testUsername%d".formatted(i))
-                                  .password("testPassword%d".formatted(i))
-                                  .nickname("testNickname%d".formatted(i))
-                                  .build();
+            Member member = MemberFactory.createUser( 
+                                  "testUsername%d".formatted(i),
+                                  "testPassword%d".formatted(i),
+                                  "testNickname%d".formatted(i)
+            );
             em.persist(member);
 
             if (j % 5 == 0) {
@@ -1343,11 +1345,11 @@ class GroupMembershipRepositoryTest extends SpringBootTestSupporter {
     @DisplayName("[성공] Group ID와 Member ID로 GroupMembership 엔티티 존재 여부 확인")
     void existsByGroupIdAndMemberId() {
         //Given
-        Member member = Member.builder()
-                              .username("testUsername")
-                              .password("testPassword")
-                              .nickname("testNickname")
-                              .build();
+        Member member = MemberFactory.createUser(
+                "testUsername",
+                "testPassword",
+                "testNickname"
+        );
         em.persist(member);
         Long memberId = member.getId();
 
@@ -1383,11 +1385,11 @@ class GroupMembershipRepositoryTest extends SpringBootTestSupporter {
     @DisplayName("[성공] Group ID와 Member ID, Disabled로 GroupMembership 엔티티 존재 여부 확인")
     void existsByGroupIdAndMemberIdAndDisabled() {
         //Given
-        Member member = Member.builder()
-                              .username("testUsername")
-                              .password("testPassword")
-                              .nickname("testNickname")
-                              .build();
+        Member member = MemberFactory.createUser(
+                "testUsername",
+                "testPassword",
+                "testNickname"
+        );
         em.persist(member);
         Long memberId = member.getId();
 
@@ -1429,11 +1431,11 @@ class GroupMembershipRepositoryTest extends SpringBootTestSupporter {
         Group                 group            = null;
 
         for (int i = 0; i < size; i++) {
-            Member member = Member.builder()
-                                  .username("testUsername%d".formatted(i))
-                                  .password("testPassword%d".formatted(i))
-                                  .nickname("testNickname%d".formatted(i))
-                                  .build();
+            Member member = MemberFactory.createUser( 
+                                  "testUsername%d".formatted(i),
+                                  "testPassword%d".formatted(i),
+                                  "testNickname%d".formatted(i)
+            );
             em.persist(member);
 
             if (j % 5 == 0) {
@@ -1487,11 +1489,11 @@ class GroupMembershipRepositoryTest extends SpringBootTestSupporter {
         Group                 group            = null;
 
         for (int i = 0; i < size; i++) {
-            Member member = Member.builder()
-                                  .username("testUsername%d".formatted(i))
-                                  .password("testPassword%d".formatted(i))
-                                  .nickname("testNickname%d".formatted(i))
-                                  .build();
+            Member member = MemberFactory.createUser( 
+                                  "testUsername%d".formatted(i),
+                                  "testPassword%d".formatted(i),
+                                  "testNickname%d".formatted(i)
+            );
             em.persist(member);
 
             if (j % 5 == 0) {
@@ -1550,11 +1552,11 @@ class GroupMembershipRepositoryTest extends SpringBootTestSupporter {
         GroupMembership       groupMembership  = null;
 
         for (int i = 0; i < size; i++) {
-            Member member = Member.builder()
-                                  .username("testUsername%d".formatted(i))
-                                  .password("testPassword%d".formatted(i))
-                                  .nickname("testNickname%d".formatted(i))
-                                  .build();
+            Member member = MemberFactory.createUser( 
+                                  "testUsername%d".formatted(i),
+                                  "testPassword%d".formatted(i),
+                                  "testNickname%d".formatted(i)
+            );
             em.persist(member);
 
             if (j % 5 == 0) {
@@ -1617,11 +1619,11 @@ class GroupMembershipRepositoryTest extends SpringBootTestSupporter {
         GroupMembership       groupMembership  = null;
 
         for (int i = 0; i < size; i++) {
-            Member member = Member.builder()
-                                  .username("testUsername%d".formatted(i))
-                                  .password("testPassword%d".formatted(i))
-                                  .nickname("testNickname%d".formatted(i))
-                                  .build();
+            Member member = MemberFactory.createUser( 
+                                  "testUsername%d".formatted(i),
+                                  "testPassword%d".formatted(i),
+                                  "testNickname%d".formatted(i)
+            );
             em.persist(member);
 
             if (j % 5 == 0) {
@@ -1686,11 +1688,11 @@ class GroupMembershipRepositoryTest extends SpringBootTestSupporter {
         GroupMembership       groupMembership  = null;
 
         for (int i = 0; i < size; i++) {
-            Member member = Member.builder()
-                                  .username("testUsername%d".formatted(i))
-                                  .password("testPassword%d".formatted(i))
-                                  .nickname("testNickname%d".formatted(i))
-                                  .build();
+            Member member = MemberFactory.createUser( 
+                                  "testUsername%d".formatted(i),
+                                  "testPassword%d".formatted(i),
+                                  "testNickname%d".formatted(i)
+            );
             em.persist(member);
 
             if (j % 5 == 0) {
@@ -1753,11 +1755,11 @@ class GroupMembershipRepositoryTest extends SpringBootTestSupporter {
         GroupMembership       groupMembership  = null;
 
         for (int i = 0; i < size; i++) {
-            Member member = Member.builder()
-                                  .username("testUsername%d".formatted(i))
-                                  .password("testPassword%d".formatted(i))
-                                  .nickname("testNickname%d".formatted(i))
-                                  .build();
+            Member member = MemberFactory.createUser( 
+                                  "testUsername%d".formatted(i),
+                                  "testPassword%d".formatted(i),
+                                  "testNickname%d".formatted(i)
+            );
             em.persist(member);
 
             if (j % 5 == 0) {
@@ -1822,11 +1824,11 @@ class GroupMembershipRepositoryTest extends SpringBootTestSupporter {
         Group                 group            = null;
 
         for (int i = 0; i < size; i++) {
-            Member member = Member.builder()
-                                  .username("testUsername%d".formatted(i))
-                                  .password("testPassword%d".formatted(i))
-                                  .nickname("testNickname%d".formatted(i))
-                                  .build();
+            Member member = MemberFactory.createUser( 
+                                  "testUsername%d".formatted(i),
+                                  "testPassword%d".formatted(i),
+                                  "testNickname%d".formatted(i)
+            );
             em.persist(member);
 
             if (j % 5 == 0) {

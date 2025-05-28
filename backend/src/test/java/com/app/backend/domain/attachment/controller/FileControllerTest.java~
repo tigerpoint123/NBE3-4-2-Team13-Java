@@ -120,11 +120,12 @@ public class FileControllerTest {
     @DisplayName("Fail : 인증된 유저가 아닐경우")
     void downloadFile_Fail2() throws Exception {
         // given
-        Member member = MemberFactory.createUser(
-                "test",
-                "test_password",
-                "test_name"
-        ) ;
+        Member member = Member.builder()
+                .id(1L)
+                .username("test")
+                .nickname("test_name")
+                .role("ROLE_USER")
+                .build();
 
         MemberDetails mockUser = new MemberDetails(member);
 

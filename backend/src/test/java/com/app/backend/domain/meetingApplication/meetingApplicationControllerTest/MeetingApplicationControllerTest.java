@@ -1,27 +1,5 @@
 package com.app.backend.domain.meetingApplication.meetingApplicationControllerTest;
 
-import static org.mockito.BDDMockito.*;
-
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
 import com.app.backend.domain.category.entity.Category;
 import com.app.backend.domain.category.repository.CategoryRepository;
 import com.app.backend.domain.group.entity.Group;
@@ -39,8 +17,29 @@ import com.app.backend.domain.meetingApplication.service.MeetingApplicationServi
 import com.app.backend.domain.member.entity.Member;
 import com.app.backend.domain.member.entity.MemberDetails;
 import com.app.backend.domain.member.repository.MemberRepository;
+import com.app.backend.domain.member.util.MemberFactory;
 import com.app.backend.global.annotation.CustomWithMockUser;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import static org.mockito.BDDMockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -99,12 +98,11 @@ public class MeetingApplicationControllerTest {
 			.category(category)
 			.build());
 
-		member = Member.builder()
-			.username("testUser")
-			.nickname("testNickname")
-			.role("USER")
-			.disabled(false)
-			.build();
+		member = MemberFactory.createUser(
+				"testUser",
+				"testPassword",
+				"testNickname"
+		);
 
 		groupRepository.save(group);
 		memberRepository.save(member);
@@ -172,12 +170,11 @@ public class MeetingApplicationControllerTest {
 			.build());
 
 		// 새로운 회원을 만들고 저장
-		Member newMember = Member.builder()
-			.username("newUser")
-			.nickname("newNickname")
-			.role("USER")
-			.disabled(false)
-			.build();
+		Member newMember = MemberFactory.createUser(
+				"newUser",
+				"newPassword",
+				"newNickname"
+		);
 		memberRepository.save(newMember);
 
 		MeetingApplicationReqBody request = new MeetingApplicationReqBody("Test Application");
@@ -206,12 +203,11 @@ public class MeetingApplicationControllerTest {
 	@CustomWithMockUser
 	void t3() throws Exception {
 		// Given
-		Member leader = memberRepository.save(Member.builder()
-			.username("testUser")
-			.nickname("testNickname")
-			.role("USER")
-			.disabled(false)
-			.build());
+		Member leader = memberRepository.save(MemberFactory.createUser(
+				"testUser",
+				"testPassword",
+				"testNickname"
+		));
 
 		MemberDetails mockUser = new MemberDetails(leader);
 
@@ -240,12 +236,11 @@ public class MeetingApplicationControllerTest {
 	@CustomWithMockUser
 	void t4() throws Exception {
 		// Given
-		Member leader = memberRepository.save(Member.builder()
-			.username("testUser")
-			.nickname("testNickname")
-			.role("USER")
-			.disabled(false)
-			.build());
+		Member leader = memberRepository.save(MemberFactory.createUser(
+				"testUser",
+				"testPassword",
+				"testNickname"
+		));
 
 		MemberDetails mockUser = new MemberDetails(leader);
 

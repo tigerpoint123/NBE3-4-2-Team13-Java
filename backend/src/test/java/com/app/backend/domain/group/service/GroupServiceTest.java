@@ -40,11 +40,11 @@ class GroupServiceTest extends SpringBootTestSupporter {
     @DisplayName("[성공] 모임 저장")
     void createGroup() {
         //Given
-        Member member = Member.builder()
-                              .username("testUsername")
-                              .password("testPassword")
-                              .nickname("testNickname")
-                              .build();
+        Member member = MemberFactory.createUser(
+                "testUsername",
+                "testPassword",
+                "testNickname"
+        );
         em.persist(member);
         Long memberId = member.getId();
 
@@ -702,11 +702,7 @@ class GroupServiceTest extends SpringBootTestSupporter {
     @DisplayName("[성공] ID로 모임 조회 후 값 수정")
     void modifyGroup() {
         //Given
-        Member member = Member.builder()
-                              .username("testUsername")
-                              .password("testPassword")
-                              .nickname("testNickname")
-                              .build();
+        Member member = MemberFactory.createUser("testUsername", "testPassword", "testNickname");
         em.persist(member);
         Long memberId = member.getId();
 
@@ -805,11 +801,11 @@ class GroupServiceTest extends SpringBootTestSupporter {
     @DisplayName("[성공] ID로 모임 삭제(Soft Delete)")
     void deleteGroup() {
         //Given
-        Member member = Member.builder()
-                              .username("testUsername")
-                              .password("testPassword")
-                              .nickname("testNickname")
-                              .build();
+        Member member = MemberFactory.createUser(
+                "testUsername",
+                "testPassword",
+                "testNickname"
+        );
         em.persist(member);
         Long memberId = member.getId();
 

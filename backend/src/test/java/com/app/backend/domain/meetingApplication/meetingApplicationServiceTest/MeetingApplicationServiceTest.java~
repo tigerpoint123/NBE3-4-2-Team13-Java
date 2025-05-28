@@ -1,8 +1,23 @@
 package com.app.backend.domain.meetingApplication.meetingApplicationServiceTest;
 
+import static org.assertj.core.api.AssertionsForClassTypes.*;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
 import com.app.backend.domain.category.entity.Category;
 import com.app.backend.domain.category.repository.CategoryRepository;
-import com.app.backend.domain.group.entity.*;
+import com.app.backend.domain.group.entity.Group;
+import com.app.backend.domain.group.entity.GroupMembership;
+import com.app.backend.domain.group.entity.GroupRole;
+import com.app.backend.domain.group.entity.MembershipStatus;
+import com.app.backend.domain.group.entity.RecruitStatus;
 import com.app.backend.domain.group.repository.GroupMembershipRepository;
 import com.app.backend.domain.group.repository.GroupRepository;
 import com.app.backend.domain.meetingApplication.dto.MeetingApplicationReqBody;
@@ -13,17 +28,6 @@ import com.app.backend.domain.meetingApplication.repository.MeetingApplicationRe
 import com.app.backend.domain.meetingApplication.service.MeetingApplicationService;
 import com.app.backend.domain.member.entity.Member;
 import com.app.backend.domain.member.repository.MemberRepository;
-import com.app.backend.domain.member.util.MemberFactory;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-
-import java.util.List;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 @SpringBootTest
 public class MeetingApplicationServiceTest {
@@ -74,11 +78,12 @@ public class MeetingApplicationServiceTest {
 			.category(category)
 			.build());
 
-		member = memberRepository.save(MemberFactory.createUser(
-				"testUser",
-				"password",
-				"nickname"
-		));
+		member = memberRepository.save(Member.builder()
+			.username("testUser")
+			.nickname("nickname")
+			.role("USER")
+			.disabled(false)
+			.build());
 	}
 
 	@Test
@@ -95,17 +100,19 @@ public class MeetingApplicationServiceTest {
 			.category(category)
 			.build());
 
-		Member member1 = memberRepository.save(MemberFactory.createUser(
-				"testUser1",
-				"password1",
-				"nickname1"
-		));
+		Member member1 = memberRepository.save(Member.builder()
+			.username("testUser1")
+			.nickname("nickname1")
+			.role("USER")
+			.disabled(false)
+			.build());
 
-		Member member2 = memberRepository.save(MemberFactory.createUser(
-				"testUser2",
-				"password2",
-				"nickname2"
-		));
+		Member member2 = memberRepository.save(Member.builder()
+			.username("testUser2")
+			.nickname("nickname2")
+			.role("USER")
+			.disabled(false)
+			.build());
 
 		groupMembershipRepository.save(GroupMembership.builder()
 			.group(limitedGroup)

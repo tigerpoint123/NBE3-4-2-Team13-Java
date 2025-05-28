@@ -1,5 +1,6 @@
 package com.app.backend.domain.chat.util;
 
+import com.app.backend.domain.member.util.MemberFactory;
 import org.springframework.stereotype.Component;
 
 import com.app.backend.domain.category.entity.Category;
@@ -30,11 +31,7 @@ public class TestDataUtil {
 	private final CategoryRepository categoryRepository;
 
 	public Member createAndSaveMember(String username, String nickname) {
-		Member member = Member.builder()
-			.username(username)
-			.nickname(nickname)
-			.role("USER")
-			.build();
+		Member member = MemberFactory.createUser(username, "password", nickname);
 		return memberRepository.save(member);
 	}
 

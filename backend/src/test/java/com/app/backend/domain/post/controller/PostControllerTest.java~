@@ -11,7 +11,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.app.backend.domain.member.entity.Member;
 import com.app.backend.domain.member.entity.MemberDetails;
-import com.app.backend.domain.member.util.MemberFactory;
 import com.app.backend.domain.post.dto.req.PostReqDto;
 import com.app.backend.domain.post.dto.resp.PostRespDto;
 import com.app.backend.domain.post.entity.Post;
@@ -59,9 +58,12 @@ public class PostControllerTest {
     @DisplayName("Success : 게시글 단건 조회")
     void getPost_Success() throws Exception {
         // Given
-        Member member = MemberFactory.createUser(
-                "test", "test_password", "test_name"
-        );
+        Member member = Member.builder()
+                .id(1L)
+                .username("test")
+                .nickname("test_name")
+                .role("ROLE_USER")
+                .build();
 
         Post post = Post.builder()
                 .id(1L)
@@ -101,9 +103,12 @@ public class PostControllerTest {
     @DisplayName("Fail : 게시글 단건 조회")
     void getPost_Fail() throws Exception {
         // Given
-        Member member = MemberFactory.createUser(
-                "test", "test_password", "test_name"
-        );
+        Member member = Member.builder()
+                .id(1L)
+                .username("test")
+                .nickname("test_name")
+                .role("ROLE_USER")
+                .build();
 
         MemberDetails mockUser = new MemberDetails(member);
 
@@ -124,9 +129,12 @@ public class PostControllerTest {
     @DisplayName("Success : 게시글 목록 조회")
     void getPosts_Success() throws Exception {
         // Given
-        Member member = MemberFactory.createUser(
-                "test", "test_password", "test_name"
-        );
+        Member member = Member.builder()
+                .id(1L)
+                .username("test")
+                .nickname("test_name")
+                .role("ROLE_USER")
+                .build();
 
         Post post = Post.builder()
                 .id(1L)
@@ -166,9 +174,12 @@ public class PostControllerTest {
     @DisplayName("Success : 게시글 저장")
     void savePost_Success() throws Exception {
         // Given
-        Member member = MemberFactory.createUser(
-                "test", "test_password", "test_name"
-        );
+        Member member = Member.builder()
+                .id(1L)
+                .username("test")
+                .nickname("test_name")
+                .role("ROLE_USER")
+                .build();
 
         MemberDetails mockUser = new MemberDetails(member);
 
@@ -207,9 +218,12 @@ public class PostControllerTest {
     @DisplayName("Success : 게시글 수정")
     void updatePost_Success() throws Exception {
         // Given
-        Member member = MemberFactory.createUser(
-                "test", "test_password", "test_name"
-        );
+        Member member = Member.builder()
+                .id(1L)
+                .username("test")
+                .nickname("test_name")
+                .role("ROLE_USER")
+                .build();
 
         MemberDetails mockUser = new MemberDetails(member);
 
@@ -249,9 +263,12 @@ public class PostControllerTest {
     @DisplayName("Success : 게시글 삭제")
     void deletePost_Success() throws Exception {
         // Given
-        Member member = MemberFactory.createUser(
-                "test", "test_password", "test_name"
-        );
+        Member member = Member.builder()
+                .id(1L)
+                .username("test")
+                .nickname("test_name")
+                .role("ROLE_USER")
+                .build();
 
         MemberDetails mockUser = new MemberDetails(member);
 
@@ -269,9 +286,12 @@ public class PostControllerTest {
     @DisplayName("Success : Member 게시글 목록 조회")
     void getUserByPosts_Success() throws Exception {
         // Given
-        Member member = MemberFactory.createUser(
-                "test", "test_password", "test_name"
-        );
+        Member member = Member.builder()
+                .id(1L)
+                .username("test")
+                .nickname("test_name")
+                .role("ROLE_USER")
+                .build();
 
         Post post = Post.builder()
                 .id(1L)

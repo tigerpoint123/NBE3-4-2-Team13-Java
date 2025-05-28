@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import com.app.backend.domain.member.util.MemberFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -59,13 +60,11 @@ public class CommentControllerTest {
 	void setUp() {
 
 		// 테스트용
-		testMember = Member.builder()
-			.username("testUser")
-			.password("password")
-			.nickname("테스터")
-			.role("USER")
-			.disabled(false)
-			.build();
+		testMember = MemberFactory.createUser(
+			"testUser",
+			"password",
+			"테스터"
+		);
 
 		memberRepository.save(testMember);
 		memberDetails = new MemberDetails(testMember);
@@ -186,12 +185,11 @@ public class CommentControllerTest {
 		testComment = commentRepository.save(testComment);
 
 		// 다른 사용자 생성
-		Member Member2 = Member.builder()
-			.username("other")
-			.password("password")
-			.nickname("다른사용자")
-			.role("USER")
-			.build();
+		Member Member2 = MemberFactory.createUser(
+			"other",
+			"password",
+			"다른사용자"
+		);
 
 		memberRepository.save(Member2);
 		MemberDetails otherMemberDetails = new MemberDetails(Member2);
@@ -305,12 +303,11 @@ public class CommentControllerTest {
 			.build();
 		testComment = commentRepository.save(testComment);
 
-		Member Member2 = Member.builder()
-			.username("other")
-			.password("password")
-			.nickname("다른사용자")
-			.role("USER")
-			.build();
+		Member Member2 = MemberFactory.createUser(
+				"other",
+				"password",
+				"다른사용자"
+		);
 		memberRepository.save(Member2);
 		MemberDetails otherMemberDetails = new MemberDetails(Member2);
 

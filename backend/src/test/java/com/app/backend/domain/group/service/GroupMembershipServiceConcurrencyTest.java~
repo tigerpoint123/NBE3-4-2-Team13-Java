@@ -90,9 +90,11 @@ class GroupMembershipServiceConcurrencyTest extends SpringBootTestSupporter {
                     em.persist(groupMembership);
                     leaderRefs.get(i - 1).set(member);
                 }
-                Member member = MemberFactory.createUser("testUsername",
-                                      "testPassword",
-                                      "testNickname");
+                Member member = Member.builder()
+                                      .username("testUsername")
+                                      .password("testPassword")
+                                      .nickname("testNickname")
+                                      .build();
                 em.persist(member);
                 memberRef.set(member);
                 GroupMembership groupMembership = GroupMembership.builder()
@@ -213,10 +215,11 @@ class GroupMembershipServiceConcurrencyTest extends SpringBootTestSupporter {
                 groupRef.set(group);
 
                 for (int i = 1; i <= leaderRefs.size(); i++) {
-                    Member member = MemberFactory.createUser(
-                                          "testLeaderUsername%d".formatted(i),
-                                          "testLeaderPassword%d".formatted(i),
-                                          "testLeaderNickname%d".formatted(i));
+                    Member member = Member.builder()
+                                          .username("testLeaderUsername%d".formatted(i))
+                                          .password("testLeaderPassword%d".formatted(i))
+                                          .nickname("testLeaderNickname%d".formatted(i))
+                                          .build();
                     em.persist(member);
                     GroupMembership groupMembership = GroupMembership.builder()
                                                                      .member(member)
@@ -226,10 +229,11 @@ class GroupMembershipServiceConcurrencyTest extends SpringBootTestSupporter {
                     em.persist(groupMembership);
                     leaderRefs.get(i - 1).set(member);
                 }
-                Member member = MemberFactory.createUser(
-                                      "testUsername",
-                                      "testPassword",
-                                      "testNickname");
+                Member member = Member.builder()
+                                      .username("testUsername")
+                                      .password("testPassword")
+                                      .nickname("testNickname")
+                                      .build();
                 em.persist(member);
                 memberRef.set(member);
                 GroupMembership groupMembership = GroupMembership.builder()
@@ -339,10 +343,11 @@ class GroupMembershipServiceConcurrencyTest extends SpringBootTestSupporter {
                 em.persist(group);
                 groupRef.set(group);
 
-                Member leader = MemberFactory.createUser(
-                                        "testLeaderUsername",
-                                        "testLeaderPassword",
-                                        "testLeaderNickname");
+                Member leader = Member.builder()
+                                      .username("testLeaderUsername")
+                                      .password("testLeaderPassword")
+                                      .nickname("testLeaderNickname")
+                                      .build();
                 em.persist(leader);
                 GroupMembership groupLeaderMembership = GroupMembership.builder()
                                                                        .member(leader)
@@ -351,11 +356,11 @@ class GroupMembershipServiceConcurrencyTest extends SpringBootTestSupporter {
                                                                        .build();
                 em.persist(groupLeaderMembership);
 
-                Member member = MemberFactory.createUser(
-                        "testUsername",
-                        "testPassword",
-                        "testNickname"
-                );
+                Member member = Member.builder()
+                                      .username("testUsername")
+                                      .password("testPassword")
+                                      .nickname("testNickname")
+                                      .build();
                 em.persist(member);
                 memberRef.set(member);
                 GroupMembership groupMembership = GroupMembership.builder()

@@ -9,7 +9,6 @@ import com.app.backend.domain.group.repository.GroupRepository;
 import com.app.backend.domain.group.service.GroupLikeService;
 import com.app.backend.domain.member.entity.Member;
 import com.app.backend.domain.member.repository.MemberRepository;
-import com.app.backend.domain.member.util.MemberFactory;
 import com.app.backend.global.annotation.CustomWithMockUser;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
@@ -75,11 +74,12 @@ public class GroupLikeControllerTest {
                 .category(category)
                 .build());
 
-        member = memberRepository.save(MemberFactory.createUser(
-                "testUser",
-                "testPassword",
-                "testNickname"
-                ));
+        member = memberRepository.save(Member.builder()
+                .username("testUser")
+                .nickname("testNickname")
+                .role("USER")
+                .disabled(false)
+                .build());
     }
 
     @Test

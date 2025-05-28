@@ -1,7 +1,5 @@
 package com.app.backend.domain.group.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import com.app.backend.domain.category.entity.Category;
 import com.app.backend.domain.group.dto.request.GroupRequest;
 import com.app.backend.domain.group.entity.Group;
@@ -11,22 +9,9 @@ import com.app.backend.domain.group.entity.RecruitStatus;
 import com.app.backend.domain.group.exception.GroupMembershipException;
 import com.app.backend.domain.group.supporter.SpringBootTestSupporter;
 import com.app.backend.domain.member.entity.Member;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
+import com.app.backend.domain.member.util.MemberFactory;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
@@ -34,6 +19,14 @@ import org.springframework.test.context.jdbc.SqlGroup;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
+
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Tag("concurrency")
 @Slf4j
@@ -90,11 +83,11 @@ class GroupServiceConcurrencyTest extends SpringBootTestSupporter {
                 groupRef.set(group);
 
                 for (int i = 1; i <= memberRefs.size(); i++) {
-                    Member member = Member.builder()
-                                          .username("testUsername%d".formatted(i))
-                                          .password("testPassword%d".formatted(i))
-                                          .nickname("testNickname%d".formatted(i))
-                                          .build();
+                    Member member = MemberFactory.createUser(
+                            "testUsername%d".formatted(i),
+                            "testPassword%d".formatted(i),
+                            "testNickname%d".formatted(i)
+                    );
                     em.persist(member);
                     GroupMembership groupMembership = GroupMembership.builder()
                                                                      .member(member)
@@ -231,11 +224,11 @@ class GroupServiceConcurrencyTest extends SpringBootTestSupporter {
                 groupRef.set(group);
 
                 for (int i = 1; i <= memberRefs.size(); i++) {
-                    Member member = Member.builder()
-                                          .username("testUsername%d".formatted(i))
-                                          .password("testPassword%d".formatted(i))
-                                          .nickname("testNickname%d".formatted(i))
-                                          .build();
+                    Member member = MemberFactory.createUser(
+                            "testUsername%d".formatted(i),
+                            "testPassword%d".formatted(i),
+                            "testNickname%d".formatted(i)
+                    );
                     em.persist(member);
                     GroupMembership groupMembership = GroupMembership.builder()
                                                                      .member(member)

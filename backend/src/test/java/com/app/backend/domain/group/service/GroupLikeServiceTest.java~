@@ -8,7 +8,6 @@ import com.app.backend.domain.group.repository.GroupLikeRepository;
 import com.app.backend.domain.group.repository.GroupRepository;
 import com.app.backend.domain.member.entity.Member;
 import com.app.backend.domain.member.repository.MemberRepository;
-import com.app.backend.domain.member.util.MemberFactory;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -51,7 +50,7 @@ public class GroupLikeServiceTest {
                 .maxRecruitCount(300)
                 .category(category)
                 .build());
-        Member member = memberRepository.save(MemberFactory.createUser("user0", "password", "nickname"));
+        Member member = memberRepository.save(Member.builder().username("user0").build());
 
         Long memberId = member.getId();
         Long groupId = group.getId();
@@ -79,7 +78,7 @@ public class GroupLikeServiceTest {
                 .maxRecruitCount(300)
                 .category(category)
                 .build());
-        Member member = memberRepository.save(MemberFactory.createUser("user0", "password", "nickname"));
+        Member member = memberRepository.save(Member.builder().username("user0").build());
 
         Long memberId = member.getId();
         Long groupId = group.getId();

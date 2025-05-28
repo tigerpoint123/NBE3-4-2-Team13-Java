@@ -5,7 +5,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import com.app.backend.domain.member.util.MemberFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -53,11 +52,13 @@ public class CommentControllerReplyTest {
 	@BeforeEach
 	void setUp() {
 		// 테스트용 멤버 생성
-		testMember = MemberFactory.createUser(
-			"testUser",
-			"password",
-			"테스터"
-		);
+		testMember = Member.builder()
+			.username("testUser")
+			.password("password")
+			.nickname("테스터")
+			.role("USER")
+			.disabled(false)
+			.build();
 		memberRepository.save(testMember);
 		memberDetails = new MemberDetails(testMember);
 
@@ -166,11 +167,12 @@ public class CommentControllerReplyTest {
 	@DisplayName("대댓글 수정 실패 (작성자가 아닌 경우)")
 	void updateReply2() throws Exception {
 
-		Member otherMember = memberRepository.save(MemberFactory.createUser(
-					"other",
-					"password",
-					"다른사용자"
-				));
+		Member otherMember = memberRepository.save(Member.builder()
+			.username("other")
+			.password("password")
+			.nickname("다른사용자")
+			.role("USER")
+			.build());
 
 		CommentCreateRequest request = new CommentCreateRequest("수정된 내용");
 
@@ -231,11 +233,12 @@ public class CommentControllerReplyTest {
 	@DisplayName("대댓글 삭제 실패 (작성자가 아닌 경우)")
 	void deleteReply2() throws Exception {
 
-		Member otherMember = memberRepository.save(MemberFactory.createUser(
-				"other",
-				"password",
-				"다른사용자"
-		));
+		Member otherMember = memberRepository.save(Member.builder()
+			.username("other")
+			.password("password")
+			.nickname("다른사용자")
+			.role("USER")
+			.build());
 
 		mvc.perform(
 				delete("/api/v1/comment/" + testReply.getId() + "/reply")

@@ -13,9 +13,10 @@ import com.app.backend.domain.group.repository.GroupMembershipRepository;
 import com.app.backend.domain.group.repository.GroupRepository;
 import com.app.backend.domain.member.entity.Member;
 import com.app.backend.domain.member.repository.MemberRepository;
-import com.app.backend.domain.member.util.MemberFactory;
 import com.app.backend.domain.post.dto.req.PostReqDto;
 import com.app.backend.domain.post.entity.PostStatus;
+import com.app.backend.domain.post.exception.PostErrorCode;
+import com.app.backend.domain.post.exception.PostException;
 import com.app.backend.domain.post.repository.postAttachment.PostAttachmentRepository;
 import com.app.backend.domain.post.service.post.PostService;
 import jakarta.persistence.EntityManager;
@@ -83,16 +84,8 @@ public class PostAttachmentServiceTest {
     }
 
     private void dataSetting() {
-        Member member1 = memberRepository.save(MemberFactory.createUser(
-                "Test member1",
-                "password1",
-                "Test Nickname 1"
-        ));
-        Member member2 = memberRepository.save(MemberFactory.createUser(
-                "Test member2",
-                "password2",
-                "Test Nickname 2"
-        ));
+        Member member1 = memberRepository.save(Member.builder().username("Test member1").nickname("Test Nickname 1").build());
+        Member member2 = memberRepository.save(Member.builder().username("Test member2").nickname("Test Nickname 2").build());
 
         Group group = groupRepository.save(Group.builder()
                 .name("test")
