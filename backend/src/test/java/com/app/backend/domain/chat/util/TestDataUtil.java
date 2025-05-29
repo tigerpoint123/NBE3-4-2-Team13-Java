@@ -31,7 +31,9 @@ public class TestDataUtil {
 	private final CategoryRepository categoryRepository;
 
 	public Member createAndSaveMember(String username, String nickname) {
-		Member member = MemberFactory.createUser(username, "password", nickname);
+		Member member = MemberFactory.createUser(
+				username, "password", nickname
+		);
 		return memberRepository.save(member);
 	}
 

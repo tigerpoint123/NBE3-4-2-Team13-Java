@@ -21,99 +21,95 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 @SpringBootTest
 @Transactional
 class PostLikeServiceTest {
-	@Autowired
-	private PostService postService;
+    @Autowired
+    private PostService postService;
 
-	@Autowired
-	private PostRepository postRepository;
+    @Autowired
+    private PostRepository postRepository;
 
-	@Autowired
-	private MemberRepository memberRepository;
+    @Autowired
+    private MemberRepository memberRepository;
 
-	private Member testMember;
-	private Post testPost;
+    private Member testMember;
+    private Post testPost;
 
-	@BeforeEach
-	void setUp() {
-		testMember = memberRepository.save(MemberFactory.createUser(
-				"testUser",
-				"password",
-				"테스터"
-		));
+    @BeforeEach
+    void setUp() {
+        testMember = memberRepository.save(MemberFactory.createUser(
+                "testUser", "password", "테스터"
+        ));
 
-		testPost = postRepository.save(Post.builder()
-			.title("테스트 게시글")
-			.content("테스트 내용")
-			.memberId(testMember.getId())
-			.nickName(testMember.getNickname())
-			.postStatus(PostStatus.PUBLIC)
-			.groupId(1L)
-			.build());
-	}
+        testPost = postRepository.save(Post.builder()
+                .title("테스트 게시글")
+                .content("테스트 내용")
+                .memberId(testMember.getId())
+                .nickName(testMember.getNickname())
+                .postStatus(PostStatus.PUBLIC)
+                .groupId(1L)
+                .build());
+    }
 
-	@Test
-	@DisplayName("게시글 좋아요 추가 성공")
-	void createPostLike() {
-		// when
-		postService.PostLike(testPost.getId(), testMember.getId());
+    @Test
+    @DisplayName("게시글 좋아요 추가 성공")
+    void createPostLike() {
+        // when
+        postService.PostLike(testPost.getId(), testMember.getId());
 
-		// then
-		Post foundPost = postRepository.findById(testPost.getId()).get();
-		assertThat(foundPost.getLikeCount()).isEqualTo(1);
-		assertThat(postService.isLiked(testPost.getId(), testMember.getId())).isTrue();
-	}
+        // then
+        Post foundPost = postRepository.findById(testPost.getId()).get();
+        assertThat(foundPost.getLikeCount()).isEqualTo(1);
+        assertThat(postService.isLiked(testPost.getId(), testMember.getId())).isTrue();
+    }
 
-	@Test
-	@DisplayName("삭제된 게시글에 좋아요 시도 시 실패")
-	void createPostLike2() {
-		// given
-		testPost.delete();
-		postRepository.save(testPost);
+    @Test
+    @DisplayName("삭제된 게시글에 좋아요 시도 시 실패")
+    void createPostLike2() {
+        // given
+        testPost.delete();
+        postRepository.save(testPost);
 
-		// when & then
-		assertThatThrownBy(() -> postService.PostLike(testPost.getId(), testMember.getId()))
-			.isInstanceOf(PostException.class)
-			.hasFieldOrPropertyWithValue("domainErrorCode", PostErrorCode.POST_NOT_FOUND);
-	}
+        // when & then
+        assertThatThrownBy(() -> postService.PostLike(testPost.getId(), testMember.getId()))
+                .isInstanceOf(PostException.class)
+                .hasFieldOrPropertyWithValue("domainErrorCode", PostErrorCode.POST_NOT_FOUND);
+    }
 
-	@Test
-	@DisplayName("여러 사용자의 좋아요 정합성 테스트")
-	void createPostLike3() {
-		// given
-		int numberOfUsers = 10;
-		for (int i = 0; i < numberOfUsers; i++) {
-			Member user = MemberFactory.createUser(
-					"testUser" + i,
-					"password",
-					"테스터" + i
-			);
-			Member savedUser = memberRepository.save(user);
+    @Test
+    @DisplayName("여러 사용자의 좋아요 정합성 테스트")
+    void createPostLike3() {
+        // given
+        int numberOfUsers = 10;
+        for (int i = 0; i < numberOfUsers; i++) {
+            Member user = MemberFactory.createUser(
+                    "testUser" + i, "password", "테스터" + i
+            );
+            Member savedUser = memberRepository.save(user);
 
-			// when
-			postService.PostLike(testPost.getId(), savedUser.getId());
-		}
+            // when
+            postService.PostLike(testPost.getId(), savedUser.getId());
+        }
 
-		// then
-		Post foundPost = postRepository.findById(testPost.getId()).get();
-		assertThat(foundPost.getLikeCount()).isEqualTo(numberOfUsers);
-	}
+        // then
+        Post foundPost = postRepository.findById(testPost.getId()).get();
+        assertThat(foundPost.getLikeCount()).isEqualTo(numberOfUsers);
+    }
 
-	@Test
-	@DisplayName("동일 사용자의 연속 좋아요 정합성")
-	void createPostLike4() {
-		// given
-		int toggleCount = 2;
+    @Test
+    @DisplayName("동일 사용자의 연속 좋아요 정합성")
+    void createPostLike4() {
+        // given
+        int toggleCount = 2;
 
-		// when
-		for (int i = 0; i < toggleCount; i++) {
-			postService.PostLike(testPost.getId(), testMember.getId());
-		}
+        // when
+        for (int i = 0; i < toggleCount; i++) {
+            postService.PostLike(testPost.getId(), testMember.getId());
+        }
 
-		// then
-		Post foundPost = postRepository.findById(testPost.getId()).get();
-		assertThat(foundPost.getLikeCount()).isEqualTo(0);
-		assertThat(postService.isLiked(testPost.getId(), testMember.getId())).isFalse();
-	}
+        // then
+        Post foundPost = postRepository.findById(testPost.getId()).get();
+        assertThat(foundPost.getLikeCount()).isEqualTo(0);
+        assertThat(postService.isLiked(testPost.getId(), testMember.getId())).isFalse();
+    }
 
 
 }

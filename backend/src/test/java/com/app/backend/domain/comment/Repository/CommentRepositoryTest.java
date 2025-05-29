@@ -56,9 +56,7 @@ class CommentRepositoryTest {
 
         // 댓글 생성
         Member member = memberRepository.save(MemberFactory.createUser(
-                "testUser",
-                "password",
-                "테스터"
+                "testUser", "password", "테스터"
         ));
 
         Comment comment = commentRepository.save(Comment.builder()

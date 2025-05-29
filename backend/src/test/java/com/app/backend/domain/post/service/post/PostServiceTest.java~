@@ -7,6 +7,7 @@ import com.app.backend.domain.group.repository.GroupMembershipRepository;
 import com.app.backend.domain.group.repository.GroupRepository;
 import com.app.backend.domain.member.entity.Member;
 import com.app.backend.domain.member.repository.MemberRepository;
+import com.app.backend.domain.member.util.MemberFactory;
 import com.app.backend.domain.post.dto.req.PostReqDto;
 import com.app.backend.domain.post.dto.resp.PostRespDto;
 import com.app.backend.domain.post.entity.Post;
@@ -39,7 +40,6 @@ import java.io.File;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
@@ -102,8 +102,16 @@ public class PostServiceTest {
     }
 
     private void dataSetting() {
-        Member member1 = memberRepository.save(Member.builder().username("Test member1").nickname("Test Nickname 1").build());
-        Member member2 = memberRepository.save(Member.builder().username("Test member2").nickname("Test Nickname 2").build());
+        Member member1 = memberRepository.save(MemberFactory.createUser(
+                "testMember1",
+                "testPassword1",
+                "Test Nickname 1"
+        ));
+        Member member2 = memberRepository.save(MemberFactory.createUser(
+                "testMember2",
+                "testPassword2",
+                "Test Nickname 2"
+        ));
 
         Group group = groupRepository.save(Group.builder()
                 .name("test")
@@ -885,7 +893,9 @@ public class PostServiceTest {
         PostReqDto.SavePostDto savePostDto = new PostReqDto.SavePostDto("새로운 게시글", "새로운 내용", PostStatus.PUBLIC, 1L);
 
         Post savedPost = postService.savePost(1L, savePostDto, files);
-        Member savedMember = memberRepository.save(Member.builder().username("test").nickname("test").build());
+        Member savedMember = memberRepository.save(MemberFactory.createUser(
+                "test", "test", "test"
+        ));
 
         // When
         PostRespDto.GetPostDto respDto = postService.getPost(1L, 1L);
@@ -912,7 +922,9 @@ public class PostServiceTest {
         PostReqDto.SavePostDto savePostDto = new PostReqDto.SavePostDto("새로운 게시글", "새로운 내용", PostStatus.PUBLIC, 1L);
 
         Post savedPost = postService.savePost(1L, savePostDto, files);
-        Member savedMember = memberRepository.save(Member.builder().username("test").nickname("test").build());
+        Member savedMember = memberRepository.save(MemberFactory.createUser(
+                "test", "test", "test"
+        ));
 
         // When
         PostRespDto.GetPostDto respDto = postService.getPost(1L, 1L);
@@ -943,7 +955,9 @@ public class PostServiceTest {
         PostReqDto.SavePostDto savePostDto = new PostReqDto.SavePostDto("새로운 게시글", "새로운 내용", PostStatus.PUBLIC, 1L);
 
         Post savedPost = postService.savePost(1L, savePostDto, files);
-        Member savedMember = memberRepository.save(Member.builder().username("test").nickname("test").build());
+        Member savedMember = memberRepository.save(MemberFactory.createUser(
+                "test", "test", "test"
+        ));
 
         // When
         PostRespDto.GetPostDto respDto = postService.getPost(1L, 1L);
@@ -977,7 +991,9 @@ public class PostServiceTest {
         PostReqDto.SavePostDto savePostDto = new PostReqDto.SavePostDto("새로운 게시글", "새로운 내용", PostStatus.PRIVATE, 1L);
 
         Post savedPost = postService.savePost(1L, savePostDto, files);
-        Member savedMember = memberRepository.save(Member.builder().username("test").nickname("test").build());
+        Member savedMember = memberRepository.save(MemberFactory.createUser(
+                "test", "test", "test"
+        ));
 
         // When
         PostRespDto.GetPostDto respDto = postService.getPost(1L, 2L);
@@ -1004,7 +1020,9 @@ public class PostServiceTest {
         PostReqDto.SavePostDto savePostDto = new PostReqDto.SavePostDto("새로운 게시글", "새로운 내용", PostStatus.PRIVATE, 1L);
 
         Post savedPost = postService.savePost(1L, savePostDto, files);
-        Member savedMember = memberRepository.save(Member.builder().username("test").nickname("test").build());
+        Member savedMember = memberRepository.save(MemberFactory.createUser(
+                "test", "test", "test"
+        ));
 
         // Then
         assertThatThrownBy(() -> postService.getPost(1L, 2L))
@@ -1032,7 +1050,9 @@ public class PostServiceTest {
         PostReqDto.SavePostDto savePostDto = new PostReqDto.SavePostDto("새로운 게시글", "새로운 내용", PostStatus.PRIVATE, 1L);
 
         Post savedPost = postService.savePost(1L, savePostDto, files);
-        Member savedMember = memberRepository.save(Member.builder().username("test").nickname("test").build());
+        Member savedMember = memberRepository.save(MemberFactory.createUser(
+                "test", "test", "test"
+        ));
 
         // Then
         assertThatThrownBy(() -> postService.getPost(1L, 2L))
@@ -1060,7 +1080,9 @@ public class PostServiceTest {
         PostReqDto.SavePostDto savePostDto = new PostReqDto.SavePostDto("새로운 게시글", "새로운 내용", PostStatus.PRIVATE, 1L);
 
         Post savedPost = postService.savePost(1L, savePostDto, files);
-        Member savedMember = memberRepository.save(Member.builder().username("test").nickname("test").build());
+        Member savedMember = memberRepository.save(MemberFactory.createUser(
+                "test", "test", "test"
+                ));
 
         // Then
         assertThatThrownBy(() -> postService.getPost(1L, 2L))

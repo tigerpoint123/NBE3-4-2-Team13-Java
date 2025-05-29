@@ -76,10 +76,8 @@ public class GroupLikeControllerTest {
                 .build());
 
         member = memberRepository.save(MemberFactory.createUser(
-                "testUser",
-                "testPassword",
-                "testNickname"
-                ));
+                "testUser", "testPassword", "testNickname"
+        ));
     }
 
     @Test
@@ -92,9 +90,9 @@ public class GroupLikeControllerTest {
         // when
         mvc.perform(post("/api/v1/groups/" + group.getId() + "/like")
                         .contentType(MediaType.APPLICATION_JSON))
-                        .andExpect(status().isOk())
-                        .andExpect(jsonPath("$.isSuccess").value(true))
-                        .andExpect(jsonPath("$.message").value("좋아요 성공"));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.message").value("좋아요 성공"));
     }
 
     @Test
@@ -107,8 +105,8 @@ public class GroupLikeControllerTest {
 
         // when
         mvc.perform(delete("/api/v1/groups/{groupId}/like", group.getId()))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.isSuccess").value(true))
-                    .andExpect(jsonPath("$.message").value("좋아요 취소 성공"));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.message").value("좋아요 취소 성공"));
     }
 }

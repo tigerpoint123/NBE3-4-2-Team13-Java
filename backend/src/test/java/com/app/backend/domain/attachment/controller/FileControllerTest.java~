@@ -47,8 +47,10 @@ public class FileControllerTest {
     void downloadFile_Success() throws Exception {
         // given
         Member member = MemberFactory.createUser(
-                "test", "test_password", "test_name"
-        );
+                "test",
+                "test_password",
+                "test_name"
+        ) ;
 
         MemberDetails mockUser = new MemberDetails(member);
 
@@ -94,8 +96,10 @@ public class FileControllerTest {
     void downloadFile_Fail1() throws Exception {
         // given
         Member member = MemberFactory.createUser(
-                "test", "test_password", "test_name"
-        );
+                "test",
+                "test_password",
+                "test_name"
+        ) ;
 
         MemberDetails mockUser = new MemberDetails(member);
 
@@ -117,8 +121,10 @@ public class FileControllerTest {
     void downloadFile_Fail2() throws Exception {
         // given
         Member member = MemberFactory.createUser(
-                "test", "test_password", "test_name"
-        );
+                "test",
+                "test_password",
+                "test_name"
+        ) ;
 
         MemberDetails mockUser = new MemberDetails(member);
 

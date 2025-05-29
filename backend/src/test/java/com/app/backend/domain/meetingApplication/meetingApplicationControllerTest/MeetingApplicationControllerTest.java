@@ -46,223 +46,215 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class MeetingApplicationControllerTest {
 
-	@Autowired
-	private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-	@Autowired
-	private GroupRepository groupRepository;
+    @Autowired
+    private GroupRepository groupRepository;
 
-	@Autowired
-	private MemberRepository memberRepository;
+    @Autowired
+    private MemberRepository memberRepository;
 
-	@Autowired
-	private GroupMembershipRepository groupMembershipRepository;
+    @Autowired
+    private GroupMembershipRepository groupMembershipRepository;
 
-	@Autowired
-	private MeetingApplicationRepository meetingApplicationRepository;
+    @Autowired
+    private MeetingApplicationRepository meetingApplicationRepository;
 
-	@Autowired
-	private CategoryRepository categoryRepository;
+    @Autowired
+    private CategoryRepository categoryRepository;
 
-	@MockitoBean
-	private MeetingApplicationService meetingApplicationService;
+    @MockitoBean
+    private MeetingApplicationService meetingApplicationService;
 
-	@Autowired
-	MockMvc mvc;
+    @Autowired
+    MockMvc mvc;
 
-	private Group group;
-	private Member member;
-	private Category category;
+    private Group group;
+    private Member member;
+    private Category category;
 
-	@BeforeEach
-	void setup() {
-		// repository 초기화
-		meetingApplicationRepository.deleteAll();
-		groupMembershipRepository.deleteAll();
-		groupRepository.deleteAll();
-		categoryRepository.deleteAll();
-		memberRepository.deleteAll();
+    @BeforeEach
+    void setup() {
+        // repository 초기화
+        meetingApplicationRepository.deleteAll();
+        groupMembershipRepository.deleteAll();
+        groupRepository.deleteAll();
+        categoryRepository.deleteAll();
+        memberRepository.deleteAll();
 
-		category = categoryRepository.save(Category.builder()
-			.name("category")
-			.build());
+        category = categoryRepository.save(Category.builder()
+                .name("category")
+                .build());
 
-		group = groupRepository.save(Group.builder()
-			.name("test group")
-			.province("test province")
-			.city("test city")
-			.town("test town")
-			.description("test description")
-			.recruitStatus(RecruitStatus.RECRUITING)
-			.maxRecruitCount(10)
-			.category(category)
-			.build());
+        group = groupRepository.save(Group.builder()
+                .name("test group")
+                .province("test province")
+                .city("test city")
+                .town("test town")
+                .description("test description")
+                .recruitStatus(RecruitStatus.RECRUITING)
+                .maxRecruitCount(10)
+                .category(category)
+                .build());
 
-		member = MemberFactory.createUser(
-				"testUser",
-				"testPassword",
-				"testNickname"
-		);
+        member = MemberFactory.createUser(
+                "testUser", "testPassword", "testNickname"
+        );
 
-		groupRepository.save(group);
-		memberRepository.save(member);
-	}
+        groupRepository.save(group);
+        memberRepository.save(member);
+    }
 
-	@Test
-	@DisplayName("신청 폼 작성")
-	@CustomWithMockUser
-	void t1() throws Exception {
-		MemberDetails mockUser = new MemberDetails(member);
+    @Test
+    @DisplayName("신청 폼 작성")
+    @CustomWithMockUser
+    void t1() throws Exception {
+        MemberDetails mockUser = new MemberDetails(member);
 
-		MeetingApplicationReqBody request = new MeetingApplicationReqBody("신청합니다.");
+        MeetingApplicationReqBody request = new MeetingApplicationReqBody("신청합니다.");
 
-		MeetingApplication mockMeetingApplication = MeetingApplication.builder()
-			.id(1L)
-			.context("신청합니다.")
-			.group(group)
-			.member(member)
-			.build();
+        MeetingApplication mockMeetingApplication = MeetingApplication.builder()
+                .id(1L)
+                .context("신청합니다.")
+                .group(group)
+                .member(member)
+                .build();
 
-		given(meetingApplicationService.create(group.getId(), request, member.getId()))
-			.willReturn(mockMeetingApplication);
+        given(meetingApplicationService.create(group.getId(), request, member.getId()))
+                .willReturn(mockMeetingApplication);
 
-		// When
-		ResultActions resultActions = mvc.perform(MockMvcRequestBuilders.post("/api/v1/groups/{groupId}", group.getId())
-			.with(user(mockUser))  // MockUser를 사용하여 로그인된 상태 시뮬레이션
-			.contentType(MediaType.APPLICATION_JSON)
-			.content(objectMapper.writeValueAsString(request)) // 요청 본문
-		);
+        // When
+        ResultActions resultActions = mvc.perform(MockMvcRequestBuilders.post("/api/v1/groups/{groupId}", group.getId())
+                .with(user(mockUser))  // MockUser를 사용하여 로그인된 상태 시뮬레이션
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)) // 요청 본문
+        );
 
-		// Then
-		resultActions.andExpect(status().isCreated());
-		resultActions.andExpect(jsonPath("$.code").value(HttpStatus.CREATED.value()));
-		resultActions.andExpect(jsonPath("$.message")
-			.value(group.getId() + "번 모임에 성공적으로 가입 신청을 하셨습니다."));
-		resultActions.andExpect(jsonPath("$.data.context").value("신청합니다."));
-		resultActions.andDo(print());
+        // Then
+        resultActions.andExpect(status().isCreated());
+        resultActions.andExpect(jsonPath("$.code").value(HttpStatus.CREATED.value()));
+        resultActions.andExpect(jsonPath("$.message")
+                .value(group.getId() + "번 모임에 성공적으로 가입 신청을 하셨습니다."));
+        resultActions.andExpect(jsonPath("$.data.context").value("신청합니다."));
+        resultActions.andDo(print());
 
-		verify(meetingApplicationService, times(1)).create(group.getId(), request, member.getId());
+        verify(meetingApplicationService, times(1)).create(group.getId(), request, member.getId());
 
-	}
+    }
 
-	@Test
-	@DisplayName("신청 폼 제출 - 그룹 정원 초과 시 예외 처리")
-	@CustomWithMockUser
-	void t2() throws Exception {
-		// Given: 그룹의 정원을 1명으로 설정
-		Group oneMemberGroup = Group.builder()
-			.name("test group")
-			.province("test province")
-			.city("test city")
-			.town("test town")
-			.description("test description")
-			.recruitStatus(RecruitStatus.RECRUITING)
-			.maxRecruitCount(1)
-			.category(category)
-			.build();
-		groupRepository.save(oneMemberGroup);  // 그룹 저장
+    @Test
+    @DisplayName("신청 폼 제출 - 그룹 정원 초과 시 예외 처리")
+    @CustomWithMockUser
+    void t2() throws Exception {
+        // Given: 그룹의 정원을 1명으로 설정
+        Group oneMemberGroup = Group.builder()
+                .name("test group")
+                .province("test province")
+                .city("test city")
+                .town("test town")
+                .description("test description")
+                .recruitStatus(RecruitStatus.RECRUITING)
+                .maxRecruitCount(1)
+                .category(category)
+                .build();
+        groupRepository.save(oneMemberGroup);  // 그룹 저장
 
-		// 그룹에 첫 번째 멤버를 추가
-		groupMembershipRepository.save(GroupMembership.builder()
-			.group(oneMemberGroup)  // 정원 1명인 그룹에 멤버 추가
-			.member(member)
-			.groupRole(GroupRole.LEADER)  // status APPROVED로 저장됨
-			.build());
+        // 그룹에 첫 번째 멤버를 추가
+        groupMembershipRepository.save(GroupMembership.builder()
+                .group(oneMemberGroup)  // 정원 1명인 그룹에 멤버 추가
+                .member(member)
+                .groupRole(GroupRole.LEADER)  // status APPROVED로 저장됨
+                .build());
 
-		// 새로운 회원을 만들고 저장
-		Member newMember = MemberFactory.createUser(
-				"newUser",
-				"newPassword",
-				"newNickname"
-		);
-		memberRepository.save(newMember);
+        // 새로운 회원을 만들고 저장
+        Member newMember = MemberFactory.createUser(
+                "newUser", "newPassword", "newNickname"
+        );
+        memberRepository.save(newMember);
 
-		MeetingApplicationReqBody request = new MeetingApplicationReqBody("Test Application");
+        MeetingApplicationReqBody request = new MeetingApplicationReqBody("Test Application");
 
-		// 정원 초과로 예외 발생
-		given(meetingApplicationService.create(oneMemberGroup.getId(), request, newMember.getId()))
-			.willThrow(new MeetingApplicationException(MeetingApplicationErrorCode.GROUP_MEMBER_LIMIT_EXCEEDED));
+        // 정원 초과로 예외 발생
+        given(meetingApplicationService.create(oneMemberGroup.getId(), request, newMember.getId()))
+                .willThrow(new MeetingApplicationException(MeetingApplicationErrorCode.GROUP_MEMBER_LIMIT_EXCEEDED));
 
-		MemberDetails mockUser = new MemberDetails(newMember);
+        MemberDetails mockUser = new MemberDetails(newMember);
 
-		// When & Then
-		mvc.perform(MockMvcRequestBuilders.post("/api/v1/groups/{groupId}", oneMemberGroup.getId())
-				.with(user(mockUser))
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(request))
-				.header("Authorization", "Bearer testToken"))
-			.andExpect(status().isConflict())  // 상태 코드 409 Conflict
-			.andExpect(result -> {
-				String responseContent = result.getResponse().getContentAsString();
-				assert(responseContent.contains("그룹 정원이 초과되었습니다."));
-			});
-	}
+        // When & Then
+        mvc.perform(MockMvcRequestBuilders.post("/api/v1/groups/{groupId}", oneMemberGroup.getId())
+                        .with(user(mockUser))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Authorization", "Bearer testToken"))
+                .andExpect(status().isConflict())  // 상태 코드 409 Conflict
+                .andExpect(result -> {
+                    String responseContent = result.getResponse().getContentAsString();
+                    assert (responseContent.contains("그룹 정원이 초과되었습니다."));
+                });
+    }
 
-	@Test
-	@DisplayName("meeting application 조회")
-	@CustomWithMockUser
-	void t3() throws Exception {
-		// Given
-		Member leader = memberRepository.save(MemberFactory.createUser(
-				"testUser",
-				"testPassword",
-				"testNickname"
-		));
+    @Test
+    @DisplayName("meeting application 조회")
+    @CustomWithMockUser
+    void t3() throws Exception {
+        // Given
+        Member leader = memberRepository.save(MemberFactory.createUser(
+                "testUser", "testPassword", "testNickname"
+        ));
 
-		MemberDetails mockUser = new MemberDetails(leader);
+        MemberDetails mockUser = new MemberDetails(leader);
 
-		GroupMembership groupMembership = groupMembershipRepository.save(GroupMembership.builder()
-			.group(group)
-			.member(leader)
-			.groupRole(GroupRole.LEADER)
-			.build());
+        GroupMembership groupMembership = groupMembershipRepository.save(GroupMembership.builder()
+                .group(group)
+                .member(leader)
+                .groupRole(GroupRole.LEADER)
+                .build());
 
-		meetingApplicationRepository.save(MeetingApplication.builder()
-			.group(group)
-			.member(member)
-			.context("Test Application")
-			.build());
+        meetingApplicationRepository.save(MeetingApplication.builder()
+                .group(group)
+                .member(member)
+                .context("Test Application")
+                .build());
 
-		// When & Then
-		mvc.perform(get("/api/v1/groups/{groupId}/meeting_applications", group.getId())
-				.with(user(mockUser))  // 인증된 사용자 설정
-				.contentType(MediaType.APPLICATION_JSON))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.message").value("meeting application 조회 성공"));
-	}
+        // When & Then
+        mvc.perform(get("/api/v1/groups/{groupId}/meeting_applications", group.getId())
+                        .with(user(mockUser))  // 인증된 사용자 설정
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("meeting application 조회 성공"));
+    }
 
-	@Test
-	@DisplayName("meeting application 상세 조회")
-	@CustomWithMockUser
-	void t4() throws Exception {
-		// Given
-		Member leader = memberRepository.save(MemberFactory.createUser(
-				"testUser",
-				"testPassword",
-				"testNickname"
-		));
+    @Test
+    @DisplayName("meeting application 상세 조회")
+    @CustomWithMockUser
+    void t4() throws Exception {
+        // Given
+        Member leader = memberRepository.save(MemberFactory.createUser(
+                "testUser", "testPassword", "testNickname"
+        ));
 
-		MemberDetails mockUser = new MemberDetails(leader);
+        MemberDetails mockUser = new MemberDetails(leader);
 
-		GroupMembership groupMembership = groupMembershipRepository.save(GroupMembership.builder()
-			.group(group)
-			.member(leader)
-			.groupRole(GroupRole.LEADER)
-			.build());
+        GroupMembership groupMembership = groupMembershipRepository.save(GroupMembership.builder()
+                .group(group)
+                .member(leader)
+                .groupRole(GroupRole.LEADER)
+                .build());
 
-		meetingApplicationRepository.save(MeetingApplication.builder()
-			.group(group)
-			.member(member)
-			.context("Test Application")
-			.build());
+        meetingApplicationRepository.save(MeetingApplication.builder()
+                .group(group)
+                .member(member)
+                .context("Test Application")
+                .build());
 
-		// When & Then
-		mvc.perform(get("/api/v1/groups/{groupId}/meeting_applications/{meetingApplicationId}", group.getId(), 1)
-				.with(user(mockUser))  // 인증된 사용자 설정
-				.contentType(MediaType.APPLICATION_JSON))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.message").value("meeting application 상세 조회 성공"));
+        // When & Then
+        mvc.perform(get("/api/v1/groups/{groupId}/meeting_applications/{meetingApplicationId}", group.getId(), 1)
+                        .with(user(mockUser))  // 인증된 사용자 설정
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("meeting application 상세 조회 성공"));
 
-	}
+    }
 
 }

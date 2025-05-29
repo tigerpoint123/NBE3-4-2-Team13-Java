@@ -103,14 +103,10 @@ public class PostServiceTest {
 
     private void dataSetting() {
         Member member1 = memberRepository.save(MemberFactory.createUser(
-                "testMember1",
-                "testPassword1",
-                "Test Nickname 1"
+                "testMember1", "testPassword1", "Test Nickname 1"
         ));
         Member member2 = memberRepository.save(MemberFactory.createUser(
-                "testMember2",
-                "testPassword2",
-                "Test Nickname 2"
+                "testMember2", "testPassword2", "Test Nickname 2"
         ));
 
         Group group = groupRepository.save(Group.builder()
@@ -1082,7 +1078,7 @@ public class PostServiceTest {
         Post savedPost = postService.savePost(1L, savePostDto, files);
         Member savedMember = memberRepository.save(MemberFactory.createUser(
                 "test", "test", "test"
-                ));
+        ));
 
         // Then
         assertThatThrownBy(() -> postService.getPost(1L, 2L))
@@ -1336,11 +1332,11 @@ public class PostServiceTest {
 
         // Then : 1
         List<PostRespDto.GetPostListDto> posts = postService.getTopFivePosts(1L);
-        assertEquals(3,posts.size());
+        assertEquals(3, posts.size());
         assertEquals(3L, posts.get(0).getTodayViewCount());
 
         // Then : 2
-        Object objectPosts =  redisTemplate.opsForValue().get("post:groupid:1");
+        Object objectPosts = redisTemplate.opsForValue().get("post:groupid:1");
 
         System.out.println(objectPosts);
 

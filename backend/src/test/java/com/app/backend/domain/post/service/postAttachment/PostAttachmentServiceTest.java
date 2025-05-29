@@ -84,14 +84,10 @@ public class PostAttachmentServiceTest {
 
     private void dataSetting() {
         Member member1 = memberRepository.save(MemberFactory.createUser(
-                "Test member1",
-                "password1",
-                "Test Nickname 1"
+                "Test member1", "password1", "Test Nickname 1"
         ));
         Member member2 = memberRepository.save(MemberFactory.createUser(
-                "Test member2",
-                "password2",
-                "Test Nickname 2"
+                "Test member2", "password2", "Test Nickname 2"
         ));
 
         Group group = groupRepository.save(Group.builder()
@@ -121,7 +117,7 @@ public class PostAttachmentServiceTest {
     @DisplayName("Success : 파일이 정상적으로 존재하는 경우")
     void downloadFile_Success1() {
         // when
-        FileRespDto.downloadDto downloadFile = postAttachmentService.downloadFile(1L,1L);
+        FileRespDto.downloadDto downloadFile = postAttachmentService.downloadFile(1L, 1L);
 
         // Then
         assertNotNull(downloadFile.getResource());
@@ -133,7 +129,7 @@ public class PostAttachmentServiceTest {
     @DisplayName("Success : public 게시물 - 그룹 멤버 x")
     void downloadFile_Success2() {
         // when
-        FileRespDto.downloadDto downloadFile = postAttachmentService.downloadFile(1L,2L);
+        FileRespDto.downloadDto downloadFile = postAttachmentService.downloadFile(1L, 2L);
 
         // Then
         assertNotNull(downloadFile.getResource());
@@ -145,7 +141,7 @@ public class PostAttachmentServiceTest {
     @DisplayName("Success : private 게시물 - 그룹 멤버 O")
     void downloadFile_Success3() {
         // when
-        FileRespDto.downloadDto downloadFile = postAttachmentService.downloadFile(2L,1L);
+        FileRespDto.downloadDto downloadFile = postAttachmentService.downloadFile(2L, 1L);
 
         // Then
         assertNotNull(downloadFile.getResource());
@@ -157,7 +153,7 @@ public class PostAttachmentServiceTest {
     @DisplayName("Fail : private 게시물 - 그룹 멤버 x")
     void downloadFile_Fail1() {
         // Then
-        assertThatThrownBy(() -> postAttachmentService.downloadFile(2L,2L))
+        assertThatThrownBy(() -> postAttachmentService.downloadFile(2L, 2L))
                 .isInstanceOf(GroupMembershipException.class)
                 .hasFieldOrPropertyWithValue("domainErrorCode", GroupMembershipErrorCode.GROUP_MEMBERSHIP_NOT_FOUND)
                 .hasMessage(GroupMembershipErrorCode.GROUP_MEMBERSHIP_NOT_FOUND.getMessage());
@@ -167,7 +163,7 @@ public class PostAttachmentServiceTest {
     @DisplayName("Fail : DB에 파일 정보가 없을 경우")
     void downloadFile_Fail2() {
         // Then
-        assertThatThrownBy(() -> postAttachmentService.downloadFile(11L,1L))
+        assertThatThrownBy(() -> postAttachmentService.downloadFile(11L, 1L))
                 .isInstanceOf(FileException.class)
                 .hasFieldOrPropertyWithValue("domainErrorCode", FileErrorCode.FILE_NOT_FOUND)
                 .hasMessage(FileErrorCode.FILE_NOT_FOUND.getMessage());

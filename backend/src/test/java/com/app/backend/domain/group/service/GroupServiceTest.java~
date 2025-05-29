@@ -41,35 +41,37 @@ class GroupServiceTest extends SpringBootTestSupporter {
     void createGroup() {
         //Given
         Member member = MemberFactory.createUser(
-                "testUsername", "testPassword", "testNickname"
+                "testUsername",
+                "testPassword",
+                "testNickname"
         );
         em.persist(member);
         Long memberId = member.getId();
 
         Category category = Category.builder()
-                .name("category")
-                .build();
+                                    .name("category")
+                                    .build();
         em.persist(category);
         String categoryName = category.getName();
 
         GroupRequest.Create request = GroupRequest.Create.builder()
-                .name("test")
-                .province("test province")
-                .city("test city")
-                .town("test town")
-                .description("test description")
-                .maxRecruitCount(10)
-                .categoryName(categoryName)
-                .build();
+                                                         .name("test")
+                                                         .province("test province")
+                                                         .city("test city")
+                                                         .town("test town")
+                                                         .description("test description")
+                                                         .maxRecruitCount(10)
+                                                         .categoryName(categoryName)
+                                                         .build();
 
         //When
         Long id = groupService.createGroup(memberId, request);
         afterEach();
 
         //Then
-        Group savedGroup = em.find(Group.class, id);
-        ChatRoom chatRoom = chatRoomRepository.findAll().stream().findFirst().get();
-        Category findCategory = categoryRepository.findAll().stream().findFirst().get();
+        Group           savedGroup      = em.find(Group.class, id);
+        ChatRoom        chatRoom        = chatRoomRepository.findAll().stream().findFirst().get();
+        Category        findCategory    = categoryRepository.findAll().stream().findFirst().get();
         GroupMembership groupMembership = groupMembershipRepository.findByGroupIdAndMemberId(id, memberId).get();
 
         assertThat(savedGroup.getName()).isEqualTo(request.getName());
@@ -89,20 +91,20 @@ class GroupServiceTest extends SpringBootTestSupporter {
     void getGroup() {
         //Given
         Category category = Category.builder()
-                .name("category")
-                .build();
+                                    .name("category")
+                                    .build();
         em.persist(category);
 
         Group group = Group.builder()
-                .name("test")
-                .province("test province")
-                .city("test city")
-                .town("test town")
-                .description("test description")
-                .recruitStatus(RecruitStatus.RECRUITING)
-                .maxRecruitCount(10)
-                .category(category)
-                .build();
+                           .name("test")
+                           .province("test province")
+                           .city("test city")
+                           .town("test town")
+                           .description("test description")
+                           .recruitStatus(RecruitStatus.RECRUITING)
+                           .maxRecruitCount(10)
+                           .category(category)
+                           .build();
         em.persist(group);
         Long id = group.getId();
         afterEach();
@@ -143,23 +145,23 @@ class GroupServiceTest extends SpringBootTestSupporter {
     void getGroupList() {
         //Given
         Category category = Category.builder()
-                .name("category")
-                .build();
+                                    .name("category")
+                                    .build();
         em.persist(category);
 
-        int size = 20;
+        int         size   = 20;
         List<Group> groups = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             Group group = Group.builder()
-                    .name("test%d".formatted(i))
-                    .province("test province%d".formatted(i))
-                    .city("test city%d".formatted(i))
-                    .town("test town%d".formatted(i))
-                    .description("test description%d".formatted(i))
-                    .recruitStatus(RecruitStatus.RECRUITING)
-                    .maxRecruitCount(10)
-                    .category(category)
-                    .build();
+                               .name("test%d".formatted(i))
+                               .province("test province%d".formatted(i))
+                               .city("test city%d".formatted(i))
+                               .town("test town%d".formatted(i))
+                               .description("test description%d".formatted(i))
+                               .recruitStatus(RecruitStatus.RECRUITING)
+                               .maxRecruitCount(10)
+                               .category(category)
+                               .build();
             groups.add(group);
             em.persist(group);
         }
@@ -171,7 +173,7 @@ class GroupServiceTest extends SpringBootTestSupporter {
         //Then
         assertThat(responseList).hasSize(size);
         for (int i = 0; i < size; i++) {
-            Group group = groups.get(i);
+            Group                  group       = groups.get(i);
             GroupResponse.ListInfo responseDto = responseList.get(i);
 
             assertThat(responseDto.getName()).isEqualTo(group.getName());
@@ -189,23 +191,23 @@ class GroupServiceTest extends SpringBootTestSupporter {
     void getGroupPage() {
         //Given
         Category category = Category.builder()
-                .name("category")
-                .build();
+                                    .name("category")
+                                    .build();
         em.persist(category);
 
-        int size = 20;
+        int         size   = 20;
         List<Group> groups = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             Group group = Group.builder()
-                    .name("test%d".formatted(i))
-                    .province("test province%d".formatted(i))
-                    .city("test city%d".formatted(i))
-                    .town("test town%d".formatted(i))
-                    .description("test description%d".formatted(i))
-                    .recruitStatus(RecruitStatus.RECRUITING)
-                    .maxRecruitCount(10)
-                    .category(category)
-                    .build();
+                               .name("test%d".formatted(i))
+                               .province("test province%d".formatted(i))
+                               .city("test city%d".formatted(i))
+                               .town("test town%d".formatted(i))
+                               .description("test description%d".formatted(i))
+                               .recruitStatus(RecruitStatus.RECRUITING)
+                               .maxRecruitCount(10)
+                               .category(category)
+                               .build();
             groups.add(group);
             em.persist(group);
         }
@@ -222,7 +224,7 @@ class GroupServiceTest extends SpringBootTestSupporter {
 
         assertThat(responseList).hasSizeLessThanOrEqualTo(pageable.getPageSize());
         for (int i = 0; i < groups.size(); i++) {
-            Group group = groups.get(i);
+            Group                  group       = groups.get(i);
             GroupResponse.ListInfo responseDto = responseList.get(i);
 
             assertThat(responseDto.getName()).isEqualTo(group.getName());
@@ -240,23 +242,23 @@ class GroupServiceTest extends SpringBootTestSupporter {
     void getGroupsByNameContainingList() {
         //Given
         Category category = Category.builder()
-                .name("category")
-                .build();
+                                    .name("category")
+                                    .build();
         em.persist(category);
 
-        int size = 20;
+        int         size   = 20;
         List<Group> groups = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             Group group = Group.builder()
-                    .name("test%d".formatted(i))
-                    .province("test province%d".formatted(i))
-                    .city("test city%d".formatted(i))
-                    .town("test town%d".formatted(i))
-                    .description("test description%d".formatted(i))
-                    .recruitStatus(RecruitStatus.RECRUITING)
-                    .maxRecruitCount(10)
-                    .category(category)
-                    .build();
+                               .name("test%d".formatted(i))
+                               .province("test province%d".formatted(i))
+                               .city("test city%d".formatted(i))
+                               .town("test town%d".formatted(i))
+                               .description("test description%d".formatted(i))
+                               .recruitStatus(RecruitStatus.RECRUITING)
+                               .maxRecruitCount(10)
+                               .category(category)
+                               .build();
             groups.add(group);
             em.persist(group);
         }
@@ -272,7 +274,7 @@ class GroupServiceTest extends SpringBootTestSupporter {
 
         assertThat(responseList).hasSize(groups.size());
         for (int i = 0; i < groups.size(); i++) {
-            Group group = groups.get(i);
+            Group                  group       = groups.get(i);
             GroupResponse.ListInfo responseDto = responseList.get(i);
 
             assertThat(responseDto.getName()).isEqualTo(group.getName());
@@ -290,30 +292,30 @@ class GroupServiceTest extends SpringBootTestSupporter {
     void getGroupsByNameContainingPage() {
         //Given
         Category category = Category.builder()
-                .name("category")
-                .build();
+                                    .name("category")
+                                    .build();
         em.persist(category);
 
-        int size = 20;
+        int         size   = 20;
         List<Group> groups = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             Group group = Group.builder()
-                    .name("test%d".formatted(i))
-                    .province("test province%d".formatted(i))
-                    .city("test city%d".formatted(i))
-                    .town("test town%d".formatted(i))
-                    .description("test description%d".formatted(i))
-                    .recruitStatus(RecruitStatus.RECRUITING)
-                    .maxRecruitCount(10)
-                    .category(category)
-                    .build();
+                               .name("test%d".formatted(i))
+                               .province("test province%d".formatted(i))
+                               .city("test city%d".formatted(i))
+                               .town("test town%d".formatted(i))
+                               .description("test description%d".formatted(i))
+                               .recruitStatus(RecruitStatus.RECRUITING)
+                               .maxRecruitCount(10)
+                               .category(category)
+                               .build();
             groups.add(group);
             em.persist(group);
         }
         afterEach();
 
         Pageable pageable = PageRequest.of(0, 10);
-        String name = "5";
+        String   name     = "5";
 
         //When
         Page<GroupResponse.ListInfo> responsePage = groupService.getGroupsByNameContaining(name, pageable);
@@ -324,7 +326,7 @@ class GroupServiceTest extends SpringBootTestSupporter {
 
         assertThat(responseList).hasSize(groups.size());
         for (int i = 0; i < groups.size(); i++) {
-            Group group = groups.get(i);
+            Group                  group       = groups.get(i);
             GroupResponse.ListInfo responseDto = responseList.get(i);
 
             assertThat(responseDto.getName()).isEqualTo(group.getName());
@@ -342,43 +344,43 @@ class GroupServiceTest extends SpringBootTestSupporter {
     void getGroupsByRegionList() {
         //Given
         Category category = Category.builder()
-                .name("category")
-                .build();
+                                    .name("category")
+                                    .build();
         em.persist(category);
 
-        int size = 20;
+        int         size   = 20;
         List<Group> groups = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             Group group = Group.builder()
-                    .name("test%d".formatted(i))
-                    .province("test province%d".formatted(i))
-                    .city("test city%d".formatted(i))
-                    .town("test town%d".formatted(i))
-                    .description("test description%d".formatted(i))
-                    .recruitStatus(RecruitStatus.RECRUITING)
-                    .maxRecruitCount(10)
-                    .category(category)
-                    .build();
+                               .name("test%d".formatted(i))
+                               .province("test province%d".formatted(i))
+                               .city("test city%d".formatted(i))
+                               .town("test town%d".formatted(i))
+                               .description("test description%d".formatted(i))
+                               .recruitStatus(RecruitStatus.RECRUITING)
+                               .maxRecruitCount(10)
+                               .category(category)
+                               .build();
             groups.add(group);
             em.persist(group);
         }
         afterEach();
 
         String province = "test province10";
-        String city = "test city10";
-        String town = "test town10";
+        String city     = "test city10";
+        String town     = "test town10";
 
         //When
         List<GroupResponse.ListInfo> responseList = groupService.getGroupsByRegion(province, city, town);
 
         //Then
         groups = groups.stream().filter(group -> group.getProvince().equals(province)
-                && group.getCity().equals(city)
-                && group.getTown().equals(town)).toList();
+                                                 && group.getCity().equals(city)
+                                                 && group.getTown().equals(town)).toList();
 
         assertThat(responseList).hasSize(groups.size());
         for (int i = 0; i < groups.size(); i++) {
-            Group group = groups.get(i);
+            Group                  group       = groups.get(i);
             GroupResponse.ListInfo responseDto = responseList.get(i);
 
             assertThat(responseDto.getName()).isEqualTo(group.getName());
@@ -396,23 +398,23 @@ class GroupServiceTest extends SpringBootTestSupporter {
     void getGroupsByRegionPage() {
         //Given
         Category category = Category.builder()
-                .name("category")
-                .build();
+                                    .name("category")
+                                    .build();
         em.persist(category);
 
-        int size = 20;
+        int         size   = 20;
         List<Group> groups = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             Group group = Group.builder()
-                    .name("test%d".formatted(i))
-                    .province("test province%d".formatted(i))
-                    .city("test city%d".formatted(i))
-                    .town("test town%d".formatted(i))
-                    .description("test description%d".formatted(i))
-                    .recruitStatus(RecruitStatus.RECRUITING)
-                    .maxRecruitCount(10)
-                    .category(category)
-                    .build();
+                               .name("test%d".formatted(i))
+                               .province("test province%d".formatted(i))
+                               .city("test city%d".formatted(i))
+                               .town("test town%d".formatted(i))
+                               .description("test description%d".formatted(i))
+                               .recruitStatus(RecruitStatus.RECRUITING)
+                               .maxRecruitCount(10)
+                               .category(category)
+                               .build();
             groups.add(group);
             em.persist(group);
         }
@@ -421,21 +423,21 @@ class GroupServiceTest extends SpringBootTestSupporter {
         Pageable pageable = PageRequest.of(0, 10);
 
         String province = "test province10";
-        String city = "test city10";
-        String town = "test town10";
+        String city     = "test city10";
+        String town     = "test town10";
 
         //When
         Page<GroupResponse.ListInfo> responsePage = groupService.getGroupsByRegion(province, city, town, pageable);
 
         //Then
         groups = groups.stream().filter(group -> group.getProvince().equals(province)
-                && group.getCity().equals(city)
-                && group.getTown().equals(town)).toList();
+                                                 && group.getCity().equals(city)
+                                                 && group.getTown().equals(town)).toList();
         List<GroupResponse.ListInfo> responseList = responsePage.getContent();
 
         assertThat(responseList).hasSizeLessThanOrEqualTo(pageable.getPageSize());
         for (int i = 0; i < groups.size(); i++) {
-            Group group = groups.get(i);
+            Group                  group       = groups.get(i);
             GroupResponse.ListInfo responseDto = responseList.get(i);
 
             assertThat(responseDto.getName()).isEqualTo(group.getName());
@@ -453,23 +455,23 @@ class GroupServiceTest extends SpringBootTestSupporter {
     void getGroupsByNameContainingAndRegionList() {
         //Given
         Category category = Category.builder()
-                .name("category")
-                .build();
+                                    .name("category")
+                                    .build();
         em.persist(category);
 
-        int size = 20;
+        int         size   = 20;
         List<Group> groups = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             Group group = Group.builder()
-                    .name("test%d".formatted(i))
-                    .province("test province%d".formatted(i))
-                    .city("test city%d".formatted(i))
-                    .town("test town%d".formatted(i))
-                    .description("test description%d".formatted(i))
-                    .recruitStatus(RecruitStatus.RECRUITING)
-                    .maxRecruitCount(10)
-                    .category(category)
-                    .build();
+                               .name("test%d".formatted(i))
+                               .province("test province%d".formatted(i))
+                               .city("test city%d".formatted(i))
+                               .town("test town%d".formatted(i))
+                               .description("test description%d".formatted(i))
+                               .recruitStatus(RecruitStatus.RECRUITING)
+                               .maxRecruitCount(10)
+                               .category(category)
+                               .build();
             groups.add(group);
             em.persist(group);
         }
@@ -478,24 +480,24 @@ class GroupServiceTest extends SpringBootTestSupporter {
         String name = "1";
 
         String province = "test province10";
-        String city = "test city10";
-        String town = "test town10";
+        String city     = "test city10";
+        String town     = "test town10";
 
         //When
         List<GroupResponse.ListInfo> responseList = groupService.getGroupsByNameContainingAndRegion(name,
-                province,
-                city,
-                town);
+                                                                                                    province,
+                                                                                                    city,
+                                                                                                    town);
 
         //Then
         groups = groups.stream().filter(group -> group.getName().contains(name)
-                && group.getProvince().equals(province)
-                && group.getCity().equals(city)
-                && group.getTown().equals(town)).toList();
+                                                 && group.getProvince().equals(province)
+                                                 && group.getCity().equals(city)
+                                                 && group.getTown().equals(town)).toList();
 
         assertThat(responseList).hasSize(groups.size());
         for (int i = 0; i < groups.size(); i++) {
-            Group group = groups.get(i);
+            Group                  group       = groups.get(i);
             GroupResponse.ListInfo responseDto = responseList.get(i);
 
             assertThat(responseDto.getName()).isEqualTo(group.getName());
@@ -513,23 +515,23 @@ class GroupServiceTest extends SpringBootTestSupporter {
     void getGroupsByNameContainingAndRegionPage() {
         //Given
         Category category = Category.builder()
-                .name("category")
-                .build();
+                                    .name("category")
+                                    .build();
         em.persist(category);
 
-        int size = 20;
+        int         size   = 20;
         List<Group> groups = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             Group group = Group.builder()
-                    .name("test%d".formatted(i))
-                    .province("test province%d".formatted(i))
-                    .city("test city%d".formatted(i))
-                    .town("test town%d".formatted(i))
-                    .description("test description%d".formatted(i))
-                    .recruitStatus(RecruitStatus.RECRUITING)
-                    .maxRecruitCount(10)
-                    .category(category)
-                    .build();
+                               .name("test%d".formatted(i))
+                               .province("test province%d".formatted(i))
+                               .city("test city%d".formatted(i))
+                               .town("test town%d".formatted(i))
+                               .description("test description%d".formatted(i))
+                               .recruitStatus(RecruitStatus.RECRUITING)
+                               .maxRecruitCount(10)
+                               .category(category)
+                               .build();
             groups.add(group);
             em.persist(group);
         }
@@ -540,26 +542,26 @@ class GroupServiceTest extends SpringBootTestSupporter {
         String name = "1";
 
         String province = "test province10";
-        String city = "test city10";
-        String town = "test town10";
+        String city     = "test city10";
+        String town     = "test town10";
 
         //When
         Page<GroupResponse.ListInfo> responsePage = groupService.getGroupsByNameContainingAndRegion(name,
-                province,
-                city,
-                town,
-                pageable);
+                                                                                                    province,
+                                                                                                    city,
+                                                                                                    town,
+                                                                                                    pageable);
 
         //Then
         groups = groups.stream().filter(group -> group.getName().contains(name)
-                && group.getProvince().equals(province)
-                && group.getCity().equals(city)
-                && group.getTown().equals(town)).toList();
+                                                 && group.getProvince().equals(province)
+                                                 && group.getCity().equals(city)
+                                                 && group.getTown().equals(town)).toList();
         List<GroupResponse.ListInfo> responseList = responsePage.getContent();
 
         assertThat(responseList).hasSizeLessThanOrEqualTo(pageable.getPageSize());
         for (int i = 0; i < groups.size(); i++) {
-            Group group = groups.get(i);
+            Group                  group       = groups.get(i);
             GroupResponse.ListInfo responseDto = responseList.get(i);
 
             assertThat(responseDto.getName()).isEqualTo(group.getName());
@@ -577,50 +579,50 @@ class GroupServiceTest extends SpringBootTestSupporter {
     void getGroupsBySearchList() {
         //Given
         Category category = Category.builder()
-                .name("category")
-                .build();
+                                    .name("category")
+                                    .build();
         em.persist(category);
 
-        int size = 20;
+        int         size   = 20;
         List<Group> groups = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             Group group = Group.builder()
-                    .name("test%d".formatted(i))
-                    .province("test province%d".formatted(i))
-                    .city("test city%d".formatted(i))
-                    .town("test town%d".formatted(i))
-                    .description("test description%d".formatted(i))
-                    .recruitStatus(RecruitStatus.RECRUITING)
-                    .maxRecruitCount(10)
-                    .category(category)
-                    .build();
+                               .name("test%d".formatted(i))
+                               .province("test province%d".formatted(i))
+                               .city("test city%d".formatted(i))
+                               .town("test town%d".formatted(i))
+                               .description("test description%d".formatted(i))
+                               .recruitStatus(RecruitStatus.RECRUITING)
+                               .maxRecruitCount(10)
+                               .category(category)
+                               .build();
             groups.add(group);
             em.persist(group);
         }
         afterEach();
 
         GroupRequest.Search dto = GroupRequest.Search.builder()
-                .categoryName("category")
-                .recruitStatus("RECRUITING")
-                .name("1")
-                .province("test province10")
-                .city("test city10")
-                .town("test town10")
-                .build();
+                                                     .categoryName("category")
+                                                     .recruitStatus("RECRUITING")
+                                                     .name("1")
+                                                     .province("test province10")
+                                                     .city("test city10")
+                                                     .town("test town10")
+                                                     .build();
 
         //When
         List<GroupResponse.ListInfo> responseList = groupService.getGroupsBySearch(dto);
 
         //Then
         groups = groups.stream().filter(group -> group.getCategory().getName().equals(dto.getCategoryName())
-                && group.getName().contains(dto.getName())
-                && group.getProvince().equals(dto.getProvince())
-                && group.getCity().equals(dto.getCity())
-                && group.getTown().equals(dto.getTown())).toList();
+                                                 && group.getName().contains(dto.getName())
+                                                 && group.getProvince().equals(dto.getProvince())
+                                                 && group.getCity().equals(dto.getCity())
+                                                 && group.getTown().equals(dto.getTown())).toList();
 
         assertThat(responseList).hasSize(groups.size());
         for (int i = 0; i < groups.size(); i++) {
-            Group group = groups.get(i);
+            Group                  group       = groups.get(i);
             GroupResponse.ListInfo responseDto = responseList.get(i);
 
             assertThat(responseDto.getName()).isEqualTo(group.getName());
@@ -638,23 +640,23 @@ class GroupServiceTest extends SpringBootTestSupporter {
     void getGroupsBySearchPage() {
         //Given
         Category category = Category.builder()
-                .name("category")
-                .build();
+                                    .name("category")
+                                    .build();
         em.persist(category);
 
-        int size = 20;
+        int         size   = 20;
         List<Group> groups = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             Group group = Group.builder()
-                    .name("test%d".formatted(i))
-                    .province("test province%d".formatted(i))
-                    .city("test city%d".formatted(i))
-                    .town("test town%d".formatted(i))
-                    .description("test description%d".formatted(i))
-                    .recruitStatus(RecruitStatus.RECRUITING)
-                    .maxRecruitCount(10)
-                    .category(category)
-                    .build();
+                               .name("test%d".formatted(i))
+                               .province("test province%d".formatted(i))
+                               .city("test city%d".formatted(i))
+                               .town("test town%d".formatted(i))
+                               .description("test description%d".formatted(i))
+                               .recruitStatus(RecruitStatus.RECRUITING)
+                               .maxRecruitCount(10)
+                               .category(category)
+                               .build();
             groups.add(group);
             em.persist(group);
         }
@@ -662,28 +664,28 @@ class GroupServiceTest extends SpringBootTestSupporter {
 
         Pageable pageable = PageRequest.of(0, 10);
         GroupRequest.Search dto = GroupRequest.Search.builder()
-                .categoryName("category")
-                .recruitStatus("RECRUITING")
-                .name("1")
-                .province("test province10")
-                .city("test city10")
-                .town("test town10")
-                .build();
+                                                     .categoryName("category")
+                                                     .recruitStatus("RECRUITING")
+                                                     .name("1")
+                                                     .province("test province10")
+                                                     .city("test city10")
+                                                     .town("test town10")
+                                                     .build();
 
         //When
         Page<GroupResponse.ListInfo> responsePage = groupService.getGroupsBySearch(dto, pageable);
 
         //Then
         groups = groups.stream().filter(group -> group.getCategory().getName().equals(dto.getCategoryName())
-                && group.getName().contains(dto.getName())
-                && group.getProvince().equals(dto.getProvince())
-                && group.getCity().equals(dto.getCity())
-                && group.getTown().equals(dto.getTown())).toList();
+                                                 && group.getName().contains(dto.getName())
+                                                 && group.getProvince().equals(dto.getProvince())
+                                                 && group.getCity().equals(dto.getCity())
+                                                 && group.getTown().equals(dto.getTown())).toList();
         List<ListInfo> responseList = responsePage.getContent();
 
         assertThat(responseList).hasSizeLessThanOrEqualTo(pageable.getPageSize());
         for (int i = 0; i < groups.size(); i++) {
-            Group group = groups.get(i);
+            Group                  group       = groups.get(i);
             GroupResponse.ListInfo responseDto = responseList.get(i);
 
             assertThat(responseDto.getName()).isEqualTo(group.getName());
@@ -705,46 +707,46 @@ class GroupServiceTest extends SpringBootTestSupporter {
         Long memberId = member.getId();
 
         Category category = Category.builder()
-                .name("category")
-                .build();
+                                    .name("category")
+                                    .build();
         em.persist(category);
         Category newCategory = Category.builder()
-                .name("nCategory")
-                .build();
+                                       .name("nCategory")
+                                       .build();
         em.persist(newCategory);
         String newCategoryName = newCategory.getName();
 
         Group group = Group.builder()
-                .name("test")
-                .province("test province")
-                .city("test city")
-                .town("test town")
-                .description("test description")
-                .recruitStatus(RecruitStatus.RECRUITING)
-                .maxRecruitCount(10)
-                .category(category)
-                .build();
+                           .name("test")
+                           .province("test province")
+                           .city("test city")
+                           .town("test town")
+                           .description("test description")
+                           .recruitStatus(RecruitStatus.RECRUITING)
+                           .maxRecruitCount(10)
+                           .category(category)
+                           .build();
         em.persist(group);
         Long groupId = group.getId();
 
         GroupMembership groupMembership = GroupMembership.builder()
-                .member(member)
-                .group(group)
-                .groupRole(GroupRole.LEADER)
-                .build();
+                                                         .member(member)
+                                                         .group(group)
+                                                         .groupRole(GroupRole.LEADER)
+                                                         .build();
         em.persist(groupMembership);
         afterEach();
 
         GroupRequest.Update update = GroupRequest.Update.builder()
-                .name("new test")
-                .province("new test province")
-                .city("new test city")
-                .town("new test town")
-                .description("new test description")
-                .recruitStatus(RecruitStatus.CLOSED.name())
-                .maxRecruitCount(20)
-                .categoryName(newCategoryName)
-                .build();
+                                                        .name("new test")
+                                                        .province("new test province")
+                                                        .city("new test city")
+                                                        .town("new test town")
+                                                        .description("new test description")
+                                                        .recruitStatus(RecruitStatus.CLOSED.name())
+                                                        .maxRecruitCount(20)
+                                                        .categoryName(newCategoryName)
+                                                        .build();
 
         //When
         GroupResponse.Detail response = groupService.modifyGroup(groupId, memberId, update);
@@ -775,14 +777,14 @@ class GroupServiceTest extends SpringBootTestSupporter {
         Long unknownId = 1234567890L;
 
         GroupRequest.Update update = GroupRequest.Update.builder()
-                .name("new test")
-                .province("new test province")
-                .city("new test city")
-                .town("new test town")
-                .description("new test description")
-                .recruitStatus(RecruitStatus.CLOSED.name())
-                .maxRecruitCount(20)
-                .build();
+                                                        .name("new test")
+                                                        .province("new test province")
+                                                        .city("new test city")
+                                                        .town("new test town")
+                                                        .description("new test description")
+                                                        .recruitStatus(RecruitStatus.CLOSED.name())
+                                                        .maxRecruitCount(20)
+                                                        .build();
 
         //When
 
@@ -800,34 +802,36 @@ class GroupServiceTest extends SpringBootTestSupporter {
     void deleteGroup() {
         //Given
         Member member = MemberFactory.createUser(
-                "testUsername", "testPassword", "testNickname"
+                "testUsername",
+                "testPassword",
+                "testNickname"
         );
         em.persist(member);
         Long memberId = member.getId();
 
         Category category = Category.builder()
-                .name("category")
-                .build();
+                                    .name("category")
+                                    .build();
         em.persist(category);
 
         Group group = Group.builder()
-                .name("test")
-                .province("test province")
-                .city("test city")
-                .town("test town")
-                .description("test description")
-                .recruitStatus(RecruitStatus.RECRUITING)
-                .maxRecruitCount(10)
-                .category(category)
-                .build();
+                           .name("test")
+                           .province("test province")
+                           .city("test city")
+                           .town("test town")
+                           .description("test description")
+                           .recruitStatus(RecruitStatus.RECRUITING)
+                           .maxRecruitCount(10)
+                           .category(category)
+                           .build();
         em.persist(group);
         Long groupId = group.getId();
 
         GroupMembership groupMembership = GroupMembership.builder()
-                .member(member)
-                .group(group)
-                .groupRole(GroupRole.LEADER)
-                .build();
+                                                         .member(member)
+                                                         .group(group)
+                                                         .groupRole(GroupRole.LEADER)
+                                                         .build();
         em.persist(groupMembership);
         afterEach();
 
@@ -837,10 +841,10 @@ class GroupServiceTest extends SpringBootTestSupporter {
         //Then
         Group deletedGroup = em.find(Group.class, groupId);
         GroupMembership deletedGroupMembership = em.find(GroupMembership.class,
-                GroupMembershipId.builder()
-                        .groupId(groupId)
-                        .memberId(memberId)
-                        .build());
+                                                         GroupMembershipId.builder()
+                                                                          .groupId(groupId)
+                                                                          .memberId(memberId)
+                                                                          .build());
 
         assertThat(flag).isTrue();
         assertThat(deletedGroup.getDisabled()).isTrue();

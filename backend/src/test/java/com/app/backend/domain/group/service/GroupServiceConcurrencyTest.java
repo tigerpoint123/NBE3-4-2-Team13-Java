@@ -32,9 +32,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Slf4j
 @SqlGroup({
         @Sql(executionPhase = ExecutionPhase.BEFORE_TEST_METHOD,
-             scripts = "classpath:/sql/truncate_tbl.sql"),
+                scripts = "classpath:/sql/truncate_tbl.sql"),
         @Sql(executionPhase = ExecutionPhase.AFTER_TEST_METHOD,
-             scripts = "classpath:/sql/truncate_tbl.sql")
+                scripts = "classpath:/sql/truncate_tbl.sql")
 })
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class GroupServiceConcurrencyTest extends SpringBootTestSupporter {
@@ -50,15 +50,15 @@ class GroupServiceConcurrencyTest extends SpringBootTestSupporter {
     void modifyGroup() throws Exception {
         //Given
         ExecutorService executorService = Executors.newFixedThreadPool(THREAD_COUNT + 1);
-        CountDownLatch  countDownLatch  = new CountDownLatch(THREAD_COUNT);
+        CountDownLatch countDownLatch = new CountDownLatch(THREAD_COUNT);
 
         List<AtomicReference<Member>> memberRefs = List.of(new AtomicReference<>(),
-                                                           new AtomicReference<>(),
-                                                           new AtomicReference<>(),
-                                                           new AtomicReference<>(),
-                                                           new AtomicReference<>());
+                new AtomicReference<>(),
+                new AtomicReference<>(),
+                new AtomicReference<>(),
+                new AtomicReference<>());
         AtomicReference<Category> newCategoryRef = new AtomicReference<>();
-        AtomicReference<Group>    groupRef       = new AtomicReference<>();
+        AtomicReference<Group> groupRef = new AtomicReference<>();
 
         Future<?> future = executorService.submit(() -> {
             TransactionStatus transactionStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
@@ -70,30 +70,28 @@ class GroupServiceConcurrencyTest extends SpringBootTestSupporter {
                 newCategoryRef.set(newCategory);
 
                 Group group = Group.builder()
-                                   .name("test")
-                                   .province("test province")
-                                   .city("test city")
-                                   .town("test town")
-                                   .description("test description")
-                                   .recruitStatus(RecruitStatus.RECRUITING)
-                                   .maxRecruitCount(10)
-                                   .category(category)
-                                   .build();
+                        .name("test")
+                        .province("test province")
+                        .city("test city")
+                        .town("test town")
+                        .description("test description")
+                        .recruitStatus(RecruitStatus.RECRUITING)
+                        .maxRecruitCount(10)
+                        .category(category)
+                        .build();
                 em.persist(group);
                 groupRef.set(group);
 
                 for (int i = 1; i <= memberRefs.size(); i++) {
                     Member member = MemberFactory.createUser(
-                            "testUsername%d".formatted(i),
-                            "testPassword%d".formatted(i),
-                            "testNickname%d".formatted(i)
+                            "testUsername%d".formatted(i), "testPassword%d".formatted(i), "testNickname%d".formatted(i)
                     );
                     em.persist(member);
                     GroupMembership groupMembership = GroupMembership.builder()
-                                                                     .member(member)
-                                                                     .group(group)
-                                                                     .groupRole(GroupRole.LEADER)
-                                                                     .build();
+                            .member(member)
+                            .group(group)
+                            .groupRole(GroupRole.LEADER)
+                            .build();
                     em.persist(groupMembership);
                     memberRefs.get(i - 1).set(member);
                 }
@@ -106,34 +104,34 @@ class GroupServiceConcurrencyTest extends SpringBootTestSupporter {
         });
         future.get();
 
-        List<Member> members     = memberRefs.stream().map(AtomicReference::get).toList();
-        Category     newCategory = newCategoryRef.get();
-        Group        group       = groupRef.get();
+        List<Member> members = memberRefs.stream().map(AtomicReference::get).toList();
+        Category newCategory = newCategoryRef.get();
+        Group group = groupRef.get();
 
-        Long       groupId         = group.getId();
-        List<Long> memberIds       = members.stream().map(Member::getId).toList();
-        String     newCategoryName = newCategory.getName();
+        Long groupId = group.getId();
+        List<Long> memberIds = members.stream().map(Member::getId).toList();
+        String newCategoryName = newCategory.getName();
 
         //When
-        Set<Integer>  methodCallSuccessThreads = ConcurrentHashMap.newKeySet();
-        AtomicInteger lastUpdatedThreadIndex   = new AtomicInteger();
+        Set<Integer> methodCallSuccessThreads = ConcurrentHashMap.newKeySet();
+        AtomicInteger lastUpdatedThreadIndex = new AtomicInteger();
 
         for (int i = 1; i <= THREAD_COUNT; i++) {
             int threadIndex = i;
             executorService.execute(() -> {
                 try {
                     GroupRequest.Update update = GroupRequest.Update.builder()
-                                                                    .name("new test%d".formatted(threadIndex))
-                                                                    .province("new test province%d".formatted(
-                                                                            threadIndex))
-                                                                    .city("new test city%d".formatted(threadIndex))
-                                                                    .town("new test town%d".formatted(threadIndex))
-                                                                    .description("new test description%d".formatted(
-                                                                            threadIndex))
-                                                                    .recruitStatus(RecruitStatus.CLOSED.name())
-                                                                    .maxRecruitCount(20)
-                                                                    .categoryName(newCategoryName)
-                                                                    .build();
+                            .name("new test%d".formatted(threadIndex))
+                            .province("new test province%d".formatted(
+                                    threadIndex))
+                            .city("new test city%d".formatted(threadIndex))
+                            .town("new test town%d".formatted(threadIndex))
+                            .description("new test description%d".formatted(
+                                    threadIndex))
+                            .recruitStatus(RecruitStatus.CLOSED.name())
+                            .maxRecruitCount(20)
+                            .categoryName(newCategoryName)
+                            .build();
 
                     Thread.sleep(100);
                     groupService.modifyGroup(groupId, memberIds.get(threadIndex % memberIds.size()), update);
@@ -195,13 +193,13 @@ class GroupServiceConcurrencyTest extends SpringBootTestSupporter {
     void deleteGroup() throws Exception {
         //Given
         ExecutorService executorService = Executors.newFixedThreadPool(THREAD_COUNT + 1);
-        CountDownLatch  countDownLatch  = new CountDownLatch(THREAD_COUNT);
+        CountDownLatch countDownLatch = new CountDownLatch(THREAD_COUNT);
 
         List<AtomicReference<Member>> memberRefs = List.of(new AtomicReference<>(),
-                                                           new AtomicReference<>(),
-                                                           new AtomicReference<>(),
-                                                           new AtomicReference<>(),
-                                                           new AtomicReference<>());
+                new AtomicReference<>(),
+                new AtomicReference<>(),
+                new AtomicReference<>(),
+                new AtomicReference<>());
         AtomicReference<Group> groupRef = new AtomicReference<>();
 
         Future<?> future = executorService.submit(() -> {
@@ -211,30 +209,28 @@ class GroupServiceConcurrencyTest extends SpringBootTestSupporter {
                 em.persist(category);
 
                 Group group = Group.builder()
-                                   .name("test")
-                                   .province("test province")
-                                   .city("test city")
-                                   .town("test town")
-                                   .description("test description")
-                                   .recruitStatus(RecruitStatus.RECRUITING)
-                                   .maxRecruitCount(10)
-                                   .category(category)
-                                   .build();
+                        .name("test")
+                        .province("test province")
+                        .city("test city")
+                        .town("test town")
+                        .description("test description")
+                        .recruitStatus(RecruitStatus.RECRUITING)
+                        .maxRecruitCount(10)
+                        .category(category)
+                        .build();
                 em.persist(group);
                 groupRef.set(group);
 
                 for (int i = 1; i <= memberRefs.size(); i++) {
                     Member member = MemberFactory.createUser(
-                            "testUsername%d".formatted(i),
-                            "testPassword%d".formatted(i),
-                            "testNickname%d".formatted(i)
+                            "testUsername%d".formatted(i), "testPassword%d".formatted(i), "testNickname%d".formatted(i)
                     );
                     em.persist(member);
                     GroupMembership groupMembership = GroupMembership.builder()
-                                                                     .member(member)
-                                                                     .group(group)
-                                                                     .groupRole(GroupRole.LEADER)
-                                                                     .build();
+                            .member(member)
+                            .group(group)
+                            .groupRole(GroupRole.LEADER)
+                            .build();
                     em.persist(groupMembership);
                     memberRefs.get(i - 1).set(member);
                 }
@@ -248,14 +244,14 @@ class GroupServiceConcurrencyTest extends SpringBootTestSupporter {
         future.get();
 
         List<Member> members = memberRefs.stream().map(AtomicReference::get).toList();
-        Group        group   = groupRef.get();
+        Group group = groupRef.get();
 
-        Long       groupId   = group.getId();
+        Long groupId = group.getId();
         List<Long> memberIds = members.stream().map(Member::getId).toList();
 
         //When
-        Set<Integer>  methodCallSuccessThreads = ConcurrentHashMap.newKeySet();
-        AtomicInteger firstDeletedThreadIndex  = new AtomicInteger();
+        Set<Integer> methodCallSuccessThreads = ConcurrentHashMap.newKeySet();
+        AtomicInteger firstDeletedThreadIndex = new AtomicInteger();
 
         for (int i = 1; i <= THREAD_COUNT; i++) {
             int threadIndex = i;

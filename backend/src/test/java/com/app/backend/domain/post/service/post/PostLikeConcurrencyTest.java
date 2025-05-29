@@ -51,9 +51,7 @@ class PostLikeConcurrencyTest {
     void setUp() {
         testMember = memberRepository.save(
                 MemberFactory.createUser(
-                        "testUser",
-                        "password",
-                        "작성자"
+                        "testUser", "password", "작성자"
                 ));
 
         testPost = postRepository.save(Post.builder()
@@ -75,9 +73,7 @@ class PostLikeConcurrencyTest {
 
         for (int i = 0; i < numberOfUsers; i++) {
             Member user = memberRepository.save(MemberFactory.createUser(
-                    "testUser" + i,
-                    "password",
-                    "테스터" + i
+                    "testUser" + i, "password", "테스터" + i
             ));
             users.add(user);
         }

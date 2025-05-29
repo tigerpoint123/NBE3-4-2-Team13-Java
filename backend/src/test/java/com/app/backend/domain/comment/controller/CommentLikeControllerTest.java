@@ -67,9 +67,7 @@ class CommentLikeControllerTest {
     void setUp() {
 
         testMember = MemberFactory.createUser(
-                "testUser",
-                "password",
-                "테스터"
+                "testUser", "password", "테스터"
         );
         testMember = memberRepository.save(testMember);
 
@@ -146,9 +144,7 @@ class CommentLikeControllerTest {
         int numberOfUsers = 10;
         for (int i = 0; i < numberOfUsers; i++) {
             Member user = MemberFactory.createUser(
-                    "testUser" + i,
-                    "password" + i,
-                    "테스터" + i
+                    "testUser" + i, "password" + i, "테스터" + i
             );
 
             memberRepository.save(user);
@@ -196,9 +192,7 @@ class CommentLikeControllerTest {
 
         for (int i = 0; i < numberOfUsers; i++) {
             Member user = MemberFactory.createUser(
-                    "testUser" + i,
-                    "password" + i,
-                    "테스터" + i
+                    "testUser" + i, "password" + i, "테스터" + i
             );
             users.add(memberRepository.save(user));
         }
