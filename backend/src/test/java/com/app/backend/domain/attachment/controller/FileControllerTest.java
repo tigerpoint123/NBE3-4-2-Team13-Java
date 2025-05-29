@@ -136,7 +136,7 @@ public class FileControllerTest {
                 .perform(get("/api/v1/download/post/{id}", 999L));
 
         // Then
-        resultActions.andExpect(status().is3xxRedirection());
+        resultActions.andExpect(status().isForbidden());
         resultActions.andDo(print());
     }
 }
