@@ -6,6 +6,18 @@
 - backend (kafka, rabbitMQ, zookeeper)
 - redis (server, lock)
 
+### 0-1. SonarQube Docker 명령어
+- sonarqube 컨테이너 실행 
+- sonar token = localhost 9000 접속 후 my account -> security -> generate token
+
+docker run --rm \ 
+-e SONAR_HOST_URL="http://host.docker.internal:9000" \
+-e SONAR_TOKEN="squ_2dfde894589f701f2ebcdc87e8052c8491dfe826" \
+-v "C:\workplace\NBE3-4-2-Team13_Java\backend:/usr/src" \
+sonarsource/sonar-scanner-cli \
+-Dproject.settings=sonar-project-before.properties
+
+
 ### 1. Redis 설정
 
 이 프로젝트는 Redis를 사용하고 있습니다. Docker를 통해 Redis를 설치하고 실행해주세요.
