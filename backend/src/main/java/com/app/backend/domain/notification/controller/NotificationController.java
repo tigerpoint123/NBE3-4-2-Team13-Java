@@ -3,6 +3,7 @@ package com.app.backend.domain.notification.controller;
 import com.app.backend.domain.member.entity.Member;
 import com.app.backend.domain.member.service.MemberService;
 import com.app.backend.domain.notification.SseEmitters;
+import com.app.backend.domain.notification.dto.NotificationEvent;
 import com.app.backend.domain.notification.dto.NotificationMessage;
 import com.app.backend.domain.notification.service.NotificationService;
 import com.app.backend.global.dto.response.ApiResponse;
@@ -13,7 +14,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -40,36 +40,68 @@ public class NotificationController {
             
             emitter.send(SseEmitter.event()
                     .name("connect")
-                    .data("Connected!"));
+                    .data("Connected!")
+                    .reconnectTime(30000L));
             
             sseEmitters.add(userId, emitter);
+            
+            new Thread(() -> {
+                try {
+                    while (true) {
+                        Thread.sleep(15000);
+                        emitter.send(SseEmitter.event()
+                                .name("heartbeat")
+                                .data("heartbeat")
+                                .reconnectTime(30000L));
+                    }
+                } catch (Exception e) {
+                    log.error("Heartbeat error for user {}: {}", userId, e.getMessage());
+                }
+            }).start();
             
             emitter.onCompletion(() -> {
                 log.info("SSE connection completed for user: {}", userId);
                 sseEmitters.remove(userId);
-                emitter.complete();
             });
             
             emitter.onTimeout(() -> {
                 log.info("SSE connection timed out for user: {}", userId);
                 sseEmitters.remove(userId);
-                emitter.complete();
             });
             
             emitter.onError((e) -> {
                 log.error("SSE connection error for user: {}", userId, e);
                 sseEmitters.remove(userId);
-                emitter.complete();
             });
             
             log.info("SSE 연결 성공: userId = {}", userId);
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("SSE 연결 실패: {}", e.getMessage(), e);
             sseEmitters.remove(userId);
             emitter.complete();
             throw new RuntimeException("SSE 연결 실패", e);
         }
         return emitter;
+    }
+
+    @PostMapping("/send") // kafka 연동 테스트 스크립트 용도
+    public ApiResponse<Void> sendNotification(
+            @RequestHeader(value = "Authorization") String token,
+            @RequestBody NotificationEvent request
+    ) {
+        Member member = memberService.getCurrentMember(token);
+        notificationService.sendNotification(
+            request.getUserId(),
+            request.getTitle(),
+            request.getContent(),
+            request.getType(),
+            request.getId()
+        );
+        return ApiResponse.of(
+            true,
+            HttpStatus.OK,
+            "알림 발행 성공"
+        );
     }
 
     @GetMapping

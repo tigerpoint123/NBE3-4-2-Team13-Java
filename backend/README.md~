@@ -19,7 +19,7 @@ sonarsource/sonar-scanner-cli \
 
 ### 0-2. SSE / Kafka 테스트 스크립트
 - SSE 만 테스트 : docker run --rm --add-host=host.docker.internal:host-gateway -v "C:\workplace\NBE3-4-2-Team13_Java\backend\load-test:/scripts" grafana/k6:latest run --out influxdb=http://host.docker.internal:8086/k6 /scripts/k6-test.js
-- Kafka 연동 테스트 : docker run --rm --add-host=host.docker.internal:host-gateway -v "C:\workplace\NBE3-4-2-Team13_Java\backend\load-test:/scripts" grafana/k6:latest run --out influxdb=http://host.docker.internal:8086/k6 /scripts/kafka.js
+- Kafka 연동 테스트 : docker run --rm --add-host=host.docker.internal:host-gateway -v "C:\workplace\NBE3-4-2-Team13_Java\backend\load-test:/scripts" grafana/k6:latest run --out influxdb=http://host.docker.internal:8086/k6 /scripts/k6-test-kafka.js
 
 ### 1. Redis 설정
 

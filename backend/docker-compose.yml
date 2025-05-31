@@ -55,3 +55,9 @@ services:
 networks:
   kafka-net:
     driver: bridge
+  monitoring:
+    driver: bridge
+
+volumes:
+  grafana_data:
+  influxdb_data:

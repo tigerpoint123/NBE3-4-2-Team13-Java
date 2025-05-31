@@ -3,6 +3,7 @@ package com.app.backend.domain.notification.controller;
 import com.app.backend.domain.member.entity.Member;
 import com.app.backend.domain.member.service.MemberService;
 import com.app.backend.domain.notification.SseEmitters;
+import com.app.backend.domain.notification.dto.NotificationEvent;
 import com.app.backend.domain.notification.dto.NotificationMessage;
 import com.app.backend.domain.notification.service.NotificationService;
 import com.app.backend.global.dto.response.ApiResponse;
@@ -29,46 +30,86 @@ public class NotificationController {
     public SseEmitter subscribe(
             @RequestHeader(value = "Authorization") String token
     ) {
-        Member member = memberService.getCurrentMember(token); // 현재 사용자 조회
+        Member member = memberService.getCurrentMember(token);
         String userId = String.valueOf(member.getId());
         log.info("SSE subscription request received for user: {}", userId);
-        SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+        
+        SseEmitter emitter = new SseEmitter(30000L);
         
         try {
-            // 연결 직후 더미 이벤트 전송 (연결 확인용)
+            sseEmitters.remove(userId);
+            
             emitter.send(SseEmitter.event()
                     .name("connect")
-                    .data("Connected!"));
+                    .data("Connected!")
+                    .reconnectTime(30000L));
             
             sseEmitters.add(userId, emitter);
             
-            // 연결 종료 시 처리
+            new Thread(() -> {
+                try {
+                    while (true) {
+                        Thread.sleep(15000);
+                        emitter.send(SseEmitter.event()
+                                .name("heartbeat")
+                                .data("heartbeat")
+                                .reconnectTime(30000L));
+                    }
+                } catch (Exception e) {
+                    log.error("Heartbeat error for user {}: {}", userId, e.getMessage());
+                }
+            }).start();
+            
             emitter.onCompletion(() -> {
                 log.info("SSE connection completed for user: {}", userId);
                 sseEmitters.remove(userId);
             });
+            
             emitter.onTimeout(() -> {
                 log.info("SSE connection timed out for user: {}", userId);
                 sseEmitters.remove(userId);
             });
+            
             emitter.onError((e) -> {
                 log.error("SSE connection error for user: {}", userId, e);
                 sseEmitters.remove(userId);
             });
             
             log.info("SSE 연결 성공: userId = {}", userId);
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("SSE 연결 실패: {}", e.getMessage(), e);
+            sseEmitters.remove(userId);
             emitter.complete();
+            throw new RuntimeException("SSE 연결 실패", e);
         }
         return emitter;
+    }
+
+    @PostMapping("/send") // kafka 연동 테스트 스크립트 용도
+    public ApiResponse<Void> sendNotification(
+            @RequestHeader(value = "Authorization") String token,
+            @RequestBody NotificationEvent request
+    ) {
+        Member member = memberService.getCurrentMember(token);
+        notificationService.sendNotification(
+            request.getUserId(),
+            request.getTitle(),
+            request.getContent(),
+            request.getType(),
+            request.getId()
+        );
+        return ApiResponse.of(
+            true,
+            HttpStatus.OK,
+            "알림 발행 성공"
+        );
     }
 
     @GetMapping
     public ApiResponse<List<NotificationMessage>> getNotifications(
             @RequestHeader(value = "Authorization") String token
     ) {
-        Member member = memberService.getCurrentMember(token); // 현재 사용자 조회
+        Member member = memberService.getCurrentMember(token);
         List<NotificationMessage> notifications =
             notificationService.getNotifications(String.valueOf(member.getId()));
         return ApiResponse.of(
