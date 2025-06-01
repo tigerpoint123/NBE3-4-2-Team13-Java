@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -31,20 +32,19 @@ public class NotificationController {
     ) {
         Member member = memberService.getCurrentMember(token);
         String userId = String.valueOf(member.getId());
-        log.info("SSE subscription request received for user: {}", userId);
-        
+
         SseEmitter emitter = new SseEmitter(30000L);
-        
+
         try {
             sseEmitters.remove(userId);
-            
+
             emitter.send(SseEmitter.event()
                     .name("connect")
                     .data("Connected!")
                     .reconnectTime(30000L));
-            
+
             sseEmitters.add(userId, emitter);
-            
+
             new Thread(() -> {
                 try {
                     while (true) {
@@ -55,28 +55,23 @@ public class NotificationController {
                                 .reconnectTime(30000L));
                     }
                 } catch (Exception e) {
-                    log.error("Heartbeat error for user {}: {}", userId, e.getMessage());
+                    // Heartbeat error handling
                 }
             }).start();
-            
+
             emitter.onCompletion(() -> {
-                log.info("SSE connection completed for user: {}", userId);
                 sseEmitters.remove(userId);
             });
-            
+
             emitter.onTimeout(() -> {
-                log.info("SSE connection timed out for user: {}", userId);
                 sseEmitters.remove(userId);
             });
-            
+
             emitter.onError((e) -> {
-                log.error("SSE connection error for user: {}", userId, e);
                 sseEmitters.remove(userId);
             });
-            
-            log.info("SSE 연결 성공: userId = {}", userId);
+
         } catch (Exception e) {
-            log.error("SSE 연결 실패: {}", e.getMessage(), e);
             sseEmitters.remove(userId);
             emitter.complete();
             throw new RuntimeException("SSE 연결 실패", e);
@@ -84,23 +79,49 @@ public class NotificationController {
         return emitter;
     }
 
-    @PostMapping("/send") // kafka 연동 테스트 스크립트 용도
+    @PostMapping("/send")
     public ApiResponse<Void> sendNotification(
             @RequestHeader(value = "Authorization") String token,
             @RequestBody NotificationEvent request
     ) {
-        Member member = memberService.getCurrentMember(token);
         notificationService.sendNotification(
-            request.getUserId(),
-            request.getTitle(),
-            request.getContent(),
-            request.getType(),
-            request.getId()
+                request.getUserId(),
+                request.getTitle(),
+                request.getContent(),
+                request.getType(),
+                request.getId()
         );
         return ApiResponse.of(
-            true,
-            HttpStatus.OK,
-            "알림 발행 성공"
+                true,
+                HttpStatus.OK,
+                "알림 발행 성공"
+        );
+    }
+
+    @PostMapping("/direct")
+    public ApiResponse<Void> sendDirectNotification(
+            @RequestHeader(value = "Authorization") String token,
+            @RequestBody NotificationEvent request
+    ) {
+        Member member = memberService.getCurrentMember(token);
+        String userId = String.valueOf(member.getId());
+
+        // SSE를 통한 직접 메시지 전송
+        NotificationMessage message = new NotificationMessage(
+                request.getId(),
+                request.getUserId(),
+                request.getTitle(),
+                request.getContent(),
+                LocalDateTime.now(),
+                false
+        );
+
+        sseEmitters.sendToUser(userId, message);
+
+        return ApiResponse.of(
+                true,
+                HttpStatus.OK,
+                "알림 발행 성공"
         );
     }
 
@@ -110,7 +131,7 @@ public class NotificationController {
     ) {
         Member member = memberService.getCurrentMember(token);
         List<NotificationMessage> notifications =
-            notificationService.getNotifications(String.valueOf(member.getId()));
+                notificationService.getNotifications(String.valueOf(member.getId()));
         return ApiResponse.of(
                 true,
                 HttpStatus.OK,

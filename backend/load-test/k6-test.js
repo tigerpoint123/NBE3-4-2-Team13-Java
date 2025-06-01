@@ -3,16 +3,15 @@ import { check, sleep } from 'k6';
 import { Rate } from 'k6/metrics';
 
 const errorRate = new Rate('errors');
+const messageReceivedRate = new Rate('messages_received');
 
 export const options = {
-  stages: [
-    { duration: '10s', target: 50 },  // 10초 동안 50명의 사용자로 증가
-    { duration: '30s', target: 50 },  // 30초 동안 50명의 사용자 유지
-    { duration: '10s', target: 0 },   // 10초 동안 사용자 수 감소
-  ],
+  vus: 30,              // 10명의 가상 유저
+  duration: '30s',      // 40초 동안 테스트
   thresholds: {
     'errors': ['rate<0.1'],  // 에러율 10% 미만
     'http_req_duration': ['p(95)<500'],  // 95%의 요청이 500ms 이내
+    'messages_received': ['rate>0.9'],  // 90% 이상의 메시지 수신 성공
   },
 };
 
@@ -46,6 +45,28 @@ export default function () {
         'Accept': 'text/event-stream',
         'Authorization': `Bearer ${token}`
       },
+      timeout: '35s'  // SSE 연결 타임아웃 설정
+    });
+
+    // 알림 발행 (SSE만 사용하는 버전)
+    const sendResponse = http.post(`${BASE_URL}/direct`, 
+      JSON.stringify({
+        userId: 1,
+        title: '그룹 초대',
+        content: '테스트 그룹에 초대되었습니다.',
+        type: 'GROUP_INVITE',
+        id: 1
+      }),
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      }
+    );
+
+    check(sendResponse, {
+      'message sent successful': (r) => r.status === 200
     });
 
     check(response, {
@@ -54,6 +75,13 @@ export default function () {
         const contentType = r.headers['Content-Type'];
         return contentType && contentType.includes('text/event-stream');
       },
+      'received message': (r) => {
+        const hasMessage = r.body.includes('data:');
+        if (hasMessage) {
+          messageReceivedRate.add(1);
+        }
+        return hasMessage;
+      }
     }) || errorRate.add(1);
   } else {
     errorRate.add(1);

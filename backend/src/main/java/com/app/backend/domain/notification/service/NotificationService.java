@@ -37,6 +37,7 @@ public class NotificationService {
                 .createdAt(LocalDateTime.now())
                 .build();
         notification = notificationRepository.save(notification);
+        
         // Kafka로 메시지 전송
         NotificationMessage message = new NotificationMessage(
                 notification.getId(),
@@ -46,7 +47,6 @@ public class NotificationService {
                 notification.getCreatedAt(),
                 notification.isRead()
         );
-        kafkaTemplate.send(NotificationEvent.NotificationType.GROUP_INVITE.toString(), userId, message);
         notificationProducer.sendNotification(message);
     }
 

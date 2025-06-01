@@ -6,11 +6,8 @@ const errorRate = new Rate('errors');
 const messageReceivedRate = new Rate('messages_received');
 
 export const options = {
-  stages: [
-    { duration: '5s', target: 10 },   // 5초 동안 10명의 사용자로 증가
-    { duration: '30s', target: 10 },  // 30초 동안 10명의 사용자 유지
-    { duration: '5s', target: 0 },    // 5초 동안 사용자 수 감소
-  ],
+  vus: 30,              // 10명의 가상 유저
+  duration: '30s',      // 40초 동안 테스트
   thresholds: {
     'errors': ['rate<0.1'],           // 에러율 10% 미만
     'http_req_duration': ['p(95)<500'], // 95%의 요청이 500ms 이내
@@ -49,6 +46,27 @@ export default function () {
         'Authorization': `Bearer ${token}`
       },
       timeout: '35s'  // SSE 연결 타임아웃 설정
+    });
+
+    // 카프카를 통한 메시지 발행
+    const sendResponse = http.post(`${BASE_URL}/send`, 
+      JSON.stringify({
+        userId: 1,
+        title: '그룹 초대',
+        content: '테스트 그룹에 초대되었습니다.',
+        type: 'GROUP_INVITE',
+        id: 1
+      }),
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      }
+    );
+
+    check(sendResponse, {
+      'kafka message sent successful': (r) => r.status === 200
     });
 
     check(response, {
